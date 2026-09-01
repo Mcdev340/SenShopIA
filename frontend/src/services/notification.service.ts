@@ -27,6 +27,7 @@ class NotificationService {
     page?: number;
     limit?: number;
   }): Promise<{
+    limit: number;
     notifications: AppNotification[];
     total: number;
     page: number;
