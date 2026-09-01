@@ -1,6 +1,5 @@
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     domains: ['localhost', 'shopsense-ai.com', 'via.placeholder.com'],
     formats: ['image/avif', 'image/webp'],
@@ -17,18 +16,19 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
   reactStrictMode: true,
+
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production'
-      ? {
-          exclude: ['error', 'warn'],
-        }
-      : false,
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? {
+            exclude: ['error', 'warn'],
+          }
+        : false,
   },
-  experimental: {
-    optimizeCss: true,
-  },
-  headers: async () => {
+
+  async headers() {
     return [
       {
         source: '/(.*)',
