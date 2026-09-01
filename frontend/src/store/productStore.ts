@@ -1,20 +1,19 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import React from 'react';
-import { 
-  Product, 
-  ProductFilter, 
-  ProductSearchResult,
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import React from "react";
+import {
+  Product,
+  ProductFilter,
   Category,
   ProductReview,
   ProductComparison,
   ExternalProductRequest,
   ProductVariant,
   ProductTag,
-} from '@/types/product';
-import { productsService } from '@/services/products.service';
-import { ApiError } from '@/lib/api-client';
-import { logger } from '@/lib/logger';
+} from "@/types/product";
+import { productsService } from "@/services/products.service";
+import { ApiError } from "@/lib/api-client";
+import { logger } from "@/lib/logger";
 
 // ============ TYPES ============
 
@@ -28,13 +27,13 @@ export interface ProductState {
   categories: Category[];
   categoryTree: Category[];
   tags: ProductTag[];
-  
+
   // État sélectionné
   selectedProduct: Product | null;
   selectedProductId: string | null;
   selectedCategory: Category | null;
   selectedCategoryId: string | null;
-  
+
   // Reviews
   reviews: ProductReview[];
   reviewStats: {
@@ -42,42 +41,42 @@ export interface ProductState {
     totalReviews: number;
     distribution: { [key: number]: number };
   } | null;
-  
+
   // Comparison
   comparison: ProductComparison | null;
   compareProducts: Product[];
-  
+
   // External product
   externalProductRequest: ExternalProductRequest | null;
   externalProductRequests: ExternalProductRequest[];
-  
+
   // Variants
   variants: ProductVariant[];
   selectedVariant: ProductVariant | null;
-  
+
   // État
   loading: boolean;
   refreshing: boolean;
   error: string | null;
-  status: 'idle' | 'loading' | 'success' | 'error';
-  
+  status: "idle" | "loading" | "success" | "error";
+
   // Pagination
   total: number;
   page: number;
   limit: number;
   totalPages: number;
-  
+
   // Filtres
   filters: ProductFilter;
-  
+
   // Cache
   productCache: Record<string, Product>;
   categoryCache: Record<string, Category>;
-  
+
   // Retry
   retryCount: number;
   maxRetries: number;
-  
+
   // Actions - Chargement
   loadProducts: (filters?: Partial<ProductFilter>) => Promise<void>;
   loadFeaturedProducts: () => Promise<void>;
@@ -88,67 +87,90 @@ export interface ProductState {
   loadCategoryTree: () => Promise<void>;
   loadTags: () => Promise<void>;
   refresh: () => Promise<void>;
-  
+
   // Actions - Récupération
   getProduct: (id: string, forceRefresh?: boolean) => Promise<Product | null>;
-  getProductBySlug: (slug: string, forceRefresh?: boolean) => Promise<Product | null>;
+  getProductBySlug: (
+    slug: string,
+    forceRefresh?: boolean,
+  ) => Promise<Product | null>;
   getCategory: (id: string) => Promise<Category | null>;
   getCategoryBySlug: (slug: string) => Promise<Category | null>;
-  
+
   // Actions - Recherche
-  searchProducts: (query: string, filters?: Partial<ProductFilter>) => Promise<void>;
+  searchProducts: (
+    query: string,
+    filters?: Partial<ProductFilter>,
+  ) => Promise<void>;
   getProductsByCategory: (categorySlug: string) => Promise<void>;
   getProductsByBrand: (brand: string) => Promise<void>;
   getProductsByTag: (tagSlug: string) => Promise<void>;
-  
+
   // Actions - Reviews
   loadProductReviews: (productId: string) => Promise<void>;
-  createProductReview: (productId: string, rating: number, title: string, comment: string, images?: File[]) => Promise<boolean>;
-  updateProductReview: (reviewId: string, data: { rating?: number; title?: string; comment?: string }) => Promise<boolean>;
+  createProductReview: (
+    productId: string,
+    rating: number,
+    title: string,
+    comment: string,
+    images?: File[],
+  ) => Promise<boolean>;
+  updateProductReview: (
+    reviewId: string,
+    data: { rating?: number; title?: string; comment?: string },
+  ) => Promise<boolean>;
   deleteProductReview: (reviewId: string) => Promise<boolean>;
   markReviewHelpful: (reviewId: string, helpful: boolean) => Promise<boolean>;
-  
+
   // Actions - Comparison
-  compareProductsAction: (productIds: string[]) => Promise<ProductComparison | null>;
+  compareProductsAction: (
+    productIds: string[],
+  ) => Promise<ProductComparison | null>;
   addToCompare: (productId: string) => void;
   removeFromCompare: (productId: string) => void;
   clearCompare: () => void;
-  
+
   // Actions - External Product
-  createExternalProductRequest: (url: string) => Promise<ExternalProductRequest | null>;
-  getExternalProductRequest: (id: string) => Promise<ExternalProductRequest | null>;
-  retryExternalProductRequest: (id: string) => Promise<ExternalProductRequest | null>;
-  
+  createExternalProductRequest: (
+    url: string,
+  ) => Promise<ExternalProductRequest | null>;
+  getExternalProductRequest: (
+    id: string,
+  ) => Promise<ExternalProductRequest | null>;
+  retryExternalProductRequest: (
+    id: string,
+  ) => Promise<ExternalProductRequest | null>;
+
   // Actions - Variants
   loadProductVariants: (productId: string) => Promise<void>;
   selectVariant: (variantId: string) => void;
   getVariantBySku: (sku: string) => Promise<ProductVariant | null>;
-  
+
   // Actions - Filtres
   setFilters: (filters: Partial<ProductFilter>) => void;
   resetFilters: () => void;
   goToPage: (page: number) => void;
   nextPage: () => void;
   previousPage: () => void;
-  
+
   // Actions - Sélection
   selectProduct: (product: Product) => void;
   selectProductById: (id: string) => void;
   selectCategory: (category: Category) => void;
   selectCategoryById: (id: string) => void;
   clearSelected: () => void;
-  
+
   // Actions - Cache
   clearCache: () => void;
   invalidateProduct: (id: string) => void;
-  
+
   // Actions - Utilitaires
   getProductById: (id: string) => Product | null;
   getProductsByCategoryId: (categoryId: string) => Product[];
   getCategoriesByParent: (parentId: string) => Category[];
   getFilteredProducts: () => Product[];
   isProductInWishlist: (productId: string) => Promise<boolean>;
-  
+
   clearError: () => void;
   reset: () => void;
 }
@@ -158,61 +180,62 @@ export interface ProductState {
 const initialFilters: ProductFilter = {
   page: 1,
   limit: 20,
-  sortBy: 'newest',
+  sortBy: "newest",
 };
 
-const initialState: Omit<ProductState, 
-  | 'loadProducts'
-  | 'loadFeaturedProducts'
-  | 'loadPopularProducts'
-  | 'loadNewProducts'
-  | 'loadOnSaleProducts'
-  | 'loadCategories'
-  | 'loadCategoryTree'
-  | 'loadTags'
-  | 'refresh'
-  | 'getProduct'
-  | 'getProductBySlug'
-  | 'getCategory'
-  | 'getCategoryBySlug'
-  | 'searchProducts'
-  | 'getProductsByCategory'
-  | 'getProductsByBrand'
-  | 'getProductsByTag'
-  | 'loadProductReviews'
-  | 'createProductReview'
-  | 'updateProductReview'
-  | 'deleteProductReview'
-  | 'markReviewHelpful'
-  | 'compareProductsAction'
-  | 'addToCompare'
-  | 'removeFromCompare'
-  | 'clearCompare'
-  | 'createExternalProductRequest'
-  | 'getExternalProductRequest'
-  | 'retryExternalProductRequest'
-  | 'loadProductVariants'
-  | 'selectVariant'
-  | 'getVariantBySku'
-  | 'setFilters'
-  | 'resetFilters'
-  | 'goToPage'
-  | 'nextPage'
-  | 'previousPage'
-  | 'selectProduct'
-  | 'selectProductById'
-  | 'selectCategory'
-  | 'selectCategoryById'
-  | 'clearSelected'
-  | 'clearCache'
-  | 'invalidateProduct'
-  | 'getProductById'
-  | 'getProductsByCategoryId'
-  | 'getCategoriesByParent'
-  | 'getFilteredProducts'
-  | 'isProductInWishlist'
-  | 'clearError'
-  | 'reset'
+const initialState: Omit<
+  ProductState,
+  | "loadProducts"
+  | "loadFeaturedProducts"
+  | "loadPopularProducts"
+  | "loadNewProducts"
+  | "loadOnSaleProducts"
+  | "loadCategories"
+  | "loadCategoryTree"
+  | "loadTags"
+  | "refresh"
+  | "getProduct"
+  | "getProductBySlug"
+  | "getCategory"
+  | "getCategoryBySlug"
+  | "searchProducts"
+  | "getProductsByCategory"
+  | "getProductsByBrand"
+  | "getProductsByTag"
+  | "loadProductReviews"
+  | "createProductReview"
+  | "updateProductReview"
+  | "deleteProductReview"
+  | "markReviewHelpful"
+  | "compareProductsAction"
+  | "addToCompare"
+  | "removeFromCompare"
+  | "clearCompare"
+  | "createExternalProductRequest"
+  | "getExternalProductRequest"
+  | "retryExternalProductRequest"
+  | "loadProductVariants"
+  | "selectVariant"
+  | "getVariantBySku"
+  | "setFilters"
+  | "resetFilters"
+  | "goToPage"
+  | "nextPage"
+  | "previousPage"
+  | "selectProduct"
+  | "selectProductById"
+  | "selectCategory"
+  | "selectCategoryById"
+  | "clearSelected"
+  | "clearCache"
+  | "invalidateProduct"
+  | "getProductById"
+  | "getProductsByCategoryId"
+  | "getCategoriesByParent"
+  | "getFilteredProducts"
+  | "isProductInWishlist"
+  | "clearError"
+  | "reset"
 > = {
   // Données
   products: [],
@@ -223,48 +246,48 @@ const initialState: Omit<ProductState,
   categories: [],
   categoryTree: [],
   tags: [],
-  
+
   // État sélectionné
   selectedProduct: null,
   selectedProductId: null,
   selectedCategory: null,
   selectedCategoryId: null,
-  
+
   // Reviews
   reviews: [],
   reviewStats: null,
-  
+
   // Comparison
   comparison: null,
   compareProducts: [],
-  
+
   // External product
   externalProductRequest: null,
   externalProductRequests: [],
-  
+
   // Variants
   variants: [],
   selectedVariant: null,
-  
+
   // État
   loading: false,
   refreshing: false,
   error: null,
-  status: 'idle' as const,
-  
+  status: "idle" as const,
+
   // Pagination
   total: 0,
   page: 1,
   limit: 20,
   totalPages: 0,
-  
+
   // Filtres
   filters: initialFilters,
-  
+
   // Cache
   productCache: {},
   categoryCache: {},
-  
+
   // Retry
   retryCount: 0,
   maxRetries: 3,
@@ -282,18 +305,18 @@ export const useProductStore = create<ProductState>()(
       loadProducts: async (filters?: Partial<ProductFilter>) => {
         // Éviter les doubles chargements
         if (get().loading) return;
-        
-        set({ loading: true, error: null, status: 'loading' });
+
+        set({ loading: true, error: null, status: "loading" });
         try {
           const currentFilters = { ...get().filters, ...filters };
           const result = await productsService.getProducts(currentFilters);
-          
+
           // Mettre à jour le cache
           const newCache = { ...get().productCache };
-          result.products.forEach(product => {
+          result.products.forEach((product) => {
             newCache[product.id] = product;
           });
-          
+
           set({
             products: result.products,
             total: result.total,
@@ -303,33 +326,39 @@ export const useProductStore = create<ProductState>()(
             filters: currentFilters,
             productCache: newCache,
             loading: false,
-            status: 'success',
+            status: "success",
             retryCount: 0,
           });
-          
-          logger.info('Products loaded', { 
-            count: result.products.length, 
+
+          logger.info("Products loaded", {
+            count: result.products.length,
             total: result.total,
           });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement des produits';
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Erreur de chargement des produits";
           const retryCount = get().retryCount;
-          
+
           // Tentative de retry
           if (retryCount < get().maxRetries) {
             set({ retryCount: retryCount + 1 });
-            setTimeout(() => {
-              get().loadProducts(filters);
-            }, 1000 * (retryCount + 1));
+            setTimeout(
+              () => {
+                get().loadProducts(filters);
+              },
+              1000 * (retryCount + 1),
+            );
             return;
           }
-          
-          set({ 
-            error: message, 
-            loading: false, 
-            status: 'error' 
+
+          set({
+            error: message,
+            loading: false,
+            status: "error",
           });
-          logger.error('Failed to load products', error);
+          logger.error("Failed to load products", error);
         }
       },
 
@@ -338,11 +367,12 @@ export const useProductStore = create<ProductState>()(
         try {
           const products = await productsService.getFeaturedProducts();
           set({ featuredProducts: products, loading: false });
-          logger.info('Featured products loaded', { count: products.length });
+          logger.info("Featured products loaded", { count: products.length });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de chargement";
           set({ error: message, loading: false });
-          logger.error('Failed to load featured products', error);
+          logger.error("Failed to load featured products", error);
         }
       },
 
@@ -351,11 +381,12 @@ export const useProductStore = create<ProductState>()(
         try {
           const products = await productsService.getPopularProducts();
           set({ popularProducts: products, loading: false });
-          logger.info('Popular products loaded', { count: products.length });
+          logger.info("Popular products loaded", { count: products.length });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de chargement";
           set({ error: message, loading: false });
-          logger.error('Failed to load popular products', error);
+          logger.error("Failed to load popular products", error);
         }
       },
 
@@ -364,11 +395,12 @@ export const useProductStore = create<ProductState>()(
         try {
           const products = await productsService.getNewProducts();
           set({ newProducts: products, loading: false });
-          logger.info('New products loaded', { count: products.length });
+          logger.info("New products loaded", { count: products.length });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de chargement";
           set({ error: message, loading: false });
-          logger.error('Failed to load new products', error);
+          logger.error("Failed to load new products", error);
         }
       },
 
@@ -377,11 +409,12 @@ export const useProductStore = create<ProductState>()(
         try {
           const products = await productsService.getOnSaleProducts();
           set({ onSaleProducts: products, loading: false });
-          logger.info('On sale products loaded', { count: products.length });
+          logger.info("On sale products loaded", { count: products.length });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de chargement";
           set({ error: message, loading: false });
-          logger.error('Failed to load on sale products', error);
+          logger.error("Failed to load on sale products", error);
         }
       },
 
@@ -389,23 +422,26 @@ export const useProductStore = create<ProductState>()(
         set({ loading: true, error: null });
         try {
           const categories = await productsService.getCategories();
-          
+
           // Mettre à jour le cache
           const newCache = { ...get().categoryCache };
-          categories.forEach(category => {
+          categories.forEach((category) => {
             newCache[category.id] = category;
           });
-          
-          set({ 
-            categories, 
+
+          set({
+            categories,
             categoryCache: newCache,
-            loading: false 
+            loading: false,
           });
-          logger.info('Categories loaded', { count: categories.length });
+          logger.info("Categories loaded", { count: categories.length });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement des catégories';
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Erreur de chargement des catégories";
           set({ error: message, loading: false });
-          logger.error('Failed to load categories', error);
+          logger.error("Failed to load categories", error);
         }
       },
 
@@ -414,11 +450,12 @@ export const useProductStore = create<ProductState>()(
         try {
           const tree = await productsService.getCategoryTree();
           set({ categoryTree: tree, loading: false });
-          logger.info('Category tree loaded');
+          logger.info("Category tree loaded");
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de chargement";
           set({ error: message, loading: false });
-          logger.error('Failed to load category tree', error);
+          logger.error("Failed to load category tree", error);
         }
       },
 
@@ -427,17 +464,20 @@ export const useProductStore = create<ProductState>()(
         try {
           const tags = await productsService.getTags();
           set({ tags, loading: false });
-          logger.info('Tags loaded', { count: tags.length });
+          logger.info("Tags loaded", { count: tags.length });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement des tags';
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Erreur de chargement des tags";
           set({ error: message, loading: false });
-          logger.error('Failed to load tags', error);
+          logger.error("Failed to load tags", error);
         }
       },
 
       refresh: async () => {
         if (get().refreshing) return;
-        
+
         set({ refreshing: true });
         try {
           await Promise.all([
@@ -452,7 +492,7 @@ export const useProductStore = create<ProductState>()(
           set({ refreshing: false });
         } catch (error) {
           set({ refreshing: false });
-          logger.error('Failed to refresh products', error);
+          logger.error("Failed to refresh products", error);
         }
       },
 
@@ -465,30 +505,31 @@ export const useProductStore = create<ProductState>()(
           set({ selectedProduct: cached, selectedProductId: id });
           return cached;
         }
-        
+
         set({ loading: true, error: null });
         try {
           const product = await productsService.getProductById(id);
-          
+
           // Mettre à jour le cache
           set((state) => ({
             selectedProduct: product,
             selectedProductId: id,
             productCache: { ...state.productCache, [id]: product },
             loading: false,
-            status: 'success',
+            status: "success",
           }));
-          
-          logger.info('Product retrieved', { productId: id });
+
+          logger.info("Product retrieved", { productId: id });
           return product;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Produit non trouvé';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError ? error.message : "Produit non trouvé";
+          set({
+            error: message,
             loading: false,
-            status: 'error',
+            status: "error",
           });
-          logger.error('Failed to get product', error);
+          logger.error("Failed to get product", error);
           return null;
         }
       },
@@ -496,36 +537,37 @@ export const useProductStore = create<ProductState>()(
       getProductBySlug: async (slug: string, forceRefresh: boolean = false) => {
         // Vérifier le cache
         const cachedId = Object.keys(get().productCache).find(
-          key => get().productCache[key].slug === slug
+          (key) => get().productCache[key].slug === slug,
         );
         if (!forceRefresh && cachedId) {
           const cached = get().productCache[cachedId];
           set({ selectedProduct: cached, selectedProductId: cachedId });
           return cached;
         }
-        
+
         set({ loading: true, error: null });
         try {
           const product = await productsService.getProductBySlug(slug);
-          
+
           set((state) => ({
             selectedProduct: product,
             selectedProductId: product.id,
             productCache: { ...state.productCache, [product.id]: product },
             loading: false,
-            status: 'success',
+            status: "success",
           }));
-          
-          logger.info('Product retrieved by slug', { slug });
+
+          logger.info("Product retrieved by slug", { slug });
           return product;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Produit non trouvé';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError ? error.message : "Produit non trouvé";
+          set({
+            error: message,
             loading: false,
-            status: 'error',
+            status: "error",
           });
-          logger.error('Failed to get product by slug', error);
+          logger.error("Failed to get product by slug", error);
           return null;
         }
       },
@@ -537,23 +579,24 @@ export const useProductStore = create<ProductState>()(
           set({ selectedCategory: cached, selectedCategoryId: id });
           return cached;
         }
-        
+
         set({ loading: true, error: null });
         try {
           const category = await productsService.getCategoryBySlug(id);
-          
+
           set((state) => ({
             selectedCategory: category,
             selectedCategoryId: category.id,
             categoryCache: { ...state.categoryCache, [category.id]: category },
             loading: false,
           }));
-          
+
           return category;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Catégorie non trouvée';
+          const message =
+            error instanceof ApiError ? error.message : "Catégorie non trouvée";
           set({ error: message, loading: false });
-          logger.error('Failed to get category', error);
+          logger.error("Failed to get category", error);
           return null;
         }
       },
@@ -562,30 +605,34 @@ export const useProductStore = create<ProductState>()(
         set({ loading: true, error: null });
         try {
           const category = await productsService.getCategoryBySlug(slug);
-          
+
           set((state) => ({
             selectedCategory: category,
             selectedCategoryId: category.id,
             categoryCache: { ...state.categoryCache, [category.id]: category },
             loading: false,
           }));
-          
+
           return category;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Catégorie non trouvée';
+          const message =
+            error instanceof ApiError ? error.message : "Catégorie non trouvée";
           set({ error: message, loading: false });
-          logger.error('Failed to get category by slug', error);
+          logger.error("Failed to get category by slug", error);
           return null;
         }
       },
 
       // ============ RECHERCHE ============
 
-      searchProducts: async (query: string, filters?: Partial<ProductFilter>) => {
+      searchProducts: async (
+        query: string,
+        filters?: Partial<ProductFilter>,
+      ) => {
         set({ loading: true, error: null });
         try {
           const result = await productsService.searchProducts(query, filters);
-          
+
           set({
             products: result.products,
             total: result.total,
@@ -593,22 +640,27 @@ export const useProductStore = create<ProductState>()(
             limit: result.limit || 20,
             totalPages: result.totalPages,
             loading: false,
-            status: 'success',
+            status: "success",
           });
-          
-          logger.info('Products searched', { query, count: result.products.length });
+
+          logger.info("Products searched", {
+            query,
+            count: result.products.length,
+          });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de recherche';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de recherche";
           set({ error: message, loading: false });
-          logger.error('Failed to search products', error);
+          logger.error("Failed to search products", error);
         }
       },
 
       getProductsByCategory: async (categorySlug: string) => {
         set({ loading: true, error: null });
         try {
-          const result = await productsService.getProductsByCategory(categorySlug);
-          
+          const result =
+            await productsService.getProductsByCategory(categorySlug);
+
           set({
             products: result.products,
             total: result.total,
@@ -617,12 +669,16 @@ export const useProductStore = create<ProductState>()(
             totalPages: result.totalPages,
             loading: false,
           });
-          
-          logger.info('Products by category loaded', { categorySlug, count: result.products.length });
+
+          logger.info("Products by category loaded", {
+            categorySlug,
+            count: result.products.length,
+          });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de chargement";
           set({ error: message, loading: false });
-          logger.error('Failed to load products by category', error);
+          logger.error("Failed to load products by category", error);
         }
       },
 
@@ -630,7 +686,7 @@ export const useProductStore = create<ProductState>()(
         set({ loading: true, error: null });
         try {
           const result = await productsService.getProductsByBrand(brand);
-          
+
           set({
             products: result.products,
             total: result.total,
@@ -639,12 +695,16 @@ export const useProductStore = create<ProductState>()(
             totalPages: result.totalPages,
             loading: false,
           });
-          
-          logger.info('Products by brand loaded', { brand, count: result.products.length });
+
+          logger.info("Products by brand loaded", {
+            brand,
+            count: result.products.length,
+          });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de chargement";
           set({ error: message, loading: false });
-          logger.error('Failed to load products by brand', error);
+          logger.error("Failed to load products by brand", error);
         }
       },
 
@@ -653,11 +713,15 @@ export const useProductStore = create<ProductState>()(
         try {
           const products = await productsService.getProductsByTag(tagSlug);
           set({ products, loading: false });
-          logger.info('Products by tag loaded', { tagSlug, count: products.length });
+          logger.info("Products by tag loaded", {
+            tagSlug,
+            count: products.length,
+          });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de chargement";
           set({ error: message, loading: false });
-          logger.error('Failed to load products by tag', error);
+          logger.error("Failed to load products by tag", error);
         }
       },
 
@@ -667,7 +731,7 @@ export const useProductStore = create<ProductState>()(
         set({ loading: true, error: null });
         try {
           const result = await productsService.getProductReviews(productId);
-          set({ 
+          set({
             reviews: result.reviews,
             reviewStats: {
               averageRating: result.averageRating,
@@ -677,52 +741,75 @@ export const useProductStore = create<ProductState>()(
             loading: false,
           });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement des avis';
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Erreur de chargement des avis";
           set({ error: message, loading: false });
-          logger.error('Failed to load product reviews', error);
+          logger.error("Failed to load product reviews", error);
         }
       },
 
-      createProductReview: async (productId: string, rating: number, title: string, comment: string, images?: File[]) => {
+      createProductReview: async (
+        productId: string,
+        rating: number,
+        title: string,
+        comment: string,
+      ) => {
         set({ loading: true, error: null });
         try {
-          const review = await productsService.createProductReview(productId, rating, title, comment);
-          
+          const review = await productsService.createProductReview(
+            productId,
+            rating,
+            title,
+            comment,
+          );
+
           // Mettre à jour la liste des avis
           set((state) => ({
             reviews: [review, ...state.reviews],
             loading: false,
           }));
-          
+
           // Mettre à jour les statistiques
           await get().loadProductReviews(productId);
-          
-          logger.info('Review created', { productId, rating });
+
+          logger.info("Review created", { productId, rating });
           return true;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur d\'envoi de l\'avis';
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Erreur d'envoi de l'avis";
           set({ error: message, loading: false });
-          logger.error('Failed to create review', error);
+          logger.error("Failed to create review", error);
           return false;
         }
       },
 
-      updateProductReview: async (reviewId: string, data: { rating?: number; title?: string; comment?: string }) => {
+      updateProductReview: async (
+        reviewId: string,
+        data: { rating?: number; title?: string; comment?: string },
+      ) => {
         set({ loading: true, error: null });
         try {
-          const review = await productsService.updateProductReview(reviewId, data);
-          
+          const review = await productsService.updateProductReview(
+            reviewId,
+            data,
+          );
+
           set((state) => ({
             reviews: state.reviews.map((r) => (r.id === reviewId ? review : r)),
             loading: false,
           }));
-          
-          logger.info('Review updated', { reviewId });
+
+          logger.info("Review updated", { reviewId });
           return true;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de mise à jour';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de mise à jour";
           set({ error: message, loading: false });
-          logger.error('Failed to update review', error);
+          logger.error("Failed to update review", error);
           return false;
         }
       },
@@ -731,18 +818,19 @@ export const useProductStore = create<ProductState>()(
         set({ loading: true, error: null });
         try {
           await productsService.deleteProductReview(reviewId);
-          
+
           set((state) => ({
             reviews: state.reviews.filter((r) => r.id !== reviewId),
             loading: false,
           }));
-          
-          logger.info('Review deleted', { reviewId });
+
+          logger.info("Review deleted", { reviewId });
           return true;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de suppression';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de suppression";
           set({ error: message, loading: false });
-          logger.error('Failed to delete review', error);
+          logger.error("Failed to delete review", error);
           return false;
         }
       },
@@ -750,10 +838,10 @@ export const useProductStore = create<ProductState>()(
       markReviewHelpful: async (reviewId: string, helpful: boolean) => {
         try {
           await productsService.markReviewHelpful(reviewId, helpful);
-          logger.info('Review marked as helpful', { reviewId, helpful });
+          logger.info("Review marked as helpful", { reviewId, helpful });
           return true;
         } catch (error) {
-          logger.error('Failed to mark review helpful', error);
+          logger.error("Failed to mark review helpful", error);
           return false;
         }
       },
@@ -764,16 +852,17 @@ export const useProductStore = create<ProductState>()(
         set({ loading: true, error: null });
         try {
           const comparison = await productsService.compareProducts(productIds);
-          set({ 
-            comparison, 
+          set({
+            comparison,
             compareProducts: comparison.products,
             loading: false,
           });
           return comparison;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de comparaison';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de comparaison";
           set({ error: message, loading: false });
-          logger.error('Failed to compare products', error);
+          logger.error("Failed to compare products", error);
           return null;
         }
       },
@@ -781,33 +870,36 @@ export const useProductStore = create<ProductState>()(
       addToCompare: (productId: string) => {
         const { compareProducts } = get();
         if (compareProducts.length >= 4) {
-          logger.warn('Maximum 4 products can be compared');
+          logger.warn("Maximum 4 products can be compared");
           return;
         }
-        if (compareProducts.some(p => p.id === productId)) {
+        if (compareProducts.some((p) => p.id === productId)) {
           return;
         }
-        
-        const product = get().productCache[productId] || 
-                       get().products.find(p => p.id === productId);
+
+        const product =
+          get().productCache[productId] ||
+          get().products.find((p) => p.id === productId);
         if (product) {
           set((state) => ({
             compareProducts: [...state.compareProducts, product],
           }));
-          logger.info('Product added to compare', { productId });
+          logger.info("Product added to compare", { productId });
         }
       },
 
       removeFromCompare: (productId: string) => {
         set((state) => ({
-          compareProducts: state.compareProducts.filter(p => p.id !== productId),
+          compareProducts: state.compareProducts.filter(
+            (p) => p.id !== productId,
+          ),
         }));
-        logger.info('Product removed from compare', { productId });
+        logger.info("Product removed from compare", { productId });
       },
 
       clearCompare: () => {
         set({ compareProducts: [], comparison: null });
-        logger.info('Compare cleared');
+        logger.info("Compare cleared");
       },
 
       // ============ EXTERNAL PRODUCT ============
@@ -815,17 +907,19 @@ export const useProductStore = create<ProductState>()(
       createExternalProductRequest: async (url: string) => {
         set({ loading: true, error: null });
         try {
-          const request = await productsService.createExternalProductRequest(url);
-          set({ 
+          const request =
+            await productsService.createExternalProductRequest(url);
+          set({
             externalProductRequest: request,
             loading: false,
           });
-          logger.info('External product request created', { url });
+          logger.info("External product request created", { url });
           return request;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de traitement';
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de traitement";
           set({ error: message, loading: false });
-          logger.error('Failed to create external product request', error);
+          logger.error("Failed to create external product request", error);
           return null;
         }
       },
@@ -834,15 +928,16 @@ export const useProductStore = create<ProductState>()(
         set({ loading: true, error: null });
         try {
           const request = await productsService.getExternalProductRequest(id);
-          set({ 
+          set({
             externalProductRequest: request,
             loading: false,
           });
           return request;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Requête non trouvée';
+          const message =
+            error instanceof ApiError ? error.message : "Requête non trouvée";
           set({ error: message, loading: false });
-          logger.error('Failed to get external product request', error);
+          logger.error("Failed to get external product request", error);
           return null;
         }
       },
@@ -851,16 +946,19 @@ export const useProductStore = create<ProductState>()(
         set({ loading: true, error: null });
         try {
           const request = await productsService.retryExternalProductRequest(id);
-          set({ 
+          set({
             externalProductRequest: request,
             loading: false,
           });
-          logger.info('External product request retried', { id });
+          logger.info("External product request retried", { id });
           return request;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de re-traitement';
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Erreur de re-traitement";
           set({ error: message, loading: false });
-          logger.error('Failed to retry external product request', error);
+          logger.error("Failed to retry external product request", error);
           return null;
         }
       },
@@ -871,23 +969,27 @@ export const useProductStore = create<ProductState>()(
         set({ loading: true, error: null });
         try {
           const variants = await productsService.getProductVariants(productId);
-          set({ 
+          set({
             variants,
-            selectedVariant: variants.find(v => v.isDefault) || variants[0] || null,
+            selectedVariant:
+              variants.find((v) => v.isDefault) || variants[0] || null,
             loading: false,
           });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement des variantes';
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Erreur de chargement des variantes";
           set({ error: message, loading: false });
-          logger.error('Failed to load product variants', error);
+          logger.error("Failed to load product variants", error);
         }
       },
 
       selectVariant: (variantId: string) => {
-        const variant = get().variants.find(v => v.id === variantId);
+        const variant = get().variants.find((v) => v.id === variantId);
         if (variant) {
           set({ selectedVariant: variant });
-          logger.info('Variant selected', { variantId });
+          logger.info("Variant selected", { variantId });
         }
       },
 
@@ -896,7 +998,7 @@ export const useProductStore = create<ProductState>()(
           const variant = await productsService.getVariantBySku(sku);
           return variant;
         } catch (error) {
-          logger.error('Failed to get variant by SKU', error);
+          logger.error("Failed to get variant by SKU", error);
           return null;
         }
       },
@@ -939,17 +1041,19 @@ export const useProductStore = create<ProductState>()(
       // ============ SÉLECTION ============
 
       selectProduct: (product: Product) => {
-        set({ 
+        set({
           selectedProduct: product,
           selectedProductId: product.id,
         });
       },
 
       selectProductById: (id: string) => {
-        const product = get().productCache[id] || 
-                       get().products.find(p => p.id === id) || null;
+        const product =
+          get().productCache[id] ||
+          get().products.find((p) => p.id === id) ||
+          null;
         if (product) {
-          set({ 
+          set({
             selectedProduct: product,
             selectedProductId: id,
           });
@@ -957,17 +1061,19 @@ export const useProductStore = create<ProductState>()(
       },
 
       selectCategory: (category: Category) => {
-        set({ 
+        set({
           selectedCategory: category,
           selectedCategoryId: category.id,
         });
       },
 
       selectCategoryById: (id: string) => {
-        const category = get().categoryCache[id] || 
-                        get().categories.find(c => c.id === id) || null;
+        const category =
+          get().categoryCache[id] ||
+          get().categories.find((c) => c.id === id) ||
+          null;
         if (category) {
-          set({ 
+          set({
             selectedCategory: category,
             selectedCategoryId: id,
           });
@@ -975,7 +1081,7 @@ export const useProductStore = create<ProductState>()(
       },
 
       clearSelected: () => {
-        set({ 
+        set({
           selectedProduct: null,
           selectedProductId: null,
           selectedCategory: null,
@@ -992,7 +1098,7 @@ export const useProductStore = create<ProductState>()(
       // ============ CACHE ============
 
       clearCache: () => {
-        set({ 
+        set({
           productCache: {},
           categoryCache: {},
         });
@@ -1004,22 +1110,25 @@ export const useProductStore = create<ProductState>()(
           delete newCache[id];
           return { productCache: newCache };
         });
-        logger.info('Product cache invalidated', { productId: id });
+        logger.info("Product cache invalidated", { productId: id });
       },
 
       // ============ UTILITAIRES ============
 
       getProductById: (id: string) => {
-        return get().productCache[id] || 
-               get().products.find(p => p.id === id) || null;
+        return (
+          get().productCache[id] ||
+          get().products.find((p) => p.id === id) ||
+          null
+        );
       },
 
       getProductsByCategoryId: (categoryId: string) => {
-        return get().products.filter(p => p.categoryId === categoryId);
+        return get().products.filter((p) => p.categoryId === categoryId);
       },
 
       getCategoriesByParent: (parentId: string) => {
-        return get().categories.filter(c => c.parentId === parentId);
+        return get().categories.filter((c) => c.parentId === parentId);
       },
 
       getFilteredProducts: () => {
@@ -1028,14 +1137,16 @@ export const useProductStore = create<ProductState>()(
 
       isProductInWishlist: async (productId: string) => {
         try {
-          return await productsService.getProductAvailability(productId).then(() => false);
+          return await productsService
+            .getProductAvailability(productId)
+            .then(() => false);
         } catch {
           return false;
         }
       },
 
       clearError: () => {
-        set({ error: null, status: 'idle' });
+        set({ error: null, status: "idle" });
       },
 
       reset: () => {
@@ -1048,15 +1159,15 @@ export const useProductStore = create<ProductState>()(
       },
     }),
     {
-      name: 'product-storage',
+      name: "product-storage",
       partialize: (state) => ({
         filters: state.filters,
         productCache: state.productCache,
         categoryCache: state.categoryCache,
         compareProducts: state.compareProducts,
       }),
-    }
-  )
+    },
+  ),
 );
 
 // ============ HOOKS PERSONNALISÉS ============
@@ -1066,7 +1177,7 @@ export const useProductStore = create<ProductState>()(
  */
 export const useProducts = (filters?: Partial<ProductFilter>) => {
   const store = useProductStore();
-  
+
   React.useEffect(() => {
     if (filters) {
       store.setFilters(filters);
@@ -1076,7 +1187,7 @@ export const useProducts = (filters?: Partial<ProductFilter>) => {
     store.loadCategories();
     store.loadTags();
   }, [JSON.stringify(filters)]);
-  
+
   return {
     products: store.products,
     loading: store.loading,
@@ -1102,11 +1213,11 @@ export const useProducts = (filters?: Partial<ProductFilter>) => {
  */
 export const useFeaturedProducts = () => {
   const store = useProductStore();
-  
+
   React.useEffect(() => {
     store.loadFeaturedProducts();
   }, []);
-  
+
   return {
     products: store.featuredProducts,
     loading: store.loading,
@@ -1119,11 +1230,11 @@ export const useFeaturedProducts = () => {
  */
 export const usePopularProducts = () => {
   const store = useProductStore();
-  
+
   React.useEffect(() => {
     store.loadPopularProducts();
   }, []);
-  
+
   return {
     products: store.popularProducts,
     loading: store.loading,
@@ -1136,11 +1247,11 @@ export const usePopularProducts = () => {
  */
 export const useNewProducts = () => {
   const store = useProductStore();
-  
+
   React.useEffect(() => {
     store.loadNewProducts();
   }, []);
-  
+
   return {
     products: store.newProducts,
     loading: store.loading,
@@ -1153,11 +1264,11 @@ export const useNewProducts = () => {
  */
 export const useOnSaleProducts = () => {
   const store = useProductStore();
-  
+
   React.useEffect(() => {
     store.loadOnSaleProducts();
   }, []);
-  
+
   return {
     products: store.onSaleProducts,
     loading: store.loading,
@@ -1170,7 +1281,7 @@ export const useOnSaleProducts = () => {
  */
 export const useProduct = (id: string) => {
   const store = useProductStore();
-  
+
   React.useEffect(() => {
     if (id) {
       store.getProduct(id);
@@ -1178,7 +1289,7 @@ export const useProduct = (id: string) => {
       store.loadProductVariants(id);
     }
   }, [id]);
-  
+
   return {
     product: store.selectedProduct,
     reviews: store.reviews,
@@ -1193,7 +1304,12 @@ export const useProduct = (id: string) => {
       store.loadProductReviews(id);
       store.loadProductVariants(id);
     },
-    createReview: (rating: number, title: string, comment: string, images?: File[]) => {
+    createReview: (
+      rating: number,
+      title: string,
+      comment: string,
+      images?: File[],
+    ) => {
       return store.createProductReview(id, rating, title, comment, images);
     },
   };
@@ -1204,12 +1320,12 @@ export const useProduct = (id: string) => {
  */
 export const useCategories = () => {
   const store = useProductStore();
-  
+
   React.useEffect(() => {
     store.loadCategories();
     store.loadCategoryTree();
   }, []);
-  
+
   return {
     categories: store.categories,
     categoryTree: store.categoryTree,
@@ -1226,7 +1342,7 @@ export const useCategories = () => {
  */
 export const useProductComparison = () => {
   const store = useProductStore();
-  
+
   return {
     compareProducts: store.compareProducts,
     comparison: store.comparison,
@@ -1245,7 +1361,7 @@ export const useProductComparison = () => {
  */
 export const useExternalProduct = () => {
   const store = useProductStore();
-  
+
   return {
     request: store.externalProductRequest,
     requests: store.externalProductRequests,

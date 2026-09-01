@@ -1,18 +1,18 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import React from 'react';
-import { 
-  Notification, 
-  NotificationType, 
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { useEffect } from "react";
+import {
+  Notification,
+  NotificationType,
   NotificationCategory,
   NotificationPriority,
   NotificationPreferences,
   NotificationFilter,
   NotificationStats,
-} from '@/types/notification';
-import { notificationService } from '@/services/notification.service';
-import { ApiError } from '@/lib/api-client';
-import { logger } from '@/lib/logger';
+} from "@/types/notification";
+import { notificationService } from "@/services/notification.service";
+import { ApiError } from "@/lib/api-client";
+import { logger } from "@/lib/logger";
 
 // ============ TYPES ============
 
@@ -22,58 +22,62 @@ export interface NotificationState {
   unreadCount: number;
   preferences: NotificationPreferences | null;
   stats: NotificationStats | null;
-  
+
   // État
   loading: boolean;
   refreshing: boolean;
   error: string | null;
-  status: 'idle' | 'loading' | 'success' | 'error';
-  
+  status: "idle" | "loading" | "success" | "error";
+
   // Pagination
   total: number;
   page: number;
   limit: number;
   totalPages: number;
-  
+
   // Filtres
   filters: NotificationFilter;
-  
+
   // Retry
   retryCount: number;
   maxRetries: number;
-  
+
   // Actions
   loadNotifications: (filters?: Partial<NotificationFilter>) => Promise<void>;
   loadUnreadCount: () => Promise<void>;
   loadPreferences: () => Promise<void>;
   loadStats: () => Promise<void>;
   refresh: () => Promise<void>;
-  
+
   markAsRead: (id: string) => Promise<boolean>;
   markAllAsRead: () => Promise<boolean>;
   markMultipleAsRead: (ids: string[]) => Promise<boolean>;
-  
+
   deleteNotification: (id: string) => Promise<boolean>;
   deleteAllNotifications: () => Promise<boolean>;
   clearReadNotifications: () => Promise<boolean>;
-  
-  updatePreferences: (preferences: Partial<NotificationPreferences>) => Promise<boolean>;
+
+  updatePreferences: (
+    preferences: Partial<NotificationPreferences>,
+  ) => Promise<boolean>;
   updateChannelPreference: (
     channel: string,
     type: string,
-    enabled: boolean
+    enabled: boolean,
   ) => Promise<boolean>;
-  
+
   setFilters: (filters: Partial<NotificationFilter>) => void;
   resetFilters: () => void;
   goToPage: (page: number) => void;
   nextPage: () => void;
   previousPage: () => void;
-  
+
   getUnreadByType: (type: NotificationType) => number;
-  getNotificationsByCategory: (category: NotificationCategory) => Notification[];
+  getNotificationsByCategory: (
+    category: NotificationCategory,
+  ) => Notification[];
   getUnreadByPriority: (priority: NotificationPriority) => number;
-  
+
   clearError: () => void;
   reset: () => void;
 }
@@ -83,34 +87,35 @@ export interface NotificationState {
 const initialFilters: NotificationFilter = {
   page: 1,
   limit: 20,
-  sortBy: 'createdAt',
-  sortOrder: 'desc',
+  sortBy: "createdAt",
+  sortOrder: "desc",
 };
 
-const initialState: Omit<NotificationState, 
-  | 'loadNotifications'
-  | 'loadUnreadCount'
-  | 'loadPreferences'
-  | 'loadStats'
-  | 'refresh'
-  | 'markAsRead'
-  | 'markAllAsRead'
-  | 'markMultipleAsRead'
-  | 'deleteNotification'
-  | 'deleteAllNotifications'
-  | 'clearReadNotifications'
-  | 'updatePreferences'
-  | 'updateChannelPreference'
-  | 'setFilters'
-  | 'resetFilters'
-  | 'goToPage'
-  | 'nextPage'
-  | 'previousPage'
-  | 'getUnreadByType'
-  | 'getNotificationsByCategory'
-  | 'getUnreadByPriority'
-  | 'clearError'
-  | 'reset'
+const initialState: Omit<
+  NotificationState,
+  | "loadNotifications"
+  | "loadUnreadCount"
+  | "loadPreferences"
+  | "loadStats"
+  | "refresh"
+  | "markAsRead"
+  | "markAllAsRead"
+  | "markMultipleAsRead"
+  | "deleteNotification"
+  | "deleteAllNotifications"
+  | "clearReadNotifications"
+  | "updatePreferences"
+  | "updateChannelPreference"
+  | "setFilters"
+  | "resetFilters"
+  | "goToPage"
+  | "nextPage"
+  | "previousPage"
+  | "getUnreadByType"
+  | "getNotificationsByCategory"
+  | "getUnreadByPriority"
+  | "clearError"
+  | "reset"
 > = {
   notifications: [],
   unreadCount: 0,
@@ -119,7 +124,7 @@ const initialState: Omit<NotificationState,
   loading: false,
   refreshing: false,
   error: null,
-  status: 'idle' as const,
+  status: "idle" as const,
   total: 0,
   page: 1,
   limit: 20,
@@ -141,12 +146,13 @@ export const useNotificationStore = create<NotificationState>()(
       loadNotifications: async (filters?: Partial<NotificationFilter>) => {
         // Éviter les doubles chargements
         if (get().loading) return;
-        
-        set({ loading: true, error: null, status: 'loading' });
+
+        set({ loading: true, error: null, status: "loading" });
         try {
           const currentFilters = { ...get().filters, ...filters };
-          const result = await notificationService.getNotifications(currentFilters);
-          
+          const result =
+            await notificationService.getNotifications(currentFilters);
+
           set({
             notifications: result.notifications,
             total: result.total,
@@ -156,34 +162,40 @@ export const useNotificationStore = create<NotificationState>()(
             unreadCount: result.unreadCount,
             filters: currentFilters,
             loading: false,
-            status: 'success',
+            status: "success",
             retryCount: 0,
           });
-          
-          logger.info('Notifications loaded', { 
-            count: result.notifications.length, 
+
+          logger.info("Notifications loaded", {
+            count: result.notifications.length,
             total: result.total,
             unread: result.unreadCount,
           });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement des notifications';
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Erreur de chargement des notifications";
           const retryCount = get().retryCount;
-          
+
           // Tentative de retry
           if (retryCount < get().maxRetries) {
             set({ retryCount: retryCount + 1 });
-            setTimeout(() => {
-              get().loadNotifications(filters);
-            }, 1000 * (retryCount + 1));
+            setTimeout(
+              () => {
+                get().loadNotifications(filters);
+              },
+              1000 * (retryCount + 1),
+            );
             return;
           }
-          
-          set({ 
-            error: message, 
-            loading: false, 
-            status: 'error' 
+
+          set({
+            error: message,
+            loading: false,
+            status: "error",
           });
-          logger.error('Failed to load notifications', error);
+          logger.error("Failed to load notifications", error);
         }
       },
 
@@ -192,7 +204,7 @@ export const useNotificationStore = create<NotificationState>()(
           const result = await notificationService.getUnreadCount();
           set({ unreadCount: result.count });
         } catch (error) {
-          logger.error('Failed to load unread count', error);
+          logger.error("Failed to load unread count", error);
         }
       },
 
@@ -200,45 +212,96 @@ export const useNotificationStore = create<NotificationState>()(
         set({ loading: true, error: null });
         try {
           const preferences = await notificationService.getPreferences();
-          set({ 
-            preferences, 
+          set({
+            preferences,
             loading: false,
-            status: 'success',
+            status: "success",
           });
-          logger.info('Preferences loaded');
+          logger.info("Preferences loaded");
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement des préférences';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Erreur de chargement des préférences";
+          set({
+            error: message,
             loading: false,
-            status: 'error',
+            status: "error",
           });
-          logger.error('Failed to load preferences', error);
+          logger.error("Failed to load preferences", error);
         }
       },
 
       loadStats: async () => {
         set({ loading: true, error: null });
         try {
-          // Récupération des statistiques depuis le service
-          const stats = await notificationService.getNotificationStats?.() || null;
-          set({ 
-            stats, 
+          // Calcul des statistiques à partir des notifications chargées
+          const notifications = get().notifications;
+          const read = notifications.filter((n) => n.isRead).length;
+          const unread = notifications.filter((n) => !n.isRead).length;
+          const dismissed = notifications.filter((n) => n.isDismissed).length;
+
+          const stats: NotificationStats = {
+            total: notifications.length,
+            read,
+            unread,
+            dismissed,
+            byType: {} as Record<NotificationType, number>,
+            byCategory: {} as Record<NotificationCategory, number>,
+            byPriority: {} as Record<NotificationPriority, number>,
+            dailyStats: [],
+          };
+
+          // Compter par type, catégorie et priorité
+          notifications.forEach((notification) => {
+            stats.byType[notification.type] =
+              (stats.byType[notification.type] || 0) + 1;
+            stats.byCategory[notification.category] =
+              (stats.byCategory[notification.category] || 0) + 1;
+            stats.byPriority[notification.priority] =
+              (stats.byPriority[notification.priority] || 0) + 1;
+          });
+
+          // Grouper par date pour les daily stats
+          const dailyMap = new Map<string, { count: number; read: number }>();
+          notifications.forEach((notification) => {
+            const date = new Date(notification.createdAt)
+              .toISOString()
+              .split("T")[0];
+            const current = dailyMap.get(date) || { count: 0, read: 0 };
+            dailyMap.set(date, {
+              count: current.count + 1,
+              read: current.read + (notification.isRead ? 1 : 0),
+            });
+          });
+
+          stats.dailyStats = Array.from(dailyMap.entries()).map(
+            ([date, data]) => ({
+              date,
+              ...data,
+            }),
+          );
+
+          set({
+            stats,
             loading: false,
           });
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de chargement des statistiques';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Erreur de chargement des statistiques";
+          set({
+            error: message,
             loading: false,
           });
-          logger.error('Failed to load stats', error);
+          logger.error("Failed to load stats", error);
         }
       },
 
       refresh: async () => {
         if (get().refreshing) return;
-        
+
         set({ refreshing: true });
         try {
           await get().loadNotifications();
@@ -246,7 +309,7 @@ export const useNotificationStore = create<NotificationState>()(
           set({ refreshing: false });
         } catch (error) {
           set({ refreshing: false });
-          logger.error('Failed to refresh notifications', error);
+          logger.error("Failed to refresh notifications", error);
         }
       },
 
@@ -256,25 +319,26 @@ export const useNotificationStore = create<NotificationState>()(
         set({ loading: true, error: null });
         try {
           await notificationService.markAsRead(id);
-          
+
           set((state) => ({
             notifications: state.notifications.map((n) =>
-              n.id === id ? { ...n, isRead: true, readAt: new Date() } : n
+              n.id === id ? { ...n, isRead: true, readAt: new Date() } : n,
             ),
             unreadCount: Math.max(0, state.unreadCount - 1),
             loading: false,
           }));
-          
-          logger.info('Notification marked as read', { notificationId: id });
+
+          logger.info("Notification marked as read", { notificationId: id });
           return true;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de marquage';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de marquage";
+          set({
+            error: message,
             loading: false,
-            status: 'error',
+            status: "error",
           });
-          logger.error('Failed to mark notification as read', error);
+          logger.error("Failed to mark notification as read", error);
           return false;
         }
       },
@@ -283,61 +347,69 @@ export const useNotificationStore = create<NotificationState>()(
         set({ loading: true, error: null });
         try {
           await notificationService.markAllAsRead();
-          
+
           set((state) => ({
-            notifications: state.notifications.map((n) => ({ 
-              ...n, 
-              isRead: true, 
-              readAt: new Date() 
+            notifications: state.notifications.map((n) => ({
+              ...n,
+              isRead: true,
+              readAt: new Date(),
             })),
             unreadCount: 0,
             loading: false,
           }));
-          
-          logger.info('All notifications marked as read');
+
+          logger.info("All notifications marked as read");
           return true;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de marquage';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de marquage";
+          set({
+            error: message,
             loading: false,
-            status: 'error',
+            status: "error",
           });
-          logger.error('Failed to mark all notifications as read', error);
+          logger.error("Failed to mark all notifications as read", error);
           return false;
         }
       },
 
       markMultipleAsRead: async (ids: string[]) => {
         if (ids.length === 0) return true;
-        
+
         set({ loading: true, error: null });
         try {
           // Appel batch si disponible, sinon boucle
           if (notificationService.markMultipleAsRead) {
             await notificationService.markMultipleAsRead(ids);
           } else {
-            await Promise.all(ids.map(id => notificationService.markAsRead(id)));
+            await Promise.all(
+              ids.map((id) => notificationService.markAsRead(id)),
+            );
           }
-          
+
           set((state) => ({
             notifications: state.notifications.map((n) =>
-              ids.includes(n.id) ? { ...n, isRead: true, readAt: new Date() } : n
+              ids.includes(n.id)
+                ? { ...n, isRead: true, readAt: new Date() }
+                : n,
             ),
             unreadCount: Math.max(0, state.unreadCount - ids.length),
             loading: false,
           }));
-          
-          logger.info('Multiple notifications marked as read', { count: ids.length });
+
+          logger.info("Multiple notifications marked as read", {
+            count: ids.length,
+          });
           return true;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de marquage';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de marquage";
+          set({
+            error: message,
             loading: false,
-            status: 'error',
+            status: "error",
           });
-          logger.error('Failed to mark multiple notifications as read', error);
+          logger.error("Failed to mark multiple notifications as read", error);
           return false;
         }
       },
@@ -348,26 +420,28 @@ export const useNotificationStore = create<NotificationState>()(
         set({ loading: true, error: null });
         try {
           await notificationService.deleteNotification(id);
-          
-          const removed = get().notifications.find(n => n.id === id);
+
+          const removed = get().notifications.find((n) => n.id === id);
           set((state) => ({
             notifications: state.notifications.filter((n) => n.id !== id),
-            unreadCount: removed && !removed.isRead 
-              ? Math.max(0, state.unreadCount - 1) 
-              : state.unreadCount,
+            unreadCount:
+              removed && !removed.isRead
+                ? Math.max(0, state.unreadCount - 1)
+                : state.unreadCount,
             loading: false,
           }));
-          
-          logger.info('Notification deleted', { notificationId: id });
+
+          logger.info("Notification deleted", { notificationId: id });
           return true;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de suppression';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de suppression";
+          set({
+            error: message,
             loading: false,
-            status: 'error',
+            status: "error",
           });
-          logger.error('Failed to delete notification', error);
+          logger.error("Failed to delete notification", error);
           return false;
         }
       },
@@ -376,23 +450,24 @@ export const useNotificationStore = create<NotificationState>()(
         set({ loading: true, error: null });
         try {
           await notificationService.deleteAllNotifications();
-          
+
           set({
             notifications: [],
             unreadCount: 0,
             loading: false,
           });
-          
-          logger.info('All notifications deleted');
+
+          logger.info("All notifications deleted");
           return true;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de suppression';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de suppression";
+          set({
+            error: message,
             loading: false,
-            status: 'error',
+            status: "error",
           });
-          logger.error('Failed to delete all notifications', error);
+          logger.error("Failed to delete all notifications", error);
           return false;
         }
       },
@@ -404,57 +479,70 @@ export const useNotificationStore = create<NotificationState>()(
             await notificationService.clearReadNotifications();
           } else {
             // Fallback: supprimer manuellement les notifications lues
-            const readIds = get().notifications
-              .filter(n => n.isRead)
-              .map(n => n.id);
-            await Promise.all(readIds.map(id => notificationService.deleteNotification(id)));
+            const readIds = get()
+              .notifications.filter((n) => n.isRead)
+              .map((n) => n.id);
+            await Promise.all(
+              readIds.map((id) => notificationService.deleteNotification(id)),
+            );
           }
-          
+
           set((state) => ({
             notifications: state.notifications.filter((n) => !n.isRead),
             loading: false,
           }));
-          
-          logger.info('Read notifications cleared');
+
+          logger.info("Read notifications cleared");
           return true;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de suppression';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de suppression";
+          set({
+            error: message,
             loading: false,
-            status: 'error',
+            status: "error",
           });
-          logger.error('Failed to clear read notifications', error);
+          logger.error("Failed to clear read notifications", error);
           return false;
         }
       },
 
       // ============ PRÉFÉRENCES ============
 
-      updatePreferences: async (preferences: Partial<NotificationPreferences>) => {
+      updatePreferences: async (
+        preferences: Partial<NotificationPreferences>,
+      ) => {
         set({ loading: true, error: null });
         try {
-          const updated = await notificationService.updatePreferences(preferences);
-          set({ 
-            preferences: updated, 
+          const updated =
+            await notificationService.updatePreferences(preferences);
+          set({
+            preferences: updated,
             loading: false,
-            status: 'success',
+            status: "success",
           });
-          logger.info('Preferences updated');
+          logger.info("Preferences updated");
           return true;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de mise à jour des préférences';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : "Erreur de mise à jour des préférences";
+          set({
+            error: message,
             loading: false,
-            status: 'error',
+            status: "error",
           });
-          logger.error('Failed to update preferences', error);
+          logger.error("Failed to update preferences", error);
           return false;
         }
       },
 
-      updateChannelPreference: async (channel: string, type: string, enabled: boolean) => {
+      updateChannelPreference: async (
+        channel: string,
+        type: string,
+        enabled: boolean,
+      ) => {
         set({ loading: true, error: null });
         try {
           let updated: NotificationPreferences;
@@ -462,37 +550,41 @@ export const useNotificationStore = create<NotificationState>()(
             updated = await notificationService.updateChannelPreference(
               channel as any,
               type as any,
-              enabled
+              enabled,
             );
           } else {
             // Fallback: update via preferences
-            const current = get().preferences || (await notificationService.getPreferences());
+            const current =
+              get().preferences || (await notificationService.getPreferences());
+            if (!current) throw new Error("Failed to get preferences");
+
             updated = await notificationService.updatePreferences({
               ...current,
               channels: {
                 ...current.channels,
                 [channel]: {
-                  ...current.channels[channel],
+                  ...(current.channels as any)[channel],
                   enabled,
                 },
               },
             });
           }
-          
-          set({ 
-            preferences: updated, 
+
+          set({
+            preferences: updated,
             loading: false,
           });
-          logger.info('Channel preference updated', { channel, type, enabled });
+          logger.info("Channel preference updated", { channel, type, enabled });
           return true;
         } catch (error) {
-          const message = error instanceof ApiError ? error.message : 'Erreur de mise à jour';
-          set({ 
-            error: message, 
+          const message =
+            error instanceof ApiError ? error.message : "Erreur de mise à jour";
+          set({
+            error: message,
             loading: false,
-            status: 'error',
+            status: "error",
           });
-          logger.error('Failed to update channel preference', error);
+          logger.error("Failed to update channel preference", error);
           return false;
         }
       },
@@ -535,25 +627,22 @@ export const useNotificationStore = create<NotificationState>()(
       // ============ UTILITAIRES ============
 
       getUnreadByType: (type: NotificationType) => {
-        return get().notifications.filter(
-          n => n.type === type && !n.isRead
-        ).length;
+        return get().notifications.filter((n) => n.type === type && !n.isRead)
+          .length;
       },
 
       getNotificationsByCategory: (category: NotificationCategory) => {
-        return get().notifications.filter(
-          n => n.category === category
-        );
+        return get().notifications.filter((n) => n.category === category);
       },
 
       getUnreadByPriority: (priority: NotificationPriority) => {
         return get().notifications.filter(
-          n => n.priority === priority && !n.isRead
+          (n) => n.priority === priority && !n.isRead,
         ).length;
       },
 
       clearError: () => {
-        set({ error: null, status: 'idle' });
+        set({ error: null, status: "idle" });
       },
 
       reset: () => {
@@ -564,14 +653,14 @@ export const useNotificationStore = create<NotificationState>()(
       },
     }),
     {
-      name: 'notification-storage',
+      name: "notification-storage",
       partialize: (state) => ({
         preferences: state.preferences,
         unreadCount: state.unreadCount,
         filters: state.filters,
       }),
-    }
-  )
+    },
+  ),
 );
 
 // ============ HOOKS PERSONNALISÉS ============
@@ -581,15 +670,15 @@ export const useNotificationStore = create<NotificationState>()(
  */
 export const useNotifications = (filters?: Partial<NotificationFilter>) => {
   const store = useNotificationStore();
-  
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (filters) {
       store.setFilters(filters);
     } else {
       store.loadNotifications();
     }
   }, [JSON.stringify(filters)]);
-  
+
   return {
     notifications: store.notifications,
     loading: store.loading,
@@ -614,18 +703,18 @@ export const useNotifications = (filters?: Partial<NotificationFilter>) => {
  */
 export const useUnreadCount = () => {
   const { unreadCount, loadUnreadCount } = useNotificationStore();
-  
-  React.useEffect(() => {
+
+  useEffect(() => {
     loadUnreadCount();
-    
+
     // Rafraîchir toutes les 30 secondes
     const interval = setInterval(() => {
       loadUnreadCount();
     }, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
-  
+
   return unreadCount;
 };
 
@@ -633,18 +722,21 @@ export const useUnreadCount = () => {
  * Hook pour les préférences de notification
  */
 export const useNotificationPreferences = () => {
-  const { preferences, loadPreferences, updatePreferences, loading } = useNotificationStore();
-  
-  React.useEffect(() => {
+  const { preferences, loadPreferences, updatePreferences, loading } =
+    useNotificationStore();
+
+  useEffect(() => {
     loadPreferences();
   }, []);
-  
+
   return {
     preferences,
     loading,
     updatePreferences,
     updateChannel: (channel: string, type: string, enabled: boolean) => {
-      return useNotificationStore.getState().updateChannelPreference(channel, type, enabled);
+      return useNotificationStore
+        .getState()
+        .updateChannelPreference(channel, type, enabled);
     },
   };
 };

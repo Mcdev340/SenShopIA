@@ -17,7 +17,7 @@ export interface BaseState {
  * État avec statut (idle, loading, success, error)
  */
 export interface StateWithStatus extends BaseState {
-  status: 'idle' | 'loading' | 'success' | 'error';
+  status: "idle" | "loading" | "success" | "error";
 }
 
 /**
@@ -114,14 +114,14 @@ export interface FilterableActions<F> {
  */
 export interface SortableState<T> {
   sortBy: keyof T | null;
-  sortOrder: 'asc' | 'desc';
+  sortOrder: "asc" | "desc";
 }
 
 /**
  * Actions pour le tri
  */
 export interface SortableActions<T> {
-  setSort: (field: keyof T, order?: 'asc' | 'desc') => void;
+  setSort: (field: keyof T, order?: "asc" | "desc") => void;
   toggleSort: (field: keyof T) => void;
   clearSort: () => void;
 }
@@ -133,7 +133,7 @@ export interface SortableActions<T> {
  */
 export interface AsyncState<T> extends BaseState {
   data: T | null;
-  status: 'idle' | 'loading' | 'success' | 'error';
+  status: "idle" | "loading" | "success" | "error";
 }
 
 /**
@@ -155,7 +155,7 @@ export interface AsyncActions<T> extends BaseActions {
  */
 export interface Toast {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
+  type: "success" | "error" | "warning" | "info";
   message: string;
   title?: string;
   duration?: number;
@@ -172,7 +172,7 @@ export interface ToastState {
  * Actions pour les toasts
  */
 export interface ToastActions {
-  addToast: (toast: Omit<Toast, 'id'>) => void;
+  addToast: (toast: Omit<Toast, "id">) => void;
   removeToast: (id: string) => void;
   clearToasts: () => void;
   success: (message: string, title?: string) => void;
@@ -239,10 +239,9 @@ export type CombinedState<T extends Record<string, any>> = T & BaseState;
 /**
  * État complet d'un store avec toutes les fonctionnalités
  */
-export type FullStoreState<T, F = any> = 
-  BaseState & 
-  Partial<PaginatedState<T>> & 
-  Partial<SelectableState<T>> & 
+export type FullStoreState<T, F = any> = BaseState &
+  Partial<PaginatedState<T>> &
+  Partial<SelectableState<T>> &
   Partial<FilterableState<F>> &
   Partial<SortableState<T>>;
 
@@ -256,77 +255,8 @@ export type StateCreator<T> = {
 
 // ============ EXPORT ============
 
-// États
-export type {
-  // Base
-  BaseState,
-  StateWithStatus,
-  
-  // Paginé
-  PaginatedState,
-  
-  // Sélection
-  SelectableState,
-  
-  // Filtres
-  FilterableState,
-  
-  // Tri
-  SortableState,
-  
-  // Asynchrone
-  AsyncState,
-  
-  // Toasts
-  ToastState,
-  
-  // Historique
-  HistoryState,
-  
-  // Validation
-  ValidationState,
-  
-  // Combiné
-  FullStoreState,
-};
-
-// Actions
-export type {
-  // Base
-  BaseActions,
-  StatusActions,
-  
-  // Paginé
-  PaginatedActions,
-  
-  // Sélection
-  SelectableActions,
-  
-  // Filtres
-  FilterableActions,
-  
-  // Tri
-  SortableActions,
-  
-  // Asynchrone
-  AsyncActions,
-  
-  // Toasts
-  ToastActions,
-  
-  // Historique
-  HistoryActions,
-  
-  // Validation
-  ValidationActions,
-};
-
-// Types utilitaires
-export type {
-  Toast,
-  StateCreator,
-  CombinedState,
-};
+// Les interfaces ci-dessus sont déjà exportées avec `export interface`.
+// On ne ré-exporte pas une seconde fois les mêmes noms pour éviter les conflits.
 
 // ============ EXPORT PAR DÉFAUT ============
 
