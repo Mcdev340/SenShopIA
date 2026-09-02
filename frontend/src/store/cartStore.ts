@@ -16,6 +16,8 @@ import { logger } from "@/lib/logger";
 // ============ TYPES ============
 
 export interface CartState {
+  isValid: any;
+  validateCart: any;
   // Données
   cart: Cart | null;
   items: CartItem[];
