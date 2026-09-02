@@ -1,29 +1,30 @@
-import { useUIStore } from '@/store/uiStore';
+import React from "react";
+import { useUIStore } from "@/store/uiStore";
 
 /**
  * Hook pour gérer les états de chargement
  * Utilise le store uiStore
- * 
+ *
  * @param key - Clé de chargement (optionnel)
  * @param options - Options supplémentaires
  * @returns {Object} État et actions de chargement
- * 
+ *
  * @example
  * // Avec clé spécifique
  * const { loading, start, stop, withLoading } = useLoading('fetchProducts');
- * 
+ *
  * // Démarrer le chargement
  * start();
- * 
+ *
  * // Arrêter le chargement
  * stop();
- * 
+ *
  * // Exécuter avec chargement automatique
  * await withLoading(() => fetchProducts());
- * 
+ *
  * // Sans clé (global)
  * const { globalLoading, setGlobalLoading } = useLoading();
- * 
+ *
  * // Avec options
  * const { loading, withLoading } = useLoading('fetchProducts', {
  *   autoStart: true,
@@ -105,7 +106,7 @@ export type UseLoadingReturn = UseLoadingWithKeyReturn | UseLoadingGlobalReturn;
 
 export const useLoading = (
   key?: string,
-  options: UseLoadingOptions = {}
+  options: UseLoadingOptions = {},
 ): UseLoadingReturn => {
   const store = useUIStore();
   const {
@@ -142,92 +143,111 @@ export const useLoading = (
   }, []);
 
   // Démarrer le chargement avec gestion du délai minimum
-  const startLoadingInternal = React.useCallback((loadingKey: string) => {
-    // Démarrer le chargement
-    store.startLoading(loadingKey);
-    startTimeRef.current = Date.now();
-    
-    if (onStart) {
-      onStart();
-    }
+  const startLoadingInternal = React.useCallback(
+    (loadingKey: string) => {
+      // Démarrer le chargement
+      store.startLoading(loadingKey);
+      startTimeRef.current = Date.now();
 
-    // Timer de sécurité (maxDuration)
-    if (maxDuration > 0) {
-      maxTimerRef.current = setTimeout(() => {
-        store.stopLoading(loadingKey);
-        if (onStop) {
-          onStop();
-        }
-        console.warn(`Chargement "${loadingKey}" a dépassé le délai maximum de ${maxDuration}ms`);
-      }, maxDuration);
-    }
-  }, [store, maxDuration, onStart, onStop]);
+      if (onStart) {
+        onStart();
+      }
+
+      // Timer de sécurité (maxDuration)
+      if (maxDuration > 0) {
+        maxTimerRef.current = setTimeout(() => {
+          store.stopLoading(loadingKey);
+          if (onStop) {
+            onStop();
+          }
+          console.warn(
+            `Chargement "${loadingKey}" a dépassé le délai maximum de ${maxDuration}ms`,
+          );
+        }, maxDuration);
+      }
+    },
+    [store, maxDuration, onStart, onStop],
+  );
 
   // Arrêter le chargement avec gestion du délai minimum
-  const stopLoadingInternal = React.useCallback((loadingKey: string) => {
-    const elapsed = Date.now() - startTimeRef.current;
-    const remaining = Math.max(0, minDuration - elapsed);
+  const stopLoadingInternal = React.useCallback(
+    (loadingKey: string) => {
+      const elapsed = Date.now() - startTimeRef.current;
+      const remaining = Math.max(0, minDuration - elapsed);
 
-    clearTimers();
+      clearTimers();
 
-    if (remaining > 0 && minDuration > 0) {
-      // Attendre le délai minimum avant d'arrêter
-      minTimerRef.current = setTimeout(() => {
+      if (remaining > 0 && minDuration > 0) {
+        // Attendre le délai minimum avant d'arrêter
+        minTimerRef.current = setTimeout(() => {
+          store.stopLoading(loadingKey);
+          if (onStop) {
+            onStop();
+          }
+          minTimerRef.current = null;
+        }, remaining);
+      } else {
         store.stopLoading(loadingKey);
         if (onStop) {
           onStop();
         }
-        minTimerRef.current = null;
-      }, remaining);
-    } else {
-      store.stopLoading(loadingKey);
-      if (onStop) {
-        onStop();
       }
-    }
-  }, [store, minDuration, onStop, clearTimers]);
+    },
+    [store, minDuration, onStop, clearTimers],
+  );
 
   // Exécuter une fonction avec chargement
-  const withLoading = React.useCallback(async <T>(
-    fn: () => Promise<T>
-  ): Promise<T> => {
-    if (!key) {
-      throw new Error('useLoading: key est requis pour withLoading');
-    }
+  const withLoading = React.useCallback(
+    async <T>(fn: () => Promise<T>): Promise<T> => {
+      if (!key) {
+        throw new Error("useLoading: key est requis pour withLoading");
+      }
 
-    try {
-      startLoadingInternal(key);
-      const result = await fn();
-      if (autoStop !== false) {
-        stopLoadingInternal(key);
+      try {
+        startLoadingInternal(key);
+        const result = await fn();
+        if (autoStop !== false) {
+          stopLoadingInternal(key);
+        }
+        return result;
+      } catch (error) {
+        if (onError) {
+          onError(error);
+        }
+        if (autoStop !== false) {
+          stopLoadingInternal(key);
+        }
+        throw error;
+      } finally {
+        clearTimers();
       }
-      return result;
-    } catch (error) {
-      if (onError) {
-        onError(error);
-      }
-      if (autoStop !== false) {
-        stopLoadingInternal(key);
-      }
-      throw error;
-    } finally {
-      clearTimers();
-    }
-  }, [key, autoStop, startLoadingInternal, stopLoadingInternal, onError, clearTimers]);
+    },
+    [
+      key,
+      autoStop,
+      startLoadingInternal,
+      stopLoadingInternal,
+      onError,
+      clearTimers,
+    ],
+  );
 
   // Démarrer le chargement avec délai
-  const startDelayed = React.useCallback((customDelay?: number) => {
-    if (!key) return;
+  const startDelayed = React.useCallback(
+    (customDelay?: number) => {
+      if (!key) return;
 
-    const delayMs = customDelay || delay;
-    if (delayMs > 0) {
-      delayTimerRef.current = setTimeout(() => {
+      const delayMs = customDelay || delay;
+      if (delayMs > 0) {
+        delayTimerRef.current = setTimeout(() => {
+          startLoadingInternal(key);
+        }, delayMs);
+      } else {
         startLoadingInternal(key);
-      }, delayMs);
-    } else {
-      startLoadingInternal(key);
-    }
-  }, [key, delay, startLoadingInternal]);
+      }
+    },
+    [key, delay, startLoadingInternal],
+  );
 
   // Réinitialiser
   const reset = React.useCallback(() => {
@@ -245,21 +265,30 @@ export const useLoading = (
     };
   }, [clearTimers]);
 
+  React.useEffect(() => {
+    if (!key) return;
+
+    if (autoStart) {
+      startLoadingInternal(key);
+    }
+
+    return () => {
+      if (autoStop !== false) {
+        stopLoadingInternal(key);
+      }
+      clearTimers();
+    };
+  }, [
+    autoStart,
+    autoStop,
+    key,
+    startLoadingInternal,
+    stopLoadingInternal,
+    clearTimers,
+  ]);
+
   // Si une clé est fournie, retourner le chargement avec clé
   if (key) {
-    // Démarrage automatique
-    React.useEffect(() => {
-      if (autoStart) {
-        startLoadingInternal(key);
-      }
-      return () => {
-        if (autoStop !== false) {
-          stopLoadingInternal(key);
-        }
-        clearTimers();
-      };
-    }, [autoStart, key]);
-
     const loading = store.isLoading(key);
 
     return {
@@ -290,23 +319,23 @@ export const useLoading = (
 
 /**
  * Hook pour gérer un tableau de chargements
- * 
+ *
  * @param keys - Liste des clés de chargement
  * @param options - Options supplémentaires
  * @returns {Object} État et actions
- * 
+ *
  * @example
  * const { isLoading, isAnyLoading, getLoadingStates } = useLoadingStates([
  *   'fetchProducts',
  *   'fetchCategories',
  *   'fetchReviews'
  * ]);
- * 
+ *
  * // Vérifier si un chargement spécifique est en cours
  * if (isLoading('fetchProducts')) {
  *   // Afficher un spinner
  * }
- * 
+ *
  * // Vérifier si un chargement est en cours
  * if (isAnyLoading()) {
  *   // Afficher un loader global
@@ -314,7 +343,7 @@ export const useLoading = (
  */
 export const useLoadingStates = (
   keys: string[],
-  options: UseLoadingOptions = {}
+  options: UseLoadingOptions = {},
 ): {
   /** Vérifier si un chargement spécifique est en cours */
   isLoading: (key: string) => boolean;
@@ -330,48 +359,57 @@ export const useLoadingStates = (
   withLoading: <T>(key: string, fn: () => Promise<T>) => Promise<T>;
 } => {
   const store = useUIStore();
-  
-  const isLoading = React.useCallback((key: string) => {
-    return store.isLoading(key);
-  }, [store]);
+
+  const isLoading = React.useCallback(
+    (key: string) => {
+      return store.isLoading(key);
+    },
+    [store],
+  );
 
   const isAnyLoading = React.useCallback(() => {
-    return keys.some(key => store.isLoading(key));
+    return keys.some((key) => store.isLoading(key));
   }, [keys, store]);
 
   const getLoadingStates = React.useCallback(() => {
     const states: Record<string, boolean> = {};
-    keys.forEach(key => {
+    keys.forEach((key) => {
       states[key] = store.isLoading(key);
     });
     return states;
   }, [keys, store]);
 
-  const startLoading = React.useCallback((key: string) => {
-    store.startLoading(key);
-  }, [store]);
-
-  const stopLoading = React.useCallback((key: string) => {
-    store.stopLoading(key);
-  }, [store]);
-
-  const withLoading = React.useCallback(async <T>(
-    key: string,
-    fn: () => Promise<T>
-  ): Promise<T> => {
-    try {
+  const startLoading = React.useCallback(
+    (key: string) => {
       store.startLoading(key);
-      const result = await fn();
+    },
+    [store],
+  );
+
+  const stopLoading = React.useCallback(
+    (key: string) => {
       store.stopLoading(key);
-      return result;
-    } catch (error) {
-      store.stopLoading(key);
-      if (options.onError) {
-        options.onError(error);
+    },
+    [store],
+  );
+
+  const withLoading = React.useCallback(
+    async <T>(key: string, fn: () => Promise<T>): Promise<T> => {
+      try {
+        store.startLoading(key);
+        const result = await fn();
+        store.stopLoading(key);
+        return result;
+      } catch (error) {
+        store.stopLoading(key);
+        if (options.onError) {
+          options.onError(error);
+        }
+        throw error;
       }
-      throw error;
-    }
-  }, [store, options.onError]);
+    },
+    [store, options.onError],
+  );
 
   return {
     isLoading,
@@ -385,13 +423,13 @@ export const useLoadingStates = (
 
 /**
  * Hook pour créer un loader avec état
- * 
+ *
  * @param initialState - État initial du loader
  * @returns {Object} État et actions
- * 
+ *
  * @example
  * const { isLoading, start, stop, withLoading } = useLoader();
- * 
+ *
  * // Charger des données
  * await withLoading(async () => {
  *   const data = await fetchData();
@@ -427,20 +465,20 @@ export const useLoader = (initialState: boolean = false) => {
     }
   }, []);
 
-  const withLoading = React.useCallback(async <T>(
-    fn: () => Promise<T>,
-    minDuration: number = 0
-  ): Promise<T> => {
-    start();
-    try {
-      const result = await fn();
-      stop(minDuration);
-      return result;
-    } catch (error) {
-      stop(0);
-      throw error;
-    }
-  }, [start, stop]);
+  const withLoading = React.useCallback(
+    async <T>(fn: () => Promise<T>, minDuration: number = 0): Promise<T> => {
+      start();
+      try {
+        const result = await fn();
+        stop(minDuration);
+        return result;
+      } catch (error) {
+        stop(0);
+        throw error;
+      }
+    },
+    [start, stop],
+  );
 
   const reset = React.useCallback(() => {
     if (timerRef.current) {
@@ -467,16 +505,6 @@ export const useLoader = (initialState: boolean = false) => {
     withLoading,
     reset,
   };
-};
-
-// Import React pour les hooks
-import React from 'react';
-
-export type {
-  UseLoadingReturn,
-  UseLoadingWithKeyReturn,
-  UseLoadingGlobalReturn,
-  UseLoadingOptions,
 };
 
 export default useLoading;

@@ -4,7 +4,7 @@
  * ============================================
  * Ce fichier exporte tous les hooks personnalisés
  * de l'application ShopSense AI.
- * 
+ *
  * Les hooks sont organisés par catégorie :
  * - Hooks de store (authentification, panier, etc.)
  * - Hooks utilitaires (debounce, throttle, etc.)
@@ -20,68 +20,91 @@
 // Ces hooks fournissent l'accès aux stores Zustand
 // Ils sont les principaux hooks de l'application
 
-export { useAuth } from './useAuth';
-export { useCart } from './useCart';
-export { useProducts } from './useProducts';
-export { useOrders } from './useOrders';
-export { useNotifications } from './useNotifications';
-export { useUI } from './useUI';
+import { useAuth } from "./useAuth";
+import { useCart } from "./useCart";
+import { useProducts } from "./useProducts";
+import { useOrders } from "./useOrders";
+import { useNotifications } from "./useNotifications";
+import { useUI } from "./useUI";
 
 // ============================================
 // 2. HOOKS UTILITAIRES DE PERFORMANCE
 // ============================================
 // Optimisation des performances
 
-export { useDebounce } from './useDebounce';
-export { useThrottle } from './useThrottle';
+import { useDebounce } from "./useDebounce";
+import { useThrottle } from "./useThrottle";
 
 // ============================================
 // 3. HOOKS DE STOCKAGE
 // ============================================
 // Persistance des données
 
-export { useLocalStorage } from './useLocalStorage';
+import { useLocalStorage } from "./useLocalStorage";
 
 // ============================================
 // 4. HOOKS D'INTERACTION AVEC LE DOM
 // ============================================
 // Gestion des interactions utilisateur
 
-export { useMediaQuery } from './useMediaQuery';
-export { useClickOutside } from './useClickOutside';
-export { useEscapeKey } from './useEscapeKey';
-export { useWindowSize } from './useWindowSize';
+import { useMediaQuery } from "./useMediaQuery";
+import { useClickOutside } from "./useClickOutside";
+import { useEscapeKey } from "./useEscapeKey";
+import { useWindowSize } from "./useWindowSize";
 
 // ============================================
 // 5. HOOKS DE PAGINATION ET NAVIGATION
 // ============================================
 // Gestion des listes et de la navigation
 
-export { usePagination } from './usePagination';
+import { usePagination } from "./usePagination";
 
 // ============================================
 // 6. HOOKS DE FORMULAIRES
 // ============================================
 // Gestion des formulaires et validation
 
-export { useForm } from './useForm';
-export { useValidation } from './useValidation';
+import { useForm } from "./useForm";
+import { useValidation } from "./useValidation";
 
 // ============================================
 // 7. HOOKS UI
 // ============================================
 // Gestion de l'interface utilisateur
 
-export { useToast } from './useToast';
-export { useModal } from './useModal';
-export { useLoading } from './useLoading';
+import { useToast } from "./useToast";
+import { useModal } from "./useModal";
+import { useLoading } from "./useLoading";
 
 // ============================================
 // 8. HOOKS DE LOGGING
 // ============================================
 // Journalisation et débogage
 
-export { useLogger } from './useLogger';
+import { useLogger } from "./useLogger";
+
+export {
+  useAuth,
+  useCart,
+  useProducts,
+  useOrders,
+  useNotifications,
+  useUI,
+  useDebounce,
+  useThrottle,
+  useLocalStorage,
+  useMediaQuery,
+  useClickOutside,
+  useEscapeKey,
+  useWindowSize,
+  usePagination,
+  useForm,
+  useValidation,
+  useToast,
+  useModal,
+  useLoading,
+  useLogger,
+};
 
 // ============================================
 // EXPORT PAR DÉFAUT
@@ -131,62 +154,47 @@ export default {
 // ============================================
 // Types pour les hooks
 
-// Types de useAuth
-export type { UseAuthReturn } from './useAuth';
-
-// Types de useCart
-export type { UseCartReturn } from './useCart';
-
-// Types de useProducts
-export type { UseProductsReturn } from './useProducts';
-
-// Types de useOrders
-export type { UseOrdersReturn } from './useOrders';
-
-// Types de useNotifications
-export type { UseNotificationsReturn } from './useNotifications';
-
-// Types de useUI
-export type { UseUIReturn } from './useUI';
-
 // Types de useForm
-export type { UseFormReturn } from './useForm';
+export type { UseFormReturn } from "./useForm";
 
 // Types de useValidation
-export type { UseValidationReturn, ValidationSchema } from './useValidation';
+export type { UseValidationReturn, ValidationSchema } from "./useValidation";
 
 // Types de usePagination
-export type { UsePaginationReturn } from './usePagination';
+export type { UsePaginationReturn } from "./usePagination";
 
 // Types de useDebounce
-export type { UseDebounceReturn } from './useDebounce';
+export type { UseDebounceReturn } from "./useDebounce";
 
 // Types de useThrottle
-export type { UseThrottleReturn } from './useThrottle';
+export type { UseThrottleReturn } from "./useThrottle";
 
 // Types de useLocalStorage
-export type { UseLocalStorageReturn } from './useLocalStorage';
+export type { UseLocalStorageReturn } from "./useLocalStorage";
 
 // Types de useMediaQuery
-export type { UseMediaQueryReturn } from './useMediaQuery';
+export type { UseMediaQueryReturn } from "./useMediaQuery";
 
 // Types de useClickOutside
-export type { UseClickOutsideReturn } from './useClickOutside';
+export type { UseClickOutsideReturn } from "./useClickOutside";
 
 // Types de useEscapeKey
-export type { UseEscapeKeyReturn } from './useEscapeKey';
+export type { UseEscapeKeyReturn } from "./useEscapeKey";
 
 // Types de useWindowSize
-export type { UseWindowSizeReturn } from './useWindowSize';
+export type { UseWindowSizeReturn } from "./useWindowSize";
 
 // Types de useToast
-export type { UseToastReturn } from './useToast';
+export type { UseToastReturn } from "./useToast";
 
 // Types de useModal
-export type { UseModalReturn } from './useModal';
+export type { UseModalReturn } from "./useModal";
 
 // Types de useLoading
-export type { UseLoadingWithKeyReturn, UseLoadingGlobalReturn } from './useLoading';
+export type {
+  UseLoadingWithKeyReturn,
+  UseLoadingGlobalReturn,
+} from "./useLoading";
 
 // Types de useLogger
-export type { UseLoggerReturn } from './useLogger';
+export type { UseLoggerReturn } from "./useLogger";

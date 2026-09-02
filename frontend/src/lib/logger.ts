@@ -20,7 +20,7 @@ export interface LoggerConfig {
   enableConsole: boolean;
   enableRemote: boolean;
   remoteUrl?: string;
-  environment: 'development' | 'production' | 'test';
+  environment: "development" | "production" | "test";
   tags?: string[];
 }
 
@@ -40,7 +40,7 @@ export interface LogEntry {
 /**
  * Logger avancé avec support multi-environnement
  */
-class Logger {
+export class Logger {
   private static instance: Logger;
   private config: LoggerConfig;
   private buffer: LogEntry[] = [];
@@ -49,15 +49,18 @@ class Logger {
 
   private constructor() {
     this.config = {
-      level: process.env.NODE_ENV === 'production' ? LogLevel.INFO : LogLevel.DEBUG,
+      level:
+        process.env.NODE_ENV === "production" ? LogLevel.INFO : LogLevel.DEBUG,
       enabled: true,
       enableConsole: true,
       enableRemote: false,
-      environment: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',
+      environment:
+        (process.env.NODE_ENV as "development" | "production" | "test") ||
+        "development",
       tags: [],
     };
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       setInterval(() => this.flush(), this.flushInterval);
     }
   }
@@ -94,7 +97,7 @@ class Logger {
 
   public removeTag(tag: string): void {
     if (this.config.tags) {
-      this.config.tags = this.config.tags.filter(t => t !== tag);
+      this.config.tags = this.config.tags.filter((t) => t !== tag);
     }
   }
 
@@ -124,7 +127,13 @@ class Logger {
 
   // ============ MÉTHODE PRINCIPALE ============
 
-  private log(level: LogLevel, message: string, data?: any, error?: Error, tags?: string[]): void {
+  private log(
+    level: LogLevel,
+    message: string,
+    data?: any,
+    error?: Error,
+    tags?: string[],
+  ): void {
     if (!this.config.enabled) return;
     if (level < this.config.level) return;
 
@@ -137,8 +146,11 @@ class Logger {
       tags: [...(this.config.tags || []), ...(tags || [])],
       context: {
         environment: this.config.environment,
-        url: typeof window !== 'undefined' ? window.location.href : undefined,
-        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
+        url: typeof window !== "undefined" ? window.location.href : undefined,
+        userAgent:
+          typeof window !== "undefined"
+            ? window.navigator.userAgent
+            : undefined,
       },
     };
 
@@ -148,7 +160,7 @@ class Logger {
       this.flush();
     }
 
-    if (this.config.environment === 'production' && level >= LogLevel.ERROR) {
+    if (this.config.environment === "production" && level >= LogLevel.ERROR) {
       this.flush();
     }
   }
@@ -171,9 +183,10 @@ class Logger {
   }
 
   private writeToConsole(entries: LogEntry[]): void {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const prefix = `[${entry.timestamp.toISOString()}]`;
-      const tagsStr = entry.tags && entry.tags.length > 0 ? `[${entry.tags.join(',')}]` : '';
+      const tagsStr =
+        entry.tags && entry.tags.length > 0 ? `[${entry.tags.join(",")}]` : "";
       const message = `${prefix} ${LogLevel[entry.level]} ${tagsStr} ${entry.message}`;
 
       switch (entry.level) {
@@ -200,23 +213,25 @@ class Logger {
 
     try {
       await fetch(this.config.remoteUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          entries: entries.map(entry => ({
+          entries: entries.map((entry) => ({
             ...entry,
-            error: entry.error ? {
-              name: entry.error.name,
-              message: entry.error.message,
-              stack: entry.error.stack,
-            } : undefined,
+            error: entry.error
+              ? {
+                  name: entry.error.name,
+                  message: entry.error.message,
+                  stack: entry.error.stack,
+                }
+              : undefined,
           })),
         }),
       });
     } catch {
-      console.error('Failed to send logs to remote');
+      console.error("Failed to send logs to remote");
     }
   }
 
@@ -265,7 +280,9 @@ class Logger {
 
   // ============ UTILITAIRES ============
 
-  public withContext(context: Record<string, any>): (message: string, data?: any) => void {
+  public withContext(
+    context: Record<string, any>,
+  ): (message: string, data?: any) => void {
     return (message: string, data?: any) => {
       this.info(message, { ...data, ...context });
     };

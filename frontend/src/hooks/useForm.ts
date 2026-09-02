@@ -1,19 +1,19 @@
-import { useState, useCallback, ChangeEvent, FormEvent } from 'react';
+import { useState, useCallback, ChangeEvent, FormEvent } from "react";
 
 /**
  * Hook pour la gestion de formulaires
- * 
+ *
  * @param initialValues - Valeurs initiales du formulaire
  * @param onSubmit - Fonction de soumission (optionnel)
  * @param validate - Fonction de validation (optionnel)
  * @returns {Object} État et actions du formulaire
- * 
+ *
  * @example
- * const { 
- *   values, 
- *   errors, 
- *   handleChange, 
- *   handleSubmit, 
+ * const {
+ *   values,
+ *   errors,
+ *   handleChange,
+ *   handleSubmit,
  *   reset,
  *   setFieldValue,
  *   setFieldError,
@@ -29,7 +29,7 @@ import { useState, useCallback, ChangeEvent, FormEvent } from 'react';
  *     return errors;
  *   }
  * );
- * 
+ *
  * // Dans le render
  * <input
  *   name="email"
@@ -62,9 +62,13 @@ export interface UseFormReturn<T extends Record<string, any>> {
   /** Définir l'erreur d'un champ spécifique */
   setFieldError: (name: keyof T, error: string) => void;
   /** Gérer le changement d'un champ */
-  handleChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  handleChange: (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => void;
   /** Gérer le blur d'un champ */
-  handleBlur: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  handleBlur: (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => void;
   /** Soumettre le formulaire */
   handleSubmit: (e?: FormEvent) => Promise<void>;
   /** Valider le formulaire */
@@ -80,7 +84,7 @@ export interface UseFormReturn<T extends Record<string, any>> {
 export const useForm = <T extends Record<string, any>>(
   initialValues: T,
   onSubmit?: (values: T) => void | Promise<void>,
-  validate?: (values: T) => Partial<Record<keyof T, string>>
+  validate?: (values: T) => Partial<Record<keyof T, string>>,
 ): UseFormReturn<T> => {
   const [values, setValues] = useState<T>(initialValues);
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
@@ -92,88 +96,106 @@ export const useForm = <T extends Record<string, any>>(
 
   const validateForm = useCallback((): boolean => {
     if (!validate) return true;
-    
+
     const validationErrors = validate(values);
     setErrors(validationErrors);
     const valid = Object.keys(validationErrors).length === 0;
     return valid;
   }, [validate, values]);
 
-  const validateField = useCallback((name: keyof T): boolean => {
-    if (!validate) return true;
-    
-    // Valider uniquement le champ spécifique
-    const fieldValue = values[name];
-    const fullErrors = validate(values);
-    const fieldError = fullErrors[name] || '';
-    
-    setErrors(prev => ({ ...prev, [name]: fieldError }));
-    return !fieldError;
-  }, [validate, values]);
+  const validateField = useCallback(
+    (name: keyof T): boolean => {
+      if (!validate) return true;
+
+      // Valider uniquement le champ spécifique
+      const fullErrors = validate(values);
+      const fieldError = fullErrors[name] || "";
+
+      setErrors((prev) => ({ ...prev, [name]: fieldError }));
+      return !fieldError;
+    },
+    [validate, values],
+  );
 
   const setFieldValue = useCallback((name: keyof T, value: any) => {
-    setValues(prev => ({ ...prev, [name]: value }));
+    setValues((prev) => ({ ...prev, [name]: value }));
     setIsDirty(true);
   }, []);
 
   const setFieldError = useCallback((name: keyof T, error: string) => {
-    setErrors(prev => ({ ...prev, [name]: error }));
+    setErrors((prev) => ({ ...prev, [name]: error }));
   }, []);
 
-  const handleChange = useCallback((
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value, type } = e.target;
-    const parsedValue = type === 'number' ? parseFloat(value) : value;
-    
-    setValues(prev => ({ ...prev, [name]: parsedValue }));
-    setIsDirty(true);
-    
-    // Valider le champ si déjà touché
-    if (touched[name]) {
-      validateField(name as keyof T);
-    }
-  }, [touched, validateField]);
+  const handleChange = useCallback(
+    (
+      e: ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
+      const { name, value, type } = e.target;
+      const parsedValue = type === "number" ? parseFloat(value) : value;
 
-  const handleBlur = useCallback((
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name } = e.target;
-    setTouched(prev => ({ ...prev, [name]: true }));
-    validateField(name as keyof T);
-  }, [validateField]);
+      setValues((prev) => ({ ...prev, [name]: parsedValue }));
+      setIsDirty(true);
 
-  const handleSubmit = useCallback(async (e?: FormEvent) => {
-    e?.preventDefault();
-    
-    setSubmitCount(prev => prev + 1);
-    setIsSubmitted(true);
-    
-    // Marquer tous les champs comme touchés
-    const allTouched = Object.keys(values).reduce((acc, key) => {
-      acc[key as keyof T] = true;
-      return acc;
-    }, {} as Partial<Record<keyof T, boolean>>);
-    setTouched(allTouched);
-    
-    // Valider le formulaire
-    const isValid = validateForm();
-    
-    if (!isValid) {
-      return;
-    }
-    
-    if (onSubmit) {
-      setIsSubmitting(true);
-      try {
-        await onSubmit(values);
-      } catch (error) {
-        console.error('Form submission error:', error);
-      } finally {
-        setIsSubmitting(false);
+      // Valider le champ si déjà touché
+      if (touched[name]) {
+        validateField(name as keyof T);
       }
-    }
-  }, [values, onSubmit, validateForm]);
+    },
+    [touched, validateField],
+  );
+
+  const handleBlur = useCallback(
+    (
+      e: ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
+      const { name } = e.target;
+      setTouched((prev) => ({ ...prev, [name]: true }));
+      validateField(name as keyof T);
+    },
+    [validateField],
+  );
+
+  const handleSubmit = useCallback(
+    async (e?: FormEvent) => {
+      e?.preventDefault();
+
+      setSubmitCount((prev) => prev + 1);
+      setIsSubmitted(true);
+
+      // Marquer tous les champs comme touchés
+      const allTouched = Object.keys(values).reduce(
+        (acc, key) => {
+          acc[key as keyof T] = true;
+          return acc;
+        },
+        {} as Partial<Record<keyof T, boolean>>,
+      );
+      setTouched(allTouched);
+
+      // Valider le formulaire
+      const isValid = validateForm();
+
+      if (!isValid) {
+        return;
+      }
+
+      if (onSubmit) {
+        setIsSubmitting(true);
+        try {
+          await onSubmit(values);
+        } catch (error) {
+          console.error("Form submission error:", error);
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+    },
+    [values, onSubmit, validateForm],
+  );
 
   const reset = useCallback(() => {
     setValues(initialValues);
@@ -217,5 +239,4 @@ export const useForm = <T extends Record<string, any>>(
   };
 };
 
-export type { UseFormReturn };
 export default useForm;

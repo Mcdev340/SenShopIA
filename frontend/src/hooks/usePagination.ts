@@ -1,36 +1,36 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from "react";
 
 /**
  * Hook pour la pagination
- * 
+ *
  * @param initialPage - Page initiale (défaut: 1)
  * @param totalPages - Nombre total de pages (défaut: 1)
  * @param initialLimit - Nombre d'éléments par page (défaut: 20)
  * @returns {Object} État et actions de pagination
- * 
+ *
  * @example
- * const { 
- *   page, 
- *   limit, 
- *   totalPages, 
- *   goToPage, 
- *   nextPage, 
+ * const {
+ *   page,
+ *   limit,
+ *   totalPages,
+ *   goToPage,
+ *   nextPage,
  *   previousPage,
  *   setLimit,
  *   hasNext,
  *   hasPrevious,
  *   getPageNumbers
  * } = usePagination(1, 10, 20);
- * 
+ *
  * // Aller à la page 3
  * goToPage(3);
- * 
+ *
  * // Page suivante
  * nextPage();
- * 
+ *
  * // Changer le nombre d'éléments par page
  * setLimit(50);
- * 
+ *
  * // Récupérer les numéros de page pour l'affichage
  * const pages = getPageNumbers();
  */
@@ -72,15 +72,20 @@ export interface UsePaginationReturn {
 export const usePagination = (
   initialPage: number = 1,
   totalPages: number = 1,
-  initialLimit: number = 20
+  initialLimit: number = 20,
 ): UsePaginationReturn => {
-  const [page, setPage] = useState<number>(Math.max(1, Math.min(initialPage, totalPages)));
+  const [page, setPage] = useState<number>(
+    Math.max(1, Math.min(initialPage, totalPages)),
+  );
   const [limit, setLimit] = useState<number>(initialLimit);
 
-  const goToPage = useCallback((newPage: number) => {
-    const validPage = Math.max(1, Math.min(newPage, totalPages));
-    setPage(validPage);
-  }, [totalPages]);
+  const goToPage = useCallback(
+    (newPage: number) => {
+      const validPage = Math.max(1, Math.min(newPage, totalPages));
+      setPage(validPage);
+    },
+    [totalPages],
+  );
 
   const nextPage = useCallback(() => {
     if (page < totalPages) {
@@ -107,40 +112,43 @@ export const usePagination = (
     setLimit(initialLimit);
   }, [initialPage, totalPages, initialLimit]);
 
-  const getPageNumbers = useCallback((maxDisplayed: number = 5): (number | string)[] => {
-    if (totalPages <= maxDisplayed) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-
-    const pages: (number | string)[] = [];
-    const half = Math.floor(maxDisplayed / 2);
-    let start = Math.max(1, page - half);
-    let end = Math.min(totalPages, page + half);
-
-    if (end - start < maxDisplayed - 1) {
-      if (start === 1) {
-        end = Math.min(totalPages, start + maxDisplayed - 1);
-      } else if (end === totalPages) {
-        start = Math.max(1, end - maxDisplayed + 1);
+  const getPageNumbers = useCallback(
+    (maxDisplayed: number = 5): (number | string)[] => {
+      if (totalPages <= maxDisplayed) {
+        return Array.from({ length: totalPages }, (_, i) => i + 1);
       }
-    }
 
-    if (start > 1) {
-      pages.push(1);
-      if (start > 2) pages.push('...');
-    }
+      const pages: (number | string)[] = [];
+      const half = Math.floor(maxDisplayed / 2);
+      let start = Math.max(1, page - half);
+      let end = Math.min(totalPages, page + half);
 
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
+      if (end - start < maxDisplayed - 1) {
+        if (start === 1) {
+          end = Math.min(totalPages, start + maxDisplayed - 1);
+        } else if (end === totalPages) {
+          start = Math.max(1, end - maxDisplayed + 1);
+        }
+      }
 
-    if (end < totalPages) {
-      if (end < totalPages - 1) pages.push('...');
-      pages.push(totalPages);
-    }
+      if (start > 1) {
+        pages.push(1);
+        if (start > 2) pages.push("...");
+      }
 
-    return pages;
-  }, [page, totalPages]);
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (end < totalPages) {
+        if (end < totalPages - 1) pages.push("...");
+        pages.push(totalPages);
+      }
+
+      return pages;
+    },
+    [page, totalPages],
+  );
 
   const hasNext = page < totalPages;
   const hasPrevious = page > 1;
@@ -167,5 +175,4 @@ export const usePagination = (
   };
 };
 
-export type { UsePaginationReturn };
 export default usePagination;
