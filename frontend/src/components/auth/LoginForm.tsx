@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAuth } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card, CardBody, CardHeader, CardFooter } from '@/components/ui/Card';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { useToast } from '@/hooks';
-import { LoginSchema } from '@/lib/validators';
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Card, CardBody, CardHeader, CardFooter } from "@/components/ui/Card";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { useToast } from "@/hooks";
+import { LoginSchema } from "@/lib/validators";
 
 type LoginFormData = z.infer<typeof LoginSchema>;
 
@@ -35,11 +35,11 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({
-  redirectTo = '/',
+  redirectTo = "/",
   showTitle = true,
   showRegisterLink = true,
   showForgotPassword = true,
-  className = '',
+  className = "",
   onSuccess,
   onError,
 }: LoginFormProps) {
@@ -57,8 +57,8 @@ export default function LoginForm({
   } = useForm<LoginFormData>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
@@ -66,25 +66,26 @@ export default function LoginForm({
     setIsLoading(true);
     try {
       const result = await login(data.email, data.password);
-      
+
       if (result) {
-        success('Connexion réussie !');
+        success("Connexion réussie !");
         if (onSuccess) {
           onSuccess();
         }
         router.push(redirectTo);
       } else {
-        setError('root', {
-          message: 'Email ou mot de passe incorrect',
+        setError("root", {
+          message: "Email ou mot de passe incorrect",
         });
         if (onError) {
-          onError('Email ou mot de passe incorrect');
+          onError("Email ou mot de passe incorrect");
         }
-        showError('Email ou mot de passe incorrect');
+        showError("Email ou mot de passe incorrect");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Une erreur est survenue';
-      setError('root', { message });
+      const message =
+        error instanceof Error ? error.message : "Une erreur est survenue";
+      setError("root", { message });
       if (onError) {
         onError(message);
       }
@@ -134,7 +135,7 @@ export default function LoginForm({
                 placeholder="vous@exemple.com"
                 className="pl-10"
                 error={errors.email?.message}
-                {...register('email')}
+                {...register("email")}
                 disabled={isLoading}
               />
             </div>
@@ -167,11 +168,11 @@ export default function LoginForm({
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 id="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 className="pl-10 pr-10"
                 error={errors.password?.message}
-                {...register('password')}
+                {...register("password")}
                 disabled={isLoading}
               />
               <button
@@ -179,7 +180,11 @@ export default function LoginForm({
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
             {errors.password && (
@@ -194,7 +199,7 @@ export default function LoginForm({
             <Checkbox
               id="remember"
               label="Se souvenir de moi"
-              {...register('remember')}
+              // Correction: LoginSchema ne contient pas de champ remember; la case reste visuelle sans modifier les données envoyées.
             />
           </div>
 
@@ -211,7 +216,7 @@ export default function LoginForm({
                 Connexion en cours...
               </>
             ) : (
-              'Se connecter'
+              "Se connecter"
             )}
           </Button>
         </form>
@@ -221,7 +226,7 @@ export default function LoginForm({
       {showRegisterLink && (
         <CardFooter className="justify-center border-t border-gray-200 dark:border-gray-800">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Pas encore de compte ?{' '}
+            Pas encore de compte ?{" "}
             <Link
               href="/register"
               className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"

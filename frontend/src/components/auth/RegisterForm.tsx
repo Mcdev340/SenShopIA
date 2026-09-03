@@ -1,29 +1,21 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  Loader2, 
-  User, 
-  Phone, 
-  CheckCircle 
-} from 'lucide-react';
-import { useAuth } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card, CardBody, CardHeader, CardFooter } from '@/components/ui/Card';
-import { Select } from '@/components/ui/Select';
-import { useToast } from '@/hooks';
-import { RegisterSchema } from '@/lib/validators';
-import Checkbox from '../ui/Checkbox';
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Mail, Lock, Eye, EyeOff, Loader2, User, Phone } from "lucide-react";
+import { useAuth } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Card, CardBody, CardHeader, CardFooter } from "@/components/ui/Card";
+import { Select } from "@/components/ui/Select";
+import { useToast } from "@/hooks";
+import { RegisterSchema } from "@/lib/validators";
+import { UserRole } from "@/types/user";
+import Checkbox from "../ui/Checkbox";
 
 type RegisterFormData = z.infer<typeof RegisterSchema>;
 
@@ -35,7 +27,7 @@ interface RegisterFormProps {
   /** Afficher le lien de connexion */
   showLoginLink?: boolean;
   /** Rôle par défaut */
-  defaultRole?: 'client' | 'admin' | 'delivery' | 'advisor';
+  defaultRole?: "client" | "admin" | "delivery" | "advisor";
   /** Classes supplémentaires */
   className?: string;
   /** Callback après inscription réussie */
@@ -45,11 +37,11 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm({
-  redirectTo = '/',
+  redirectTo = "/",
   showTitle = true,
   showLoginLink = true,
-  defaultRole = 'client',
-  className = '',
+  defaultRole = "client",
+  className = "",
   onSuccess,
   onError,
 }: RegisterFormProps) {
@@ -63,46 +55,52 @@ export default function RegisterForm({
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
     setError,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
-      username: '',
-      email: '',
-      phone: '',
-      password: '',
-      confirmPassword: '',
+      username: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
       role: defaultRole,
     },
   });
 
-  const password = watch('password');
-
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      const result = await registerUser(data);
-      
+      // Correction: les champs optionnels du schéma sont normalisés avant l'appel au service typé.
+      const result = await registerUser({
+        ...data,
+        phone: data.phone ?? "",
+        // Correction: le service attend l'enum UserRole, alors que Zod infère une union de chaînes.
+        role: (data.role ?? defaultRole) as UserRole,
+      });
+
       if (result) {
-        success('Inscription réussie ! Un email de vérification vous a été envoyé.');
+        success(
+          "Inscription réussie ! Un email de vérification vous a été envoyé.",
+        );
         if (onSuccess) {
           onSuccess();
         }
         router.push(redirectTo);
       } else {
-        setError('root', {
-          message: 'Erreur lors de l\'inscription',
+        setError("root", {
+          message: "Erreur lors de l'inscription",
         });
         if (onError) {
-          onError('Erreur lors de l\'inscription');
+          onError("Erreur lors de l'inscription");
         }
-        showError('Erreur lors de l\'inscription');
+        showError("Erreur lors de l'inscription");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Une erreur est survenue';
-      setError('root', { message });
+      const message =
+        error instanceof Error ? error.message : "Une erreur est survenue";
+      setError("root", { message });
       if (onError) {
         onError(message);
       }
@@ -113,9 +111,9 @@ export default function RegisterForm({
   };
 
   const roleOptions = [
-    { value: 'client', label: 'Client' },
-    { value: 'delivery', label: 'Livreur' },
-    { value: 'advisor', label: 'Conseiller' },
+    { value: "client", label: "Client" },
+    { value: "delivery", label: "Livreur" },
+    { value: "advisor", label: "Conseiller" },
   ];
 
   return (
@@ -157,7 +155,7 @@ export default function RegisterForm({
                 placeholder="johndoe"
                 className="pl-10"
                 error={errors.username?.message}
-                {...register('username')}
+                {...register("username")}
                 disabled={isLoading}
               />
             </div>
@@ -184,7 +182,7 @@ export default function RegisterForm({
                 placeholder="vous@exemple.com"
                 className="pl-10"
                 error={errors.email?.message}
-                {...register('email')}
+                {...register("email")}
                 disabled={isLoading}
               />
             </div>
@@ -210,7 +208,7 @@ export default function RegisterForm({
                 placeholder="+221 77 123 45 67"
                 className="pl-10"
                 error={errors.phone?.message}
-                {...register('phone')}
+                {...register("phone")}
                 disabled={isLoading}
               />
             </div>
@@ -232,7 +230,7 @@ export default function RegisterForm({
             <Select
               id="role"
               options={roleOptions}
-              {...register('role')}
+              {...register("role")}
               error={errors.role?.message}
               disabled={isLoading}
             />
@@ -255,11 +253,11 @@ export default function RegisterForm({
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 id="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 className="pl-10 pr-10"
                 error={errors.password?.message}
-                {...register('password')}
+                {...register("password")}
                 disabled={isLoading}
               />
               <button
@@ -267,7 +265,11 @@ export default function RegisterForm({
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
             {errors.password && (
@@ -289,11 +291,11 @@ export default function RegisterForm({
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 id="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="••••••••"
                 className="pl-10 pr-10"
                 error={errors.confirmPassword?.message}
-                {...register('confirmPassword')}
+                {...register("confirmPassword")}
                 disabled={isLoading}
               />
               <button
@@ -301,7 +303,11 @@ export default function RegisterForm({
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
-                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showConfirmPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
             {errors.confirmPassword && (
@@ -318,14 +324,14 @@ export default function RegisterForm({
               required
               label={
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  J'accepte les{' '}
+                  J'accepte les{" "}
                   <Link
                     href="/terms"
                     className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
                   >
                     conditions d'utilisation
-                  </Link>
-                  {' '}et la{' '}
+                  </Link>{" "}
+                  et la{" "}
                   <Link
                     href="/privacy"
                     className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
@@ -350,7 +356,7 @@ export default function RegisterForm({
                 Inscription en cours...
               </>
             ) : (
-              'Créer un compte'
+              "Créer un compte"
             )}
           </Button>
         </form>
@@ -360,7 +366,7 @@ export default function RegisterForm({
       {showLoginLink && (
         <CardFooter className="justify-center border-t border-gray-200 dark:border-gray-800">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Déjà un compte ?{' '}
+            Déjà un compte ?{" "}
             <Link
               href="/login"
               className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"

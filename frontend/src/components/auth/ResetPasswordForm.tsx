@@ -1,18 +1,25 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Lock, Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import { useAuth } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card, CardBody, CardHeader, CardFooter } from '@/components/ui/Card';
-import { useToast } from '@/hooks';
-import { PasswordResetConfirmSchema } from '@/lib/validators';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { useAuth } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Card, CardBody, CardHeader, CardFooter } from "@/components/ui/Card";
+import { useToast } from "@/hooks";
+import { PasswordResetConfirmSchema } from "@/lib/validators";
 
 type ResetPasswordFormData = z.infer<typeof PasswordResetConfirmSchema>;
 
@@ -29,7 +36,7 @@ interface ResetPasswordFormProps {
 
 export default function ResetPasswordForm({
   showTitle = true,
-  className = '',
+  className = "",
   onSuccess,
   onError,
 }: ResetPasswordFormProps) {
@@ -43,8 +50,8 @@ export default function ResetPasswordForm({
   const [isSuccess, setIsSuccess] = useState(false);
 
   // Récupérer les paramètres de l'URL
-  const uid = searchParams?.get('uid') || '';
-  const token = searchParams?.get('token') || '';
+  const uid = searchParams?.get("uid") || "";
+  const token = searchParams?.get("token") || "";
 
   const {
     register,
@@ -57,25 +64,25 @@ export default function ResetPasswordForm({
     defaultValues: {
       uid: uid,
       token: token,
-      newPassword: '',
-      confirmPassword: '',
+      newPassword: "",
+      confirmPassword: "",
     },
   });
 
   // Vérifier que les paramètres sont présents
   useEffect(() => {
     if (!uid || !token) {
-      setError('root', {
-        message: 'Lien de réinitialisation invalide ou expiré',
+      setError("root", {
+        message: "Lien de réinitialisation invalide ou expiré",
       });
     }
   }, [uid, token, setError]);
 
-  const newPassword = watch('newPassword');
+  const newPassword = watch("newPassword");
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (!uid || !token) {
-      showError('Lien de réinitialisation invalide ou expiré');
+      showError("Lien de réinitialisation invalide ou expiré");
       return;
     }
 
@@ -85,30 +92,31 @@ export default function ResetPasswordForm({
         uid,
         token,
         data.newPassword,
-        data.confirmPassword
+        data.confirmPassword,
       );
-      
+
       if (result) {
         setIsSuccess(true);
-        success('Mot de passe réinitialisé avec succès !');
+        success("Mot de passe réinitialisé avec succès !");
         if (onSuccess) {
           onSuccess();
         }
         setTimeout(() => {
-          router.push('/login');
+          router.push("/login");
         }, 3000);
       } else {
-        setError('root', {
-          message: 'Erreur lors de la réinitialisation',
+        setError("root", {
+          message: "Erreur lors de la réinitialisation",
         });
         if (onError) {
-          onError('Erreur lors de la réinitialisation');
+          onError("Erreur lors de la réinitialisation");
         }
-        showError('Erreur lors de la réinitialisation');
+        showError("Erreur lors de la réinitialisation");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Une erreur est survenue';
-      setError('root', { message });
+      const message =
+        error instanceof Error ? error.message : "Une erreur est survenue";
+      setError("root", { message });
       if (onError) {
         onError(message);
       }
@@ -130,8 +138,8 @@ export default function ResetPasswordForm({
             Mot de passe réinitialisé !
           </h2>
           <p className="text-gray-500 dark:text-gray-400">
-            Votre mot de passe a été réinitialisé avec succès.
-            Vous allez être redirigé vers la page de connexion.
+            Votre mot de passe a été réinitialisé avec succès. Vous allez être
+            redirigé vers la page de connexion.
           </p>
           <Link href="/login">
             <Button variant="outline" className="mt-4">
@@ -155,13 +163,11 @@ export default function ResetPasswordForm({
             Lien invalide
           </h2>
           <p className="text-gray-500 dark:text-gray-400">
-            Ce lien de réinitialisation est invalide ou a expiré.
-            Veuillez faire une nouvelle demande.
+            Ce lien de réinitialisation est invalide ou a expiré. Veuillez faire
+            une nouvelle demande.
           </p>
           <Link href="/forgot-password">
-            <Button className="mt-4">
-              Demander un nouveau lien
-            </Button>
+            <Button className="mt-4">Demander un nouveau lien</Button>
           </Link>
         </CardBody>
       </Card>
@@ -204,11 +210,11 @@ export default function ResetPasswordForm({
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 id="newPassword"
-                type={showNewPassword ? 'text' : 'password'}
+                type={showNewPassword ? "text" : "password"}
                 placeholder="••••••••"
                 className="pl-10 pr-10"
                 error={errors.newPassword?.message}
-                {...register('newPassword')}
+                {...register("newPassword")}
                 disabled={isLoading}
               />
               <button
@@ -216,7 +222,11 @@ export default function ResetPasswordForm({
                 onClick={() => setShowNewPassword(!showNewPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
-                {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showNewPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
             {errors.newPassword && (
@@ -238,11 +248,11 @@ export default function ResetPasswordForm({
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 id="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="••••••••"
                 className="pl-10 pr-10"
                 error={errors.confirmPassword?.message}
-                {...register('confirmPassword')}
+                {...register("confirmPassword")}
                 disabled={isLoading}
               />
               <button
@@ -250,7 +260,11 @@ export default function ResetPasswordForm({
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
-                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showConfirmPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
             {errors.confirmPassword && (
@@ -267,26 +281,48 @@ export default function ResetPasswordForm({
             </p>
             <ul className="space-y-1 text-gray-600 dark:text-gray-400">
               <li className="flex items-center space-x-2">
-                <span className={newPassword.length >= 6 ? 'text-green-500' : 'text-gray-400'}>
-                  {newPassword.length >= 6 ? '✅' : '◯'}
+                <span
+                  className={
+                    newPassword.length >= 6 ? "text-green-500" : "text-gray-400"
+                  }
+                >
+                  {newPassword.length >= 6 ? "✅" : "◯"}
                 </span>
                 <span>Au moins 6 caractères</span>
               </li>
               <li className="flex items-center space-x-2">
-                <span className={/[A-Z]/.test(newPassword) ? 'text-green-500' : 'text-gray-400'}>
-                  {/[A-Z]/.test(newPassword) ? '✅' : '◯'}
+                <span
+                  className={
+                    /[A-Z]/.test(newPassword)
+                      ? "text-green-500"
+                      : "text-gray-400"
+                  }
+                >
+                  {/[A-Z]/.test(newPassword) ? "✅" : "◯"}
                 </span>
                 <span>Au moins une majuscule</span>
               </li>
               <li className="flex items-center space-x-2">
-                <span className={/[a-z]/.test(newPassword) ? 'text-green-500' : 'text-gray-400'}>
-                  {/[a-z]/.test(newPassword) ? '✅' : '◯'}
+                <span
+                  className={
+                    /[a-z]/.test(newPassword)
+                      ? "text-green-500"
+                      : "text-gray-400"
+                  }
+                >
+                  {/[a-z]/.test(newPassword) ? "✅" : "◯"}
                 </span>
                 <span>Au moins une minuscule</span>
               </li>
               <li className="flex items-center space-x-2">
-                <span className={/[0-9]/.test(newPassword) ? 'text-green-500' : 'text-gray-400'}>
-                  {/[0-9]/.test(newPassword) ? '✅' : '◯'}
+                <span
+                  className={
+                    /[0-9]/.test(newPassword)
+                      ? "text-green-500"
+                      : "text-gray-400"
+                  }
+                >
+                  {/[0-9]/.test(newPassword) ? "✅" : "◯"}
                 </span>
                 <span>Au moins un chiffre</span>
               </li>
@@ -306,7 +342,7 @@ export default function ResetPasswordForm({
                 Réinitialisation en cours...
               </>
             ) : (
-              'Réinitialiser le mot de passe'
+              "Réinitialiser le mot de passe"
             )}
           </Button>
         </form>
