@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { X, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
-import { useCart, useUI } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { CartItem } from './CartItem';
-import { CartSummary } from './CartSummary';
-import { CartEmpty } from './CartEmpty';
-import { cn } from '@/lib/utils';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { X, ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
+import { useCart } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import CartItem from "./CartItem";
+import CartSummary from "./CartSummary";
+import CartEmpty from "./CartEmpty";
+import { cn } from "@/lib/utils";
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -16,7 +16,11 @@ interface CartDrawerProps {
   className?: string;
 }
 
-export default function CartDrawer({ isOpen, onClose, className }: CartDrawerProps) {
+export default function CartDrawer({
+  isOpen,
+  onClose,
+  className,
+}: CartDrawerProps) {
   const { items, itemCount, loading, loadCart } = useCart();
   const [isClosing, setIsClosing] = useState(false);
 
@@ -30,23 +34,23 @@ export default function CartDrawer({ isOpen, onClose, className }: CartDrawerPro
   // Fermer avec Échap
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === "Escape" && isOpen) {
         handleClose();
       }
     };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen]);
 
   // Empêcher le scroll du body
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
@@ -65,8 +69,8 @@ export default function CartDrawer({ isOpen, onClose, className }: CartDrawerPro
       {/* Overlay */}
       <div
         className={cn(
-          'fixed inset-0 bg-black/50 z-50 transition-opacity duration-300',
-          isOpen && !isClosing ? 'opacity-100' : 'opacity-0'
+          "fixed inset-0 bg-black/50 z-50 transition-opacity duration-300",
+          isOpen && !isClosing ? "opacity-100" : "opacity-0",
         )}
         onClick={handleClose}
         aria-hidden="true"
@@ -75,9 +79,9 @@ export default function CartDrawer({ isOpen, onClose, className }: CartDrawerPro
       {/* Drawer */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl transition-transform duration-300 ease-in-out',
-          isOpen && !isClosing ? 'translate-x-0' : 'translate-x-full',
-          className
+          "fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl transition-transform duration-300 ease-in-out",
+          isOpen && !isClosing ? "translate-x-0" : "translate-x-full",
+          className,
         )}
         role="dialog"
         aria-label="Panier"

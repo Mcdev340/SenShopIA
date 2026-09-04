@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { X, Plus, Minus, ShoppingBag, Heart, AlertCircle } from 'lucide-react';
-import { useCart, useProducts, useToast } from '@/hooks';
-import { formatPrice, cn } from '@/lib/utils';
-import { CartItem as CartItemType } from '@/types/cart';
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { X, Plus, Minus, ShoppingBag, Heart, AlertCircle } from "lucide-react";
+import { useCart, useToast } from "@/hooks";
+import { formatPrice, cn } from "@/lib/utils";
+import { CartItem as CartItemType } from "@/types/cart";
 
 interface CartItemProps {
   item: CartItemType;
@@ -14,9 +14,12 @@ interface CartItemProps {
   className?: string;
 }
 
-export default function CartItem({ item, compact = false, className = '' }: CartItemProps) {
-  const { updateQuantity, removeFromCart, saveForLater } = useCart();
-  const { addToWishlist } = useProducts();
+export default function CartItem({
+  item,
+  compact = false,
+  className = "",
+}: CartItemProps) {
+  const { updateItem, removeItem, saveForLater, addToWishlist } = useCart();
   const { success, error: showError } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
@@ -34,7 +37,7 @@ export default function CartItem({ item, compact = false, className = '' }: Cart
 
     setIsUpdating(true);
     try {
-      await updateQuantity(item.id, newQuantity);
+      await updateItem(item.id, newQuantity);
     } finally {
       setIsUpdating(false);
     }
@@ -43,10 +46,10 @@ export default function CartItem({ item, compact = false, className = '' }: Cart
   const handleRemove = async () => {
     setIsRemoving(true);
     try {
-      await removeFromCart(item.id);
-      success('Produit retiré du panier');
+      await removeItem(item.id);
+      success("Produit retiré du panier");
     } catch (error) {
-      showError('Erreur lors de la suppression');
+      showError("Erreur lors de la suppression");
     } finally {
       setIsRemoving(false);
     }
@@ -55,29 +58,31 @@ export default function CartItem({ item, compact = false, className = '' }: Cart
   const handleSaveForLater = async () => {
     try {
       await saveForLater(item.id);
-      success('Produit sauvegardé pour plus tard');
+      success("Produit sauvegardé pour plus tard");
     } catch (error) {
-      showError('Erreur lors de la sauvegarde');
+      showError("Erreur lors de la sauvegarde");
     }
   };
 
   const handleAddToWishlist = async () => {
     try {
       await addToWishlist(item.productId);
-      success('Ajouté à la liste de souhaits');
+      success("Ajouté à la liste de souhaits");
     } catch (error) {
-      showError('Erreur lors de l\'ajout');
+      showError("Erreur lors de l'ajout");
     }
   };
 
   // Version compacte pour le drawer
   if (compact) {
     return (
-      <div className={cn(
-        'flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors',
-        isOutOfStock && 'opacity-50',
-        className
-      )}>
+      <div
+        className={cn(
+          "flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors",
+          isOutOfStock && "opacity-50",
+          className,
+        )}
+      >
         {/* Image */}
         <Link href={`/products/${product.slug}`} className="flex-shrink-0">
           <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -125,10 +130,14 @@ export default function CartItem({ item, compact = false, className = '' }: Cart
           >
             <Minus className="w-3 h-3" />
           </button>
-          <span className="w-6 text-center text-sm font-medium">{item.quantity}</span>
+          <span className="w-6 text-center text-sm font-medium">
+            {item.quantity}
+          </span>
           <button
             onClick={() => handleQuantityChange(item.quantity + 1)}
-            disabled={isUpdating || item.quantity >= product.stock || isOutOfStock}
+            disabled={
+              isUpdating || item.quantity >= product.stock || isOutOfStock
+            }
             className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             aria-label="Augmenter la quantité"
           >
@@ -158,11 +167,13 @@ export default function CartItem({ item, compact = false, className = '' }: Cart
 
   // Version complète
   return (
-    <div className={cn(
-      'flex gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow',
-      isOutOfStock && 'opacity-60',
-      className
-    )}>
+    <div
+      className={cn(
+        "flex gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow",
+        isOutOfStock && "opacity-60",
+        className,
+      )}
+    >
       {/* Image */}
       <Link href={`/products/${product.slug}`} className="flex-shrink-0">
         <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
@@ -219,7 +230,10 @@ export default function CartItem({ item, compact = false, className = '' }: Cart
           <div className="mt-1 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
             <span>Variante:</span>
             {Object.entries(item.variant.attributes).map(([key, value]) => (
-              <span key={key} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">
+              <span
+                key={key}
+                className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded"
+              >
                 {key}: {value}
               </span>
             ))}
@@ -251,7 +265,9 @@ export default function CartItem({ item, compact = false, className = '' }: Cart
             </span>
             <button
               onClick={() => handleQuantityChange(item.quantity + 1)}
-              disabled={isUpdating || item.quantity >= product.stock || isOutOfStock}
+              disabled={
+                isUpdating || item.quantity >= product.stock || isOutOfStock
+              }
               className="p-2 px-3 rounded-r-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-label="Augmenter la quantité"
             >
