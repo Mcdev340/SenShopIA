@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useCart } from '@/hooks';
 import { CartItem } from './CartItem';
 import { CartEmpty } from './CartEmpty';
@@ -8,7 +8,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { cn } from '@/lib/utils';
-import { Trash2, ShoppingBag } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 interface CartListProps {
   className?: string;

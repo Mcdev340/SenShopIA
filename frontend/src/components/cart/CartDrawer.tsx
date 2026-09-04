@@ -1,6 +1,3 @@
-export default function CartDrawer() {
-  return null;
-}
 'use client';
 
 import React, { useEffect, useState } from 'react';
