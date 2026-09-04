@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useAuth, useAI, useToast } from '@/hooks';
-import { ChatHeader } from './ChatHeader';
-import { ChatList } from './ChatList';
-import { ChatInput } from './ChatInput';
-import { ChatEmpty } from './ChatEmpty';
-import { ChatTyping } from './ChatTyping';
-import { Spinner } from '@/components/ui/Spinner';
-import { Button } from '@/components/ui/Button';
-import { cn } from '@/lib/utils';
-import { ChatMessage as ChatMessageType, ChatSession } from '@/types/chat';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useAuth, useToast } from "@/hooks";
+import { aiService } from "@/services/ai.service";
+import ChatHeader from "./ChatHeader";
+import ChatList from "./ChatList";
+import ChatInput from "./ChatInput";
+import ChatEmpty from "./ChatEmpty";
+import ChatTyping from "./ChatTyping";
+import Spinner from "@/components/ui/Spinner";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
+import { ChatMessage as ChatMessageType, MessageType } from "@/types/chat";
 
 interface ChatInterfaceProps {
   sessionId?: string;
@@ -27,34 +28,22 @@ interface ChatInterfaceProps {
 
 export default function ChatInterface({
   sessionId: initialSessionId,
-  maxWidth = '800px',
-  maxHeight = '600px',
-  className = '',
-  title = 'Assistant ShopSense AI',
-  welcomeMessage = 'Bonjour ! Je suis votre assistant intelligent. Comment puis-je vous aider aujourd\'hui ?',
+  maxWidth = "800px",
+  maxHeight = "600px",
+  className = "",
+  title = "Assistant ShopSense AI",
+  welcomeMessage = "Bonjour ! Je suis votre assistant intelligent. Comment puis-je vous aider aujourd'hui ?",
   onMessageSent,
   onMessageReceived,
   onTransfer,
   onClose,
 }: ChatInterfaceProps) {
   const { user } = useAuth();
-  const { 
-    sendMessage, 
-    getChatSession, 
-    startNewSession,
-    transferToHuman,
-    getChatStatus,
-    connectWebSocket,
-    disconnectWebSocket,
-    sendMessageWebSocket,
-    onMessage,
-    removeMessageHandler,
-    closeSession,
-  } = useAI();
   const { success, error: showError } = useToast();
 
-  const [sessionId, setSessionId] = useState<string | null>(initialSessionId || null);
-  const [session, setSession] = useState<ChatSession | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(
+    initialSessionId || null,
+  );
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
@@ -66,87 +55,96 @@ export default function ChatInterface({
   const [advisorName, setAdvisorName] = useState<string | undefined>(undefined);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messageHandlerRef = useRef<((message: ChatMessageType) => void) | null>(null);
+  const messageHandlerRef = useRef<((message: ChatMessageType) => void) | null>(
+    null,
+  );
   const wsRef = useRef<WebSocket | null>(null);
 
   // Charger la session
-  const loadSession = useCallback(async (id: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const sessionData = await getChatSession(id);
-      setSession(sessionData);
-      setMessages(sessionData.messages || []);
-      
-      // Vérifier le statut
-      const status = await getChatStatus(id);
-      if (status.status === 'transferred') {
-        setIsTransferred(true);
-        setAdvisorName(status.advisorName);
-        if (onTransfer) {
-          onTransfer(id);
+  const loadSession = useCallback(
+    async (id: string) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const sessionData = await aiService.getChatSession(id);
+        setMessages(sessionData.messages || []);
+
+        // Vérifier le statut
+        const status = await aiService.getChatStatus(id);
+        if (status.status === "transferred") {
+          setIsTransferred(true);
+          setAdvisorName(status.advisorName);
+          if (onTransfer) {
+            onTransfer(id);
+          }
+        } else {
+          setIsTransferred(false);
+          setAdvisorName(undefined);
         }
-      } else {
-        setIsTransferred(false);
-        setAdvisorName(undefined);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Erreur de chargement de la session";
+        setError(errorMessage);
+        showError(errorMessage);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur de chargement de la session';
-      setError(errorMessage);
-      showError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getChatSession, getChatStatus, onTransfer, showError]);
+    },
+    [onTransfer, showError],
+  );
 
   // Initialiser la session
   const initializeSession = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const newSession = await startNewSession();
+      const newSession = await aiService.startNewSession();
       setSessionId(newSession.id);
-      setSession(newSession);
       setMessages(newSession.messages || []);
       setIsTransferred(false);
       setAdvisorName(undefined);
-      
+
       // Connecter WebSocket
-      const wsConnection = connectWebSocket(newSession.id);
+      const wsConnection = aiService.connectWebSocket(newSession.id);
       setWs(wsConnection);
       wsRef.current = wsConnection;
       setIsConnected(true);
-      
+
       // Ajouter le message de bienvenue s'il n'existe pas
       if (newSession.messages.length === 0) {
         const welcomeMsg: ChatMessageType = {
           id: `welcome-${Date.now()}`,
-          userId: 'ai',
+          userId: "ai",
           sessionId: newSession.id,
           content: welcomeMessage,
           isAI: true,
           isRead: true,
           timestamp: new Date(),
-          type: 'text',
+          type: MessageType.TEXT,
           metadata: {
             suggestions: [
-              'Je cherche un produit',
-              'Aide pour une commande',
-              'Suivi de colis',
-              'Problème de paiement',
-            ]
-          }
+              "Je cherche un produit",
+              "Aide pour une commande",
+              "Suivi de colis",
+              "Problème de paiement",
+            ],
+          },
         };
         setMessages([welcomeMsg]);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur d\'initialisation du chat';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erreur d'initialisation du chat";
       setError(errorMessage);
       showError(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }, [startNewSession, connectWebSocket, welcomeMessage, showError]);
+  }, [welcomeMessage, showError]);
 
   // Initialiser au montage
   useEffect(() => {
@@ -158,50 +156,50 @@ export default function ChatInterface({
 
     return () => {
       if (messageHandlerRef.current) {
-        removeMessageHandler(messageHandlerRef.current);
+        aiService.removeMessageHandler(messageHandlerRef.current);
       }
-      disconnectWebSocket();
+      aiService.disconnectWebSocket();
       setIsConnected(false);
     };
-  }, [initialSessionId, loadSession, initializeSession, disconnectWebSocket, removeMessageHandler]);
+  }, [initialSessionId, loadSession, initializeSession]);
 
   // Gestionnaire de messages WebSocket
   useEffect(() => {
     if (!sessionId) return;
 
     const handler = (message: ChatMessageType) => {
-      setMessages(prev => [...prev, message]);
+      setMessages((prev) => [...prev, message]);
       setIsTyping(false);
-      
+
       if (onMessageReceived) {
         onMessageReceived(message);
       }
-      
+
       // Vérifier si c'est un transfert
-      if (message.metadata?.action === 'transfer') {
+      if (message.metadata?.action === "transfer") {
         setIsTransferred(true);
-        setAdvisorName(message.metadata?.advisorName);
+        setAdvisorName(message.metadata?.data?.advisorName);
         if (onTransfer) {
           onTransfer(sessionId);
         }
-        success('Transfert vers un conseiller effectué');
+        success("Transfert vers un conseiller effectué");
       }
     };
 
     messageHandlerRef.current = handler;
-    onMessage(handler);
+    aiService.onMessage(handler);
 
     return () => {
       if (messageHandlerRef.current) {
-        removeMessageHandler(messageHandlerRef.current);
+        aiService.removeMessageHandler(messageHandlerRef.current);
       }
     };
-  }, [sessionId, onMessage, removeMessageHandler, onMessageReceived, onTransfer, success]);
+  }, [sessionId, onMessageReceived, onTransfer, success]);
 
   // Auto-scroll vers le bas
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
@@ -212,37 +210,37 @@ export default function ChatInterface({
     // Créer un message temporaire
     const tempMessage: ChatMessageType = {
       id: `temp-${Date.now()}`,
-      userId: user?.id || 'user',
+      userId: user?.id || "user",
       sessionId: sessionId,
       content: content.trim(),
       isAI: false,
       isRead: true,
       timestamp: new Date(),
-      type: 'text',
+      type: MessageType.TEXT,
     };
 
-    setMessages(prev => [...prev, tempMessage]);
+    setMessages((prev) => [...prev, tempMessage]);
     setIsSending(true);
     setIsTyping(true);
 
     try {
       // Envoyer via WebSocket si connecté
       if (ws && ws.readyState === WebSocket.OPEN && isConnected) {
-        sendMessageWebSocket(content);
+        aiService.sendMessageWebSocket(content);
       } else {
         // Fallback via API
-        const response = await sendMessage(content, sessionId);
-        
+        const response = await aiService.sendMessage(content, sessionId);
+
         // Ajouter la réponse
         const aiMessage: ChatMessageType = {
           id: `ai-${Date.now()}`,
-          userId: 'ai',
+          userId: "ai",
           sessionId: sessionId,
           content: response.message,
           isAI: true,
           isRead: true,
           timestamp: new Date(),
-          type: response.type || 'text',
+          type: (response.type || MessageType.TEXT) as MessageType,
           metadata: {
             action: response.action?.type,
             data: response.action?.data,
@@ -250,7 +248,7 @@ export default function ChatInterface({
             quickReplies: response.quickReplies,
           },
         };
-        setMessages(prev => [...prev, aiMessage]);
+        setMessages((prev) => [...prev, aiMessage]);
         setIsTyping(false);
 
         if (onMessageSent) {
@@ -258,22 +256,23 @@ export default function ChatInterface({
         }
 
         // Vérifier le transfert
-        if (response.action?.type === 'transfer') {
+        if (response.action?.type === "transfer") {
           setIsTransferred(true);
           setAdvisorName(response.action?.data?.advisorName);
           if (onTransfer) {
             onTransfer(sessionId);
           }
-          success('Transfert vers un conseiller effectué');
+          success("Transfert vers un conseiller effectué");
         }
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur d\'envoi du message';
+      const errorMessage =
+        error instanceof Error ? error.message : "Erreur d'envoi du message";
       showError(errorMessage);
       setError(errorMessage);
-      
+
       // Supprimer le message temporaire
-      setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
+      setMessages((prev) => prev.filter((m) => m.id !== tempMessage.id));
     } finally {
       setIsSending(false);
       setIsTyping(false);
@@ -285,19 +284,23 @@ export default function ChatInterface({
     if (!sessionId) return;
 
     try {
-      const result = await transferToHuman(sessionId, 'Demande de transfert');
-      if (result.status === 'success') {
+      const result = await aiService.transferToHuman(
+        sessionId,
+        "Demande de transfert",
+      );
+      if (result.status === "success") {
         setIsTransferred(true);
-        setAdvisorName(result.advisorName);
-        success('Transfert vers un conseiller en cours...');
+        setAdvisorName(result.advisorId);
+        success("Transfert vers un conseiller en cours...");
         if (onTransfer) {
           onTransfer(sessionId);
         }
       } else {
-        showError('Erreur de transfert');
+        showError("Erreur de transfert");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur de transfert';
+      const errorMessage =
+        error instanceof Error ? error.message : "Erreur de transfert";
       showError(errorMessage);
     }
   };
@@ -306,7 +309,7 @@ export default function ChatInterface({
   const handleRefresh = async () => {
     if (sessionId) {
       await loadSession(sessionId);
-      success('Chat rafraîchi');
+      success("Chat rafraîchi");
     } else {
       await initializeSession();
     }
@@ -316,12 +319,12 @@ export default function ChatInterface({
   const handleClose = async () => {
     if (sessionId) {
       try {
-        await closeSession(sessionId);
+        await aiService.closeSession(sessionId);
       } catch (error) {
         // Ignorer les erreurs de fermeture
       }
     }
-    disconnectWebSocket();
+    aiService.disconnectWebSocket();
     setIsConnected(false);
     if (onClose) {
       onClose();
@@ -341,13 +344,15 @@ export default function ChatInterface({
     return (
       <div
         className={cn(
-          'flex flex-col items-center justify-center bg-white dark:bg-gray-900 rounded-lg shadow-lg',
-          className
+          "flex flex-col items-center justify-center bg-white dark:bg-gray-900 rounded-lg shadow-lg",
+          className,
         )}
-        style={{ maxWidth, maxHeight, minHeight: '400px' }}
+        style={{ maxWidth, maxHeight, minHeight: "400px" }}
       >
-        <Spinner size="lg" />
-        <p className="mt-4 text-gray-500 dark:text-gray-400">Chargement du chat...</p>
+        <Spinner />
+        <p className="mt-4 text-gray-500 dark:text-gray-400">
+          Chargement du chat...
+        </p>
       </div>
     );
   }
@@ -356,10 +361,10 @@ export default function ChatInterface({
     return (
       <div
         className={cn(
-          'flex flex-col items-center justify-center bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8',
-          className
+          "flex flex-col items-center justify-center bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8",
+          className,
         )}
-        style={{ maxWidth, maxHeight, minHeight: '400px' }}
+        style={{ maxWidth, maxHeight, minHeight: "400px" }}
       >
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-4">
@@ -380,8 +385,8 @@ export default function ChatInterface({
   return (
     <div
       className={cn(
-        'flex flex-col bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden',
-        className
+        "flex flex-col bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden",
+        className,
       )}
       style={{ maxWidth, maxHeight }}
     >
@@ -390,7 +395,7 @@ export default function ChatInterface({
         title={title}
         subtitle="Nous sommes là pour vous aider"
         isTransferred={isTransferred}
-        status={isTransferred ? 'transferred' : 'active'}
+        status={isTransferred ? "transferred" : "active"}
         advisorName={advisorName}
         isLoading={isLoading}
         onTransfer={handleTransfer}
@@ -409,12 +414,16 @@ export default function ChatInterface({
           <>
             <ChatList
               messages={messages}
-              currentUserId={user?.id || 'user'}
+              currentUserId={user?.id || "user"}
               showAvatars={true}
               showTimestamps={true}
               showActions={true}
             />
-            {isTyping && <ChatTyping name={isTransferred ? advisorName || 'Conseiller' : 'Assistant'} />}
+            {isTyping && (
+              <ChatTyping
+                name={isTransferred ? advisorName || "Conseiller" : "Assistant"}
+              />
+            )}
             <div ref={messagesEndRef} />
           </>
         )}
@@ -426,11 +435,11 @@ export default function ChatInterface({
         disabled={isSending || isTransferred || isLoading}
         isSending={isSending}
         placeholder={
-          isTransferred 
-            ? 'Transfert vers un conseiller en cours...' 
-            : isLoading 
-              ? 'Chargement...' 
-              : 'Écrivez votre message...'
+          isTransferred
+            ? "Transfert vers un conseiller en cours..."
+            : isLoading
+              ? "Chargement..."
+              : "Écrivez votre message..."
         }
         allowAttachments={true}
         allowEmojis={true}
@@ -440,8 +449,8 @@ export default function ChatInterface({
       {/* Statut de connexion */}
       <div className="px-4 py-1 text-center border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
         <span className="text-xs text-gray-400 dark:text-gray-500">
-          {isConnected ? '🔵 Connecté' : '⚪ Déconnecté'}
-          {isTransferred && ' • 🤝 Transféré à un conseiller'}
+          {isConnected ? "🔵 Connecté" : "⚪ Déconnecté"}
+          {isTransferred && " • 🤝 Transféré à un conseiller"}
         </span>
       </div>
     </div>

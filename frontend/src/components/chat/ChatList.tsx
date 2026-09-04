@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useRef, useEffect } from 'react';
-import { ChatMessage } from './ChatMessage';
-import { ChatMessage as ChatMessageType } from '@/types/chat';
-import { cn } from '@/lib/utils';
+import { useRef, useEffect } from "react";
+import ChatMessage from "./ChatMessage";
+import { ChatMessage as ChatMessageType } from "@/types/chat";
+import { cn } from "@/lib/utils";
 
 interface ChatListProps {
   messages: ChatMessageType[];
@@ -22,33 +22,36 @@ export default function ChatList({
   showAvatars = true,
   showTimestamps = true,
   showActions = true,
-  className = '',
+  className = "",
   onCopy,
   onFeedback,
 }: ChatListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // Grouper les messages par date
-  const groupedMessages = messages.reduce((groups, message) => {
-    const date = new Date(message.timestamp).toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(message);
-    return groups;
-  }, {} as Record<string, ChatMessageType[]>);
+  const groupedMessages = messages.reduce(
+    (groups, message) => {
+      const date = new Date(message.timestamp).toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(message);
+      return groups;
+    },
+    {} as Record<string, ChatMessageType[]>,
+  );
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn("space-y-4", className)}>
       {Object.entries(groupedMessages).map(([date, dateMessages]) => (
         <div key={date}>
           {/* Séparateur de date */}

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, Smile, Mic, X, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef, useEffect } from "react";
+import { Send, Paperclip, Smile, Mic, X, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -19,15 +19,15 @@ interface ChatInputProps {
 export default function ChatInput({
   onSend,
   disabled = false,
-  placeholder = 'Écrivez votre message...',
+  placeholder = "Écrivez votre message...",
   isSending = false,
   allowAttachments = false,
   allowEmojis = false,
   allowVoice = false,
-  className = '',
+  className = "",
 }: ChatInputProps) {
-  const [message, setMessage] = useState('');
-  const [setIsFocused] = useState(false);
+  const [message, setMessage] = useState("");
+  const [, setIsFocused] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -36,7 +36,7 @@ export default function ChatInput({
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
     }
   }, [message]);
@@ -44,16 +44,16 @@ export default function ChatInput({
   const handleSend = () => {
     if (message.trim()) {
       onSend(message.trim());
-      setMessage('');
+      setMessage("");
       setAttachments([]);
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = "auto";
       }
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -62,15 +62,15 @@ export default function ChatInput({
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      setAttachments(prev => [...prev, ...Array.from(files)]);
+      setAttachments((prev) => [...prev, ...Array.from(files)]);
     }
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const removeAttachment = (index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleVoiceRecording = () => {
@@ -79,28 +79,41 @@ export default function ChatInput({
     if (!isRecording) {
       setTimeout(() => {
         setIsRecording(false);
-        setMessage('🎤 Message vocal');
+        setMessage("🎤 Message vocal");
       }, 3000);
     }
   };
 
   const handleEmojiSelect = (emoji: string) => {
-    setMessage(prev => prev + emoji);
+    setMessage((prev) => prev + emoji);
     setShowEmojiPicker(false);
     textareaRef.current?.focus();
   };
 
-  const quickEmojis = ['😊', '👍', '❤️', '🔥', '😂', '🎉', '👋', '🤔'];
+  const quickEmojis = ["😊", "👍", "❤️", "🔥", "😂", "🎉", "👋", "🤔"];
 
   return (
-    <div className={cn('border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900', className)}>
+    <div
+      className={cn(
+        "border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900",
+        className,
+      )}
+    >
       {/* Pièces jointes */}
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-2 p-2 border-b border-gray-200 dark:border-gray-800">
           {attachments.map((file, index) => (
-            <div key={index} className="flex items-center gap-2 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm">
-              <span className="text-gray-600 dark:text-gray-300 truncate max-w-[150px]">{file.name}</span>
-              <button onClick={() => removeAttachment(index)} className="text-gray-400 hover:text-red-500 transition-colors">
+            <div
+              key={index}
+              className="flex items-center gap-2 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm"
+            >
+              <span className="text-gray-600 dark:text-gray-300 truncate max-w-[150px]">
+                {file.name}
+              </span>
+              <button
+                onClick={() => removeAttachment(index)}
+                className="text-gray-400 hover:text-red-500 transition-colors"
+              >
                 <X className="w-3 h-3" />
               </button>
             </div>
@@ -113,10 +126,16 @@ export default function ChatInput({
         {/* Bouton pièce jointe */}
         {allowAttachments && (
           <>
-            <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" multiple />
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              className="hidden"
+              multiple
+            />
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled}
@@ -132,7 +151,7 @@ export default function ChatInput({
           <div className="relative">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               disabled={disabled}
@@ -170,9 +189,9 @@ export default function ChatInput({
           disabled={disabled || isSending}
           rows={1}
           className={cn(
-            'flex-1 resize-none bg-transparent border-0 outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 min-h-[40px] max-h-[120px] py-2 px-3',
-            'focus:ring-0 focus:outline-none',
-            disabled && 'opacity-50 cursor-not-allowed'
+            "flex-1 resize-none bg-transparent border-0 outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 min-h-[40px] max-h-[120px] py-2 px-3",
+            "focus:ring-0 focus:outline-none",
+            disabled && "opacity-50 cursor-not-allowed",
           )}
         />
 
@@ -180,13 +199,15 @@ export default function ChatInput({
         {allowVoice && (
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={handleVoiceRecording}
             disabled={disabled}
             className={cn(
-              'p-2 transition-colors',
-              isRecording ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+              "p-2 transition-colors",
+              isRecording
+                ? "text-red-500 animate-pulse"
+                : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
             )}
           >
             <Mic className="w-5 h-5" />
