@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { cn } from "@/lib/utils";
 
 interface ProductStockProps {
@@ -22,7 +21,6 @@ export default function ProductStock({
 }: ProductStockProps) {
   const isOutOfStock = stock <= 0;
   const isLowStock = stock > 0 && stock <= 5;
-  const isInStock = stock > 5;
 
   const sizeClasses = {
     sm: "text-xs",

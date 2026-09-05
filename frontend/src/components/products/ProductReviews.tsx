@@ -1,23 +1,19 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
+import type { ChangeEvent } from "react";
 import { useAuth, useProducts, useToast } from "@/hooks";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/Textarea";
-import { Avatar } from "@/components/ui/Avatar";
-import { ProductRating } from "./ProductRating";
-import { Spinner } from "@/components/ui/Spinner";
+import Textarea from "@/components/ui/Textarea";
+import Avatar from "@/components/ui/Avatar";
+import ProductRating from "./ProductRating";
+import Spinner from "@/components/ui/Spinner";
 import { formatRelativeTime, cn } from "@/lib/utils";
-import {
-  Star,
-  ThumbsUp,
-  ThumbsDown,
-  User,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-} from "lucide-react";
+import { Star, ThumbsUp, ThumbsDown, Loader2, CheckCircle } from "lucide-react";
+
+const AvatarComponent = Avatar as any;
+const TextareaComponent = Textarea as any;
 
 interface ProductReviewsProps {
   productId: string;
@@ -62,7 +58,7 @@ export default function ProductReviews({
       }
 
       try {
-        const result = await loadProductReviews(productId);
+        const result = (await loadProductReviews(productId)) as any;
         setReviews(result.reviews || []);
         setStats({
           averageRating: result.averageRating || 0,
@@ -194,7 +190,7 @@ export default function ProductReviews({
             </h4>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => setShowForm(false)}
             >
@@ -236,10 +232,12 @@ export default function ProductReviews({
             required
           />
 
-          <Textarea
+          <TextareaComponent
             placeholder="Votre commentaire..."
             value={comment}
-            onChange={(e) => setComment(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+              setComment(e.target.value)
+            }
             rows={4}
             required
           />
@@ -287,7 +285,7 @@ export default function ProductReviews({
                 className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0"
               >
                 <div className="flex items-start gap-3">
-                  <Avatar
+                  <AvatarComponent
                     src={review.user?.avatar}
                     alt={review.user?.username || "Utilisateur"}
                     size="sm"

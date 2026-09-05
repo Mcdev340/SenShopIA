@@ -1,20 +1,17 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Product } from "@/types/product";
-import { ProductCard } from "./ProductCard";
-import { Spinner } from "@/components/ui/Spinner";
-import { EmptyState } from "@/components/shared/EmptyState";
+import ProductCard from "./ProductCard";
+import Spinner from "@/components/ui/Spinner";
+import EmptyState from "@/components/shared/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import Badge from "@/components/ui/Badge";
 import {
   Search,
-  Filter,
   SlidersHorizontal,
-  LayoutGrid,
-  LayoutList,
   ChevronLeft,
   ChevronRight,
   Grid2X2,
@@ -22,6 +19,9 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const EmptyStateComponent = EmptyState as any;
+const BadgeComponent = Badge as any;
 
 interface ProductListProps {
   products: Product[];
@@ -70,7 +70,7 @@ export default function ProductList({
   showPagination = true,
   onPageChange,
   onSearch,
-  onFilterChange,
+  onFilterChange: _onFilterChange,
   onSortChange,
   onViewChange,
   className = "",
@@ -121,7 +121,7 @@ export default function ProductList({
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
-        <Spinner size="lg" />
+        <Spinner />
         <p className="text-gray-500 dark:text-gray-400">
           Chargement des produits...
         </p>
@@ -131,7 +131,7 @@ export default function ProductList({
 
   if (products.length === 0) {
     return (
-      <EmptyState
+      <EmptyStateComponent
         title="Aucun produit"
         description={
           searchQuery
@@ -221,9 +221,9 @@ export default function ProductList({
             onChange={(e) => setLimit(e.target.value)}
             className="w-20"
           />
-          <Badge variant="secondary" className="whitespace-nowrap">
+          <BadgeComponent className="whitespace-nowrap">
             {total} produits
-          </Badge>
+          </BadgeComponent>
         </div>
       </div>
 

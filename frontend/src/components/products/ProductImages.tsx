@@ -131,14 +131,14 @@ export default function ProductImages({
           <>
             <button
               onClick={prevImage}
-              className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-white/80 dark:bg-gray-800/80 rounded-full hover:bg-white dark:hover:bg-gray-700 transition-colors shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-white/80 dark:bg-gray-800/80 rounded-full hover:bg-white dark:hover:bg-gray-700 transition-opacity shadow-lg opacity-0 group-hover:opacity-100"
               aria-label="Image précédente"
             >
               <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
             </button>
             <button
               onClick={nextImage}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white/80 dark:bg-gray-800/80 rounded-full hover:bg-white dark:hover:bg-gray-700 transition-colors shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white/80 dark:bg-gray-800/80 rounded-full hover:bg-white dark:hover:bg-gray-700 transition-opacity shadow-lg opacity-0 group-hover:opacity-100"
               aria-label="Image suivante"
             >
               <ChevronRight className="w-5 h-5 text-gray-700 dark:text-gray-300" />

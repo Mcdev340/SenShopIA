@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
 import { Product } from "@/types/product";
-import { ProductCard } from "./ProductCard";
-import { Spinner } from "@/components/ui/Spinner";
-import { EmptyState } from "@/components/shared/EmptyState";
+import ProductCard from "./ProductCard";
+import Spinner from "@/components/ui/Spinner";
+import EmptyState from "@/components/shared/EmptyState";
 import { cn } from "@/lib/utils";
+
+const EmptyStateComponent = EmptyState as any;
 
 interface ProductGridProps {
   products: Product[];
@@ -40,8 +41,6 @@ export default function ProductGrid({
   onWishlist,
   onQuickView,
 }: ProductGridProps) {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-
   const columnsClasses = {
     2: "grid-cols-1 sm:grid-cols-2",
     3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
@@ -52,7 +51,7 @@ export default function ProductGrid({
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
-        <Spinner size="lg" />
+        <Spinner />
         <p className="text-gray-500 dark:text-gray-400">
           Chargement des produits...
         </p>
@@ -62,7 +61,7 @@ export default function ProductGrid({
 
   if (products.length === 0) {
     return (
-      <EmptyState
+      <EmptyStateComponent
         title="Aucun produit"
         description="Aucun produit ne correspond à votre recherche."
         actionText="Voir tous les produits"

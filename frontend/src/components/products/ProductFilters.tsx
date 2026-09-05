@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import {
-  SlidersHorizontal,
   X,
   ChevronDown,
   ChevronUp,
@@ -15,8 +14,12 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { Radio } from "@/components/ui/Radio";
+import Radio from "@/components/ui/Radio";
+import Badge from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
+
+const RadioComponent = Radio as any;
+const BadgeComponent = Badge as any;
 
 interface FilterOption {
   id: string;
@@ -62,8 +65,6 @@ export default function ProductFilters({
   >(filters.reduce((acc, f) => ({ ...acc, [f.id]: true }), {}));
 
   const [searchTerms, setSearchTerms] = useState<Record<string, string>>({});
-  const [localFilters, setLocalFilters] =
-    useState<Record<string, any>>(selectedFilters);
 
   const toggleSection = useCallback((sectionId: string) => {
     setExpandedSections((prev) => ({
@@ -78,7 +79,6 @@ export default function ProductFilters({
 
   const handleFilterChange = useCallback(
     (filterId: string, value: any) => {
-      setLocalFilters((prev) => ({ ...prev, [filterId]: value }));
       onFilterChange(filterId, value);
     },
     [onFilterChange],
@@ -214,9 +214,9 @@ export default function ProductFilters({
                       <Checkbox
                         id={`${section.id}-${option.id}`}
                         checked={isChecked}
-                        onCheckedChange={(checked) => {
+                        onChange={(event) => {
                           const current = selectedFilters[section.id] || [];
-                          const newValue = checked
+                          const newValue = event.target.checked
                             ? [...current, option.id]
                             : current.filter((id: string) => id !== option.id);
                           handleFilterChange(section.id, newValue);
@@ -248,7 +248,7 @@ export default function ProductFilters({
             {section.type === "radio" && (
               <div className="space-y-2">
                 <div className="flex items-center">
-                  <Radio
+                  <RadioComponent
                     id={`${section.id}-all`}
                     name={section.id}
                     checked={!selectedFilters[section.id]}
@@ -263,7 +263,7 @@ export default function ProductFilters({
                 </div>
                 {filteredOptions.map((option) => (
                   <div key={option.id} className="flex items-center">
-                    <Radio
+                    <RadioComponent
                       id={`${section.id}-${option.id}`}
                       name={section.id}
                       checked={selectedFilters[section.id] === option.id}
@@ -314,9 +314,9 @@ export default function ProductFilters({
               Filtres
             </h2>
             {activeFiltersCount > 0 && (
-              <Badge variant="secondary" className="ml-2">
+              <BadgeComponent className="ml-2">
                 {activeFiltersCount}
-              </Badge>
+              </BadgeComponent>
             )}
           </div>
           <button
@@ -363,13 +363,13 @@ export default function ProductFilters({
             Filtres
           </h3>
           {activeFiltersCount > 0 && (
-            <Badge variant="secondary" className="ml-1">
+            <BadgeComponent className="ml-1">
               {activeFiltersCount}
-            </Badge>
+            </BadgeComponent>
           )}
         </div>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={onClearAll}
           className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { ProductVariant as ProductVariantType } from "@/types/product";
 import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";

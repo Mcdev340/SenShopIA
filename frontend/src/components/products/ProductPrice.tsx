@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { formatPrice, cn } from "@/lib/utils";
 
 interface ProductPriceProps {
@@ -20,7 +19,7 @@ export default function ProductPrice({
   showDiscount = true,
   showOriginal = true,
   className = "",
-  currency = "XOF",
+  currency: _currency = "XOF",
 }: ProductPriceProps) {
   const isOnSale =
     salePrice !== undefined && salePrice !== null && salePrice < price;

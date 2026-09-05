@@ -1,41 +1,34 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
-import Image from "next/image";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   ShoppingCart,
   Heart,
   Share2,
-  Check,
   Truck,
   Shield,
   Clock,
   ArrowLeft,
-  Star,
-  StarHalf,
   Minus,
   Plus,
   Loader2,
-  AlertCircle,
-  ChevronDown,
-  ChevronUp,
   Tag,
   Award,
-  RotateCcw,
-  CreditCard,
 } from "lucide-react";
-import { Product, ProductVariant as ProductVariantType } from "@/types/product";
-import { useCart, useProducts, useToast } from "@/hooks";
+import { Product } from "@/types/product";
+import { useCart, useToast } from "@/hooks";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { ProductImages } from "./ProductImages";
-import { ProductPrice } from "./ProductPrice";
-import { ProductStock } from "./ProductStock";
-import { ProductRating } from "./ProductRating";
-import { ProductVariant } from "./ProductVariant";
-import { ProductReviews } from "./ProductReviews";
-import { formatPrice, cn } from "@/lib/utils";
+import Badge from "@/components/ui/Badge";
+import ProductImages from "./ProductImages";
+import ProductPrice from "./ProductPrice";
+import ProductStock from "./ProductStock";
+import ProductRating from "./ProductRating";
+import ProductVariant from "./ProductVariant";
+import ProductReviews from "./ProductReviews";
+import { cn } from "@/lib/utils";
+
+const BadgeComponent = Badge as any;
 
 interface ProductDetailsProps {
   product: Product;
@@ -53,8 +46,8 @@ export default function ProductDetails({
   onBack,
 }: ProductDetailsProps) {
   const router = useRouter();
-  const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useProducts();
+  const { addItem, addToWishlist, removeFromWishlist, isInWishlist } =
+    useCart();
   const { success, error: showError } = useToast();
 
   const [quantity, setQuantity] = useState(1);
@@ -65,7 +58,6 @@ export default function ProductDetails({
     "description" | "specifications" | "reviews"
   >("description");
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(0);
 
   const isOnSale =
     product.salePrice !== undefined &&
@@ -104,7 +96,7 @@ export default function ProductDetails({
 
     setIsAddingToCart(true);
     try {
-      await addToCart(product.id, quantity);
+      await addItem(product.id, selectedVariant || undefined, quantity);
       success(`${product.name} ajouté au panier`);
       if (onAddToCart) {
         onAddToCart(product, quantity);
@@ -117,7 +109,7 @@ export default function ProductDetails({
   }, [
     product,
     quantity,
-    addToCart,
+    addItem,
     isOutOfStock,
     success,
     showError,
@@ -347,17 +339,19 @@ export default function ProductDetails({
           {/* Badges */}
           <div className="flex flex-wrap gap-2">
             {isOnSale && (
-              <Badge className="bg-red-500 text-white border-0">
+              <BadgeComponent className="bg-red-500 text-white border-0">
                 <Tag className="w-3 h-3 mr-1" />-{discountPercentage}% Promo
-              </Badge>
+              </BadgeComponent>
             )}
             {product.isNew && (
-              <Badge className="bg-blue-500 text-white border-0">Nouveau</Badge>
+              <BadgeComponent className="bg-blue-500 text-white border-0">
+                Nouveau
+              </BadgeComponent>
             )}
             {product.isFeatured && (
-              <Badge className="bg-purple-500 text-white border-0">
+              <BadgeComponent className="bg-purple-500 text-white border-0">
                 Vedette
-              </Badge>
+              </BadgeComponent>
             )}
           </div>
 
