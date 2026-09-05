@@ -1,12 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  UseFormRegister,
-  FieldErrors,
-  UseFormWatch,
-  Control,
-} from "react-hook-form";
+import { useState } from "react";
+import { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
 import {
   CreditCard,
   Smartphone,
@@ -21,7 +16,6 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { Radio } from "@/components/ui/Radio";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +23,6 @@ interface PaymentFormProps {
   register: UseFormRegister<any>;
   errors: FieldErrors<any>;
   watch: UseFormWatch<any>;
-  control?: Control<any>;
   paymentMethod: string;
   onPaymentMethodChange: (method: string) => void;
   className?: string;
@@ -38,15 +31,13 @@ interface PaymentFormProps {
 export default function PaymentForm({
   register,
   errors,
-  watch,
-  control,
+  watch: _watch,
   paymentMethod,
   onPaymentMethodChange,
   className = "",
 }: PaymentFormProps) {
   const [showCvc, setShowCvc] = useState(false);
   const [saveCard, setSaveCard] = useState(false);
-  const [showCardDetails, setShowCardDetails] = useState(true);
 
   const paymentMethods = [
     {
@@ -176,7 +167,11 @@ export default function PaymentForm({
                 className="pl-10"
                 maxLength={19}
                 {...register("cardNumber")}
-                error={errors.cardNumber?.message}
+                error={
+                  typeof errors.cardNumber?.message === "string"
+                    ? errors.cardNumber.message
+                    : undefined
+                }
                 onChange={(e) => {
                   const value = e.target.value.replace(/\D/g, "");
                   const formatted = value.replace(/(.{4})/g, "$1 ").trim();
@@ -194,7 +189,11 @@ export default function PaymentForm({
             <Input
               placeholder="Jean Dupont"
               {...register("cardName")}
-              error={errors.cardName?.message}
+              error={
+                typeof errors.cardName?.message === "string"
+                  ? errors.cardName.message
+                  : undefined
+              }
             />
           </div>
 
@@ -208,7 +207,11 @@ export default function PaymentForm({
                 placeholder="MM/AA"
                 maxLength={5}
                 {...register("cardExpiry")}
-                error={errors.cardExpiry?.message}
+                error={
+                  typeof errors.cardExpiry?.message === "string"
+                    ? errors.cardExpiry.message
+                    : undefined
+                }
                 onChange={(e) => {
                   const value = e.target.value.replace(/\D/g, "");
                   if (value.length >= 2) {
@@ -232,7 +235,11 @@ export default function PaymentForm({
                   maxLength={4}
                   className="pr-10"
                   {...register("cardCvc")}
-                  error={errors.cardCvc?.message}
+                  error={
+                    typeof errors.cardCvc?.message === "string"
+                      ? errors.cardCvc.message
+                      : undefined
+                  }
                 />
                 <button
                   type="button"
@@ -253,8 +260,8 @@ export default function PaymentForm({
             id="saveCard"
             label="Enregistrer cette carte pour mes prochains paiements"
             checked={saveCard}
-            onCheckedChange={(checked) => {
-              setSaveCard(!!checked);
+            onChange={(event) => {
+              setSaveCard(event.target.checked);
             }}
           />
         </div>
@@ -272,9 +279,12 @@ export default function PaymentForm({
             </label>
             <Select
               options={mobileMoneyProviders}
-              placeholder="Sélectionnez votre opérateur"
               {...register("mobileMoneyProvider")}
-              error={errors.mobileMoneyProvider?.message}
+              error={
+                typeof errors.mobileMoneyProvider?.message === "string"
+                  ? errors.mobileMoneyProvider.message
+                  : undefined
+              }
             />
           </div>
 
@@ -289,7 +299,11 @@ export default function PaymentForm({
                 className="pl-10"
                 maxLength={15}
                 {...register("mobileMoneyPhone")}
-                error={errors.mobileMoneyPhone?.message}
+                error={
+                  typeof errors.mobileMoneyPhone?.message === "string"
+                    ? errors.mobileMoneyPhone.message
+                    : undefined
+                }
               />
             </div>
           </div>

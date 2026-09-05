@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useCart } from "@/hooks";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { formatPrice } from "@/lib/utils";
@@ -8,14 +8,11 @@ import { cn } from "@/lib/utils";
 import {
   Truck,
   Shield,
-  CreditCard,
   Clock,
   Package,
-  Tag,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 
 interface CheckoutSummaryProps {
   className?: string;
@@ -27,7 +24,7 @@ interface CheckoutSummaryProps {
 export default function CheckoutSummary({
   className = "",
   compact = false,
-  showDetails = true,
+  showDetails: _showDetails = true,
   onToggleDetails,
 }: CheckoutSummaryProps) {
   const {

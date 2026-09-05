@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import { MapPin, User, Phone, Mail, Home, Building, Globe } from "lucide-react";
+import { MapPin, Phone, Home, Globe } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
@@ -31,7 +31,8 @@ export default function ShippingForm({
 
   const getError = (field: string) => {
     const errorKey = prefix ? `${prefix}.${field}` : field;
-    return errors[errorKey]?.message;
+    const message = errors[errorKey]?.message;
+    return typeof message === "string" ? message : undefined;
   };
 
   const countries = COUNTRIES.map((country) => ({
@@ -128,7 +129,6 @@ export default function ShippingForm({
             <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
             <Select
               options={countries}
-              placeholder="Sélectionnez un pays"
               className="pl-10"
               {...register(getFieldName("country"))}
               error={getError("country")}

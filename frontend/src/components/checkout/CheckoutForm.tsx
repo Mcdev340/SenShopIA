@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,34 +8,25 @@ import { z } from "zod";
 import {
   CreditCard,
   Truck,
-  MapPin,
-  User,
-  Mail,
-  Phone,
   Lock,
   ChevronRight,
   ChevronLeft,
   CheckCircle,
   Loader2,
-  AlertCircle,
   ShoppingBag,
-  Home,
   Building,
   Package,
   Shield,
 } from "lucide-react";
 import { useCart, useAuth, useOrders, useToast } from "@/hooks";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { Card, CardBody, CardHeader, CardFooter } from "@/components/ui/Card";
-import { CheckoutSummary } from "./CheckoutSummary";
-import { ShippingForm } from "./ShippingForm";
-import { PaymentForm } from "./PaymentForm";
-import { OrderSummary } from "./OrderSummary";
+import { Card, CardBody } from "@/components/ui/Card";
+import CheckoutSummary from "./CheckoutSummary";
+import ShippingForm from "./ShippingForm";
+import PaymentForm from "./PaymentForm";
 import { cn } from "@/lib/utils";
-import { COUNTRIES } from "@/lib/constants";
+import { PaymentMethod } from "@/types/order";
 
 // Schéma de validation du checkout
 const AddressSchema = z.object({
@@ -99,14 +90,13 @@ export default function CheckoutForm({
 }: CheckoutFormProps) {
   const router = useRouter();
   const { items, total, clearCart, loading: cartLoading, loadCart } = useCart();
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const { createOrder } = useOrders();
   const { success, error: showError } = useToast();
 
   const [currentStep, setCurrentStep] = useState<Step>("shipping");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [stepProgress, setStepProgress] = useState(0);
 
   const methods = useForm<CheckoutFormData>({
@@ -155,13 +145,10 @@ export default function CheckoutForm({
     getValues,
     formState: { errors },
     setError,
-    reset,
-    control,
   } = methods;
 
   const sameAsShipping = watch("sameAsShipping");
   const paymentMethod = watch("paymentMethod");
-  const totalAmount = total;
 
   // Charger le panier
   useEffect(() => {
@@ -289,7 +276,6 @@ export default function CheckoutForm({
   // Création de la commande
   const createOrderFromData = async (data: CheckoutFormData) => {
     setIsSubmitting(true);
-    setIsProcessing(true);
 
     try {
       const orderData = {
@@ -302,9 +288,9 @@ export default function CheckoutForm({
         billingAddress: data.sameAsShipping
           ? data.shippingAddress
           : data.billingAddress,
-        paymentMethod: data.paymentMethod,
+        paymentMethod: data.paymentMethod as PaymentMethod,
         deliveryInstructions: data.deliveryInstructions || "",
-        couponCode: null,
+        couponCode: undefined,
         notes: "",
       };
 
@@ -336,7 +322,6 @@ export default function CheckoutForm({
       }
     } finally {
       setIsSubmitting(false);
-      setIsProcessing(false);
     }
   };
 
@@ -368,9 +353,12 @@ export default function CheckoutForm({
         register={register}
         errors={errors}
         defaultValues={getValues("shippingAddress")}
-        onChange={(values) => {
+        onChange={(values: Record<string, string | boolean>) => {
           Object.entries(values).forEach(([key, value]) => {
-            setValue(`shippingAddress.${key}`, value);
+            setValue(
+              `shippingAddress.${key as keyof CheckoutFormData["shippingAddress"]}`,
+              value as never,
+            );
           });
         }}
       />
@@ -399,7 +387,9 @@ export default function CheckoutForm({
           <Checkbox
             id="sameAsShipping"
             checked={sameAsShipping}
-            onCheckedChange={(checked) => setValue("sameAsShipping", !!checked)}
+            onChange={(event) =>
+              setValue("sameAsShipping", event.target.checked)
+            }
             className="mt-1"
           />
           <label
@@ -423,9 +413,12 @@ export default function CheckoutForm({
               errors={errors}
               defaultValues={getValues("billingAddress")}
               prefix="billingAddress"
-              onChange={(values) => {
+              onChange={(values: Record<string, string | boolean>) => {
                 Object.entries(values).forEach(([key, value]) => {
-                  setValue(`billingAddress.${key}`, value);
+                  setValue(
+                    `billingAddress.${key as keyof CheckoutFormData["billingAddress"]}`,
+                    value as never,
+                  );
                 });
               }}
             />
@@ -463,9 +456,10 @@ export default function CheckoutForm({
         register={register}
         errors={errors}
         watch={watch}
-        control={control}
         paymentMethod={paymentMethod}
-        onPaymentMethodChange={(method) => setValue("paymentMethod", method)}
+        onPaymentMethodChange={(method: string) =>
+          setValue("paymentMethod", method as CheckoutFormData["paymentMethod"])
+        }
       />
 
       {/* Conditions */}
@@ -485,8 +479,7 @@ export default function CheckoutForm({
             </span>
           }
           checked={watch("agreeTerms")}
-          onCheckedChange={(checked) => setValue("agreeTerms", !!checked)}
-          error={errors.agreeTerms?.message}
+          onChange={(event) => setValue("agreeTerms", event.target.checked)}
         />
         <Checkbox
           id="agreeNewsletter"
@@ -496,7 +489,9 @@ export default function CheckoutForm({
             </span>
           }
           checked={watch("agreeNewsletter")}
-          onCheckedChange={(checked) => setValue("agreeNewsletter", !!checked)}
+          onChange={(event) =>
+            setValue("agreeNewsletter", event.target.checked)
+          }
         />
       </div>
 

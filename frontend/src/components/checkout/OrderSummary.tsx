@@ -1,19 +1,10 @@
 "use client";
 
-import React from "react";
 import { useCart } from "@/hooks";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import {
-  Package,
-  Truck,
-  Shield,
-  Clock,
-  CreditCard,
-  Tag,
-  CheckCircle,
-} from "lucide-react";
+import { Package, Truck, Shield, Clock, CreditCard, Tag } from "lucide-react";
 
 interface OrderSummaryProps {
   className?: string;
