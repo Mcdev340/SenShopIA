@@ -1,30 +1,30 @@
-"use client";
+'use client';
 
-import React, { useState, useCallback, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import {
-  Heart,
-  ShoppingCart,
-  Star,
-  Eye,
-  Share2,
+import React, { useState, useCallback, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { 
+  Heart, 
+  ShoppingCart, 
+  Star, 
+  Eye, 
+  Share2, 
   Check,
   Loader2,
   Tag,
   Clock,
   Truck,
   AlertCircle,
-} from "lucide-react";
-import { Product } from "@/types/product";
-import { useCart, useProducts, useToast } from "@/hooks";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { formatPrice, cn } from "@/lib/utils";
+} from 'lucide-react';
+import { Product } from '@/types/product';
+import { useCart, useProducts, useToast } from '@/hooks';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { formatPrice, cn } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
-  variant?: "default" | "compact" | "minimal";
+  variant?: 'default' | 'compact' | 'minimal';
   showActions?: boolean;
   showRating?: boolean;
   showStock?: boolean;
@@ -39,7 +39,7 @@ interface ProductCardProps {
 
 export default function ProductCard({
   product,
-  variant = "default",
+  variant = 'default',
   showActions = true,
   showRating = true,
   showStock = true,
@@ -49,26 +49,21 @@ export default function ProductCard({
   onView,
   onWishlist,
   onQuickView,
-  className = "",
+  className = '',
 }: ProductCardProps) {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useProducts();
   const { success, error: showError } = useToast();
-
+  
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isWishlist, setIsWishlist] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
 
-  const isOnSale =
-    product.salePrice !== undefined &&
-    product.salePrice !== null &&
-    product.salePrice < product.price;
+  const isOnSale = product.salePrice !== undefined && product.salePrice !== null && product.salePrice < product.price;
   const isOutOfStock = product.stock <= 0;
   const isLowStock = product.stock <= 5 && product.stock > 0;
-  const discountPercentage = isOnSale
-    ? Math.round((1 - product.salePrice! / product.price) * 100)
-    : 0;
+  const discountPercentage = isOnSale ? Math.round((1 - product.salePrice! / product.price) * 100) : 0;
 
   // Vérifier si le produit est dans la wishlist
   useEffect(() => {
@@ -83,110 +78,87 @@ export default function ProductCard({
     checkWishlist();
   }, [product.id, isInWishlist]);
 
-  const handleAddToCart = useCallback(
-    async (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+  const handleAddToCart = useCallback(async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isOutOfStock) {
+      showError('Ce produit est en rupture de stock');
+      return;
+    }
 
-      if (isOutOfStock) {
-        showError("Ce produit est en rupture de stock");
-        return;
+    setIsAddingToCart(true);
+    try {
+      await addToCart(product.id, 1);
+      success('Produit ajouté au panier');
+      if (onAddToCart) {
+        onAddToCart(product);
       }
+    } catch (error) {
+      showError('Erreur lors de l\'ajout au panier');
+    } finally {
+      setIsAddingToCart(false);
+    }
+  }, [product, addToCart, isOutOfStock, success, showError, onAddToCart]);
 
-      setIsAddingToCart(true);
-      try {
-        await addToCart(product.id, 1);
-        success("Produit ajouté au panier");
-        if (onAddToCart) {
-          onAddToCart(product);
-        }
-      } catch (error) {
-        showError("Erreur lors de l'ajout au panier");
-      } finally {
-        setIsAddingToCart(false);
+  const handleWishlist = useCallback(async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isWishlistLoading) return;
+    
+    setIsWishlistLoading(true);
+    try {
+      if (isWishlist) {
+        await removeFromWishlist(product.id);
+        setIsWishlist(false);
+        success('Retiré de la wishlist');
+      } else {
+        await addToWishlist(product.id);
+        setIsWishlist(true);
+        success('Ajouté à la wishlist');
       }
-    },
-    [product, addToCart, isOutOfStock, success, showError, onAddToCart],
-  );
-
-  const handleWishlist = useCallback(
-    async (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (isWishlistLoading) return;
-
-      setIsWishlistLoading(true);
-      try {
-        if (isWishlist) {
-          await removeFromWishlist(product.id);
-          setIsWishlist(false);
-          success("Retiré de la wishlist");
-        } else {
-          await addToWishlist(product.id);
-          setIsWishlist(true);
-          success("Ajouté à la wishlist");
-        }
-        if (onWishlist) {
-          onWishlist(product);
-        }
-      } catch (error) {
-        showError("Erreur lors de l'opération");
-      } finally {
-        setIsWishlistLoading(false);
+      if (onWishlist) {
+        onWishlist(product);
       }
-    },
-    [
-      product,
-      addToWishlist,
-      removeFromWishlist,
-      isWishlist,
-      isWishlistLoading,
-      success,
-      showError,
-      onWishlist,
-    ],
-  );
+    } catch (error) {
+      showError('Erreur lors de l\'opération');
+    } finally {
+      setIsWishlistLoading(false);
+    }
+  }, [product, addToWishlist, removeFromWishlist, isWishlist, isWishlistLoading, success, showError, onWishlist]);
 
-  const handleQuickView = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (onQuickView) {
-        onQuickView(product);
-      }
-    },
-    [product, onQuickView],
-  );
+  const handleQuickView = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onQuickView) {
+      onQuickView(product);
+    }
+  }, [product, onQuickView]);
 
-  const handleShare = useCallback(
-    async (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      try {
-        await navigator.share?.({
-          title: product.name,
-          text: `Découvrez ${product.name} sur ShopSense AI`,
-          url: `${window.location.origin}/products/${product.slug}`,
-        });
-      } catch {
-        navigator.clipboard.writeText(
-          `${window.location.origin}/products/${product.slug}`,
-        );
-        success("Lien copié");
-      }
-    },
-    [product, success],
-  );
+  const handleShare = useCallback(async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await navigator.share?.({
+        title: product.name,
+        text: `Découvrez ${product.name} sur ShopSense AI`,
+        url: `${window.location.origin}/products/${product.slug}`,
+      });
+    } catch {
+      navigator.clipboard.writeText(`${window.location.origin}/products/${product.slug}`);
+      success('Lien copié');
+    }
+  }, [product, success]);
 
   // Version minimal
-  if (variant === "minimal") {
+  if (variant === 'minimal') {
     return (
       <Link
         href={`/products/${product.slug}`}
         className={cn(
-          "group block p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors",
-          className,
+          'group block p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors',
+          className
         )}
       >
         <div className="flex items-center space-x-3">
@@ -219,13 +191,13 @@ export default function ProductCard({
   }
 
   // Version compact
-  if (variant === "compact") {
+  if (variant === 'compact') {
     return (
       <Link
         href={`/products/${product.slug}`}
         className={cn(
-          "group block p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all hover:-translate-y-0.5",
-          className,
+          'group block p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all hover:-translate-y-0.5',
+          className
         )}
       >
         <div className="flex gap-3">
@@ -292,8 +264,8 @@ export default function ProductCard({
   return (
     <div
       className={cn(
-        "group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1",
-        className,
+        'group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1',
+        className
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -315,7 +287,7 @@ export default function ProductCard({
               <span className="text-sm">Pas d'image</span>
             </div>
           )}
-
+          
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {isOnSale && (
@@ -337,12 +309,10 @@ export default function ProductCard({
 
           {/* Actions au hover */}
           {showActions && (
-            <div
-              className={cn(
-                "absolute inset-0 bg-black/40 flex items-center justify-center gap-2 transition-opacity duration-300",
-                isHovered ? "opacity-100" : "opacity-0",
-              )}
-            >
+            <div className={cn(
+              'absolute inset-0 bg-black/40 flex items-center justify-center gap-2 transition-opacity duration-300',
+              isHovered ? 'opacity-100' : 'opacity-0'
+            )}>
               {showQuickView && (
                 <Button
                   variant="secondary"
@@ -360,12 +330,10 @@ export default function ProductCard({
                 onClick={handleWishlist}
                 disabled={isWishlistLoading}
               >
-                <Heart
-                  className={cn(
-                    "w-4 h-4 transition-colors",
-                    isWishlist && "fill-red-500 text-red-500",
-                  )}
-                />
+                <Heart className={cn(
+                  'w-4 h-4 transition-colors',
+                  isWishlist && 'fill-red-500 text-red-500'
+                )} />
               </Button>
               <Button
                 variant="secondary"
