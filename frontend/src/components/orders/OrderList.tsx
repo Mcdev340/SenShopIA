@@ -1,29 +1,26 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
-import { OrderCard } from "./OrderCard";
+import { useState, useCallback } from "react";
+import OrderCard from "./OrderCard";
 import { Order } from "@/types/order";
-import { OrderStatus } from "@/types/order";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
-import { Spinner } from "@/components/ui/Spinner";
-import { EmptyState } from "@/components/shared/EmptyState";
+import EmptyState from "@/components/shared/EmptyState";
 import {
   Search,
-  Filter,
   X,
   SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
-  Package,
   ShoppingBag,
   AlertCircle,
   Loader2,
-  ArrowUpDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const EmptyStateComponent = EmptyState as any;
 
 interface OrderListProps {
   orders: Order[];
@@ -158,7 +155,7 @@ export default function OrderList({
 
   if (orders.length === 0) {
     return (
-      <EmptyState
+      <EmptyStateComponent
         title={searchQuery ? "Aucun résultat" : "Aucune commande"}
         description={
           searchQuery
@@ -212,7 +209,7 @@ export default function OrderList({
             </Button>
           )}
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
+            <Button variant="outline" size="sm" onClick={clearFilters}>
               <X className="w-4 h-4 mr-1" />
               Effacer
             </Button>

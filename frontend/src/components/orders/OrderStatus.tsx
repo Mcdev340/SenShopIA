@@ -1,18 +1,17 @@
 "use client";
 
-import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import {
   Clock,
   CheckCircle,
   Truck,
-  Package,
   XCircle,
   AlertCircle,
   CreditCard,
   Loader2,
   Circle,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export type OrderStatusType =
   | "pending"
@@ -39,7 +38,7 @@ const statusConfig: Record<
   OrderStatusType,
   {
     label: string;
-    icon: React.ReactNode;
+    icon: LucideIcon;
     color: string;
     bgColor: string;
     borderColor: string;
@@ -249,7 +248,6 @@ export default function OrderStatus({
             {statusSteps.map((step, index) => {
               const isActive = index <= currentStep;
               const stepConfig = statusConfig[step];
-              const StepIcon = stepConfig.icon;
               return (
                 <div key={step} className="flex flex-col items-center">
                   <div

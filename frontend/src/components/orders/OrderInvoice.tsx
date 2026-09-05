@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import { useRef, useCallback, useState } from "react";
 import { Card, CardBody, CardHeader, CardFooter } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { formatPrice, formatDate, formatDateTime } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks";
@@ -13,15 +12,10 @@ import {
   Mail,
   Share2,
   FileText,
-  CheckCircle,
-  CreditCard,
   Calendar,
   User,
   MapPin,
-  Package,
   Phone,
-  Building,
-  Loader2,
   Copy,
   Check,
 } from "lucide-react";
@@ -69,7 +63,6 @@ interface OrderInvoiceProps {
 }
 
 export default function OrderInvoice({
-  orderId,
   orderNumber,
   orderDate,
   customer,
@@ -96,7 +89,6 @@ export default function OrderInvoice({
   onCopy,
 }: OrderInvoiceProps) {
   const { success } = useToast();
-  const [isPrinting, setIsPrinting] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const invoiceRef = useRef<HTMLDivElement>(null);
 
@@ -123,9 +115,7 @@ export default function OrderInvoice({
   };
 
   const handlePrint = useCallback(() => {
-    setIsPrinting(true);
     window.print();
-    setTimeout(() => setIsPrinting(false), 1000);
     if (onPrint) {
       onPrint();
     }
@@ -180,14 +170,14 @@ export default function OrderInvoice({
               </p>
             </div>
             <div className="flex flex-col items-end space-y-2">
-              <Badge
+              <span
                 className={cn(
                   "text-sm font-medium",
                   paymentStatusConfig[paymentStatus].color,
                 )}
               >
                 {paymentStatusConfig[paymentStatus].label}
-              </Badge>
+              </span>
               <div className="text-right">
                 <p className="text-sm font-bold text-gray-900 dark:text-white">
                   {company.name}
