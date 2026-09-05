@@ -14,16 +14,8 @@ import {
   Settings,
   FileText,
   BarChart3,
-  CreditCard,
-  Bell,
   HelpCircle,
   ArrowRight,
-  UserPlus,
-  DollarSign,
-  Tag,
-  Home,
-  Calendar,
-  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -214,7 +206,7 @@ export default function QuickActions({
             )}
           </div>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             className="text-primary-600 hover:text-primary-700 dark:text-primary-400"
           >

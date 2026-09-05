@@ -14,28 +14,27 @@ import {
   HelpCircle,
   LogOut,
   Menu,
-  X,
   Bell,
   Search,
   User,
   ChevronDown,
-  Home,
   BarChart3,
   Tag,
-  Shield,
   UserCog,
-  Moon,
-  Sun,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { useAuth, useUI, useNotifications } from "@/hooks";
 import { Button } from "@/components/ui/Button";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import { Dropdown } from "@/components/ui/Dropdown";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import Avatar from "@/components/ui/Avatar";
+import Badge from "@/components/ui/Badge";
+import Dropdown from "@/components/ui/Dropdown";
+import ThemeToggle from "@/components/shared/ThemeToggle";
 import { cn } from "@/lib/utils";
+
+const AvatarComponent = Avatar as any;
+const BadgeComponent = Badge as any;
+const DropdownComponent = Dropdown as any;
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -59,7 +58,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout, isAuthenticated, loading: authLoading } = useAuth();
-  const { isMobile, sidebarOpen, setSidebarOpen } = useUI();
+  const { isMobile } = useUI();
   const { unreadCount } = useNotifications();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -312,7 +311,7 @@ export default function DashboardLayout({
             {/* Right */}
             <div className="flex items-center space-x-2">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 className="p-2 relative"
                 onClick={() => router.push("/notifications")}
@@ -320,19 +319,19 @@ export default function DashboardLayout({
               >
                 <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 {unreadCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs">
+                  <BadgeComponent className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs">
                     {unreadCount > 9 ? "9+" : unreadCount}
-                  </Badge>
+                  </BadgeComponent>
                 )}
               </Button>
               <ThemeToggle />
-              <Dropdown
+              <DropdownComponent
                 trigger={
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     className="flex items-center space-x-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   >
-                    <Avatar
+                    <AvatarComponent
                       src={user?.avatar || undefined}
                       alt={user?.username || "User"}
                       size="sm"
@@ -410,7 +409,7 @@ export default function DashboardLayout({
         {/* User Info */}
         {!isCollapsed && (
           <div className="flex items-center space-x-3 px-4 py-4 border-b border-gray-200 dark:border-gray-800">
-            <Avatar
+            <AvatarComponent
               src={user?.avatar || undefined}
               alt={user?.username || "User"}
               size="md"
@@ -459,14 +458,17 @@ export default function DashboardLayout({
                     {item.label}
                   </span>
                 )}
-                {(!isCollapsed || isMobile) && item.badge && (
-                  <Badge
-                    variant={isActive ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {item.badge}
-                  </Badge>
-                )}
+                {(!isCollapsed || isMobile) &&
+                  "badge" in item &&
+                  typeof item.badge === "string" &&
+                  item.badge && (
+                    <BadgeComponent
+                      variant={isActive ? "default" : "secondary"}
+                      className="text-xs"
+                    >
+                      {item.badge}
+                    </BadgeComponent>
+                  )}
               </a>
             );
           })}

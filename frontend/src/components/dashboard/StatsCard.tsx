@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardBody } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, ArrowRight, Loader2 } from "lucide-react";
+import { TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
 
 interface StatsCardProps {
   title: string;

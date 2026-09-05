@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import Badge from "@/components/ui/Badge";
 import {
   ArrowRight,
   Eye,
   ChevronDown,
   ChevronUp,
-  ShoppingBag,
   Clock,
   CheckCircle,
   Truck,
@@ -19,6 +18,8 @@ import {
   Package,
 } from "lucide-react";
 import { cn, formatPrice, formatRelativeTime } from "@/lib/utils";
+
+const BadgeComponent = Badge as any;
 
 interface Order {
   id: string;
@@ -102,7 +103,7 @@ export default function RecentOrders({
     const config = statusConfig[status];
     const Icon = config.icon;
     return (
-      <Badge
+      <BadgeComponent
         className={cn(
           "flex items-center space-x-1",
           config.color,
@@ -115,7 +116,7 @@ export default function RecentOrders({
           <Icon className="w-3 h-3" />
         )}
         <span>{config.label}</span>
-      </Badge>
+      </BadgeComponent>
     );
   };
 
@@ -152,7 +153,7 @@ export default function RecentOrders({
           <div className="flex items-center space-x-2">
             {orders.length > limit && (
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400"
                 onClick={() => setExpanded(!expanded)}
@@ -172,7 +173,7 @@ export default function RecentOrders({
             )}
             {showViewAll && (
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 className="text-primary-600 hover:text-primary-700 dark:text-primary-400"
                 onClick={handleViewAll}
@@ -254,7 +255,7 @@ export default function RecentOrders({
                     </span>
                   </div>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     className="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex-shrink-0"
                     aria-label="Voir la commande"

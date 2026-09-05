@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { StatsCard } from "./StatsCard";
+import StatsCard from "./StatsCard";
 import {
   ShoppingBag,
   Users,
@@ -9,13 +9,8 @@ import {
   Package,
   Truck,
   MessageCircle,
-  TrendingUp,
   Clock,
   Star,
-  CreditCard,
-  BarChart3,
-  AlertCircle,
-  CheckCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
