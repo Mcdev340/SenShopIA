@@ -8,10 +8,10 @@ import React, {
   useRef,
 } from "react";
 import { cn } from "@/lib/utils";
-import { FormError } from "./FormError";
-import { FormHelper } from "./FormHelper";
-import { FormLabel } from "./FormLabel";
-import { FormSuccess } from "./FormSuccess";
+import FormError from "./FormError";
+import FormHelper from "./FormHelper";
+import FormLabel from "./FormLabel";
+import FormSuccess from "./FormSuccess";
 import { useFormContext } from "./Form";
 
 // ============ TYPES ============

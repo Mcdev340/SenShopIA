@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
 import { AlertCircle, XCircle } from "lucide-react";
 import { useFormField } from "./FormField";
@@ -30,8 +30,6 @@ export default function FormError({
   ...props
 }: FormErrorProps) {
   const context = useFormField();
-  const [isVisible, setIsVisible] = useState(false);
-
   // Ne pas afficher si pas d'erreur
   if (!children) {
     return null;
@@ -39,14 +37,6 @@ export default function FormError({
 
   // Ne pas afficher si le champ n'est pas touché (sauf erreur de validation)
   const shouldShow = context.isTouched && context.hasError;
-
-  useEffect(() => {
-    if (shouldShow) {
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-    }
-  }, [shouldShow]);
 
   if (!shouldShow) {
     return null;

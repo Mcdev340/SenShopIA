@@ -228,7 +228,7 @@ export default function Form({
   );
 
   const validateField = useCallback(
-    (name: string) => {
+    (_name: string) => {
       if (onValidate) {
         const valid = onValidate();
         setInternalIsValid(valid);
