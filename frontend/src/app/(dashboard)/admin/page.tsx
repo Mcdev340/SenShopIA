@@ -1,41 +1,30 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { 
-  ShoppingBag, 
-  Users, 
-  Package, 
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  ArrowRight,
-  Loader2,
-} from 'lucide-react';
-import { useAuth, useOrders, useProducts, useUI } from '@/hooks';
-import { StatsGrid, useDefaultStats } from '@/components/dashboard/StatsGrid';
-import { ChartCard, useDefaultChartData } from '@/components/dashboard/ChartCard';
-import { RecentOrders, useDefaultOrders } from '@/components/dashboard/RecentOrders';
-import { QuickActions, useQuickActions } from '@/components/dashboard/QuickActions';
-import { RecentActivity, useDefaultActivities } from '@/components/dashboard/RecentActivity';
-import { Button } from '@/components/ui/Button';
-import { Card, CardBody } from '@/components/ui/Card';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ShoppingBag, Users, Package, DollarSign } from "lucide-react";
+import { useOrders, useProducts } from "@/hooks";
+import StatsGrid from "@/components/dashboard/StatsGrid";
+import { useDefaultChartData } from "@/components/dashboard/ChartCard";
+import ChartCard from "@/components/dashboard/ChartCard";
+import { useDefaultOrders } from "@/components/dashboard/RecentOrders";
+import RecentOrders from "@/components/dashboard/RecentOrders";
+import { useQuickActions } from "@/components/dashboard/QuickActions";
+import QuickActions from "@/components/dashboard/QuickActions";
+import { useDefaultActivities } from "@/components/dashboard/RecentActivity";
+import RecentActivity from "@/components/dashboard/RecentActivity";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { user } = useAuth();
-  const { orders, loadOrders, loading: ordersLoading } = useOrders();
-  const { products, loadProducts, loading: productsLoading } = useProducts();
-  const { success } = useUI();
+  const { orders, loadOrders } = useOrders();
+  const { products, loadProducts } = useProducts();
 
-  const [stats, setStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const defaultStats = useDefaultStats();
   const chartData = useDefaultChartData();
   const defaultOrders = useDefaultOrders();
   const defaultActivities = useDefaultActivities();
-  const quickActions = useQuickActions('admin');
+  const quickActions = useQuickActions("admin");
 
   useEffect(() => {
     const loadData = async () => {
@@ -46,7 +35,7 @@ export default function AdminDashboardPage() {
           loadProducts({ limit: 5 }),
         ]);
       } catch (error) {
-        console.error('Error loading dashboard data:', error);
+        console.error("Error loading dashboard data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -57,41 +46,41 @@ export default function AdminDashboardPage() {
   // Statistiques calculées
   const adminStats = [
     {
-      id: 'orders',
-      title: 'Commandes',
+      id: "orders",
+      title: "Commandes",
       value: orders?.length || 0,
       icon: <ShoppingBag className="w-5 h-5" />,
       trend: 12.5,
-      trendLabel: 'vs mois dernier',
-      color: 'primary' as const,
-      onClick: () => router.push('/dashboard/admin/orders'),
+      trendLabel: "vs mois dernier",
+      color: "primary" as const,
+      onClick: () => router.push("/dashboard/admin/orders"),
     },
     {
-      id: 'revenue',
-      title: 'Revenus',
-      value: '2,450,000 FCFA',
+      id: "revenue",
+      title: "Revenus",
+      value: "2,450,000 FCFA",
       icon: <DollarSign className="w-5 h-5" />,
       trend: 8.2,
-      trendLabel: 'vs mois dernier',
-      color: 'success' as const,
+      trendLabel: "vs mois dernier",
+      color: "success" as const,
     },
     {
-      id: 'users',
-      title: 'Utilisateurs',
-      value: '856',
+      id: "users",
+      title: "Utilisateurs",
+      value: "856",
       icon: <Users className="w-5 h-5" />,
       trend: 5.7,
-      trendLabel: 'vs mois dernier',
-      color: 'info' as const,
+      trendLabel: "vs mois dernier",
+      color: "info" as const,
     },
     {
-      id: 'products',
-      title: 'Produits',
+      id: "products",
+      title: "Produits",
       value: products?.length || 0,
       icon: <Package className="w-5 h-5" />,
       trend: -2.3,
-      trendLabel: 'vs mois dernier',
-      color: 'warning' as const,
+      trendLabel: "vs mois dernier",
+      color: "warning" as const,
     },
   ];
 
@@ -112,11 +101,7 @@ export default function AdminDashboardPage() {
           />
         </div>
         <div>
-          <RecentOrders
-            orders={defaultOrders}
-            loading={isLoading}
-            limit={5}
-          />
+          <RecentOrders orders={defaultOrders} loading={isLoading} limit={5} />
         </div>
       </div>
 

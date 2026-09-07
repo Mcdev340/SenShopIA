@@ -1,37 +1,32 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useOrders } from '@/hooks';
-import { OrderList } from '@/components/orders/OrderList';
-import { Button } from '@/components/ui/Button';
-import { RefreshCw, MapPin, Truck, CheckCircle } from 'lucide-react';
-import { useToast } from '@/hooks';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
-import { Card, CardBody } from '@/components/ui/Card';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useOrders } from "@/hooks";
+import OrderList from "@/components/orders/OrderList";
+import { Button } from "@/components/ui/Button";
+import { RefreshCw } from "lucide-react";
+import { useToast } from "@/hooks";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
+import { OrderStatus } from "@/types/order";
 
 export default function DeliveryOrdersPage() {
   const router = useRouter();
   const { orders, loadOrders, loading, total, page, totalPages } = useOrders();
-  const { success, error: showError } = useToast();
-  const [activeTab, setActiveTab] = useState('pending');
+  const { success } = useToast();
+  const activeTab = OrderStatus.PENDING;
 
   useEffect(() => {
-    loadOrders({ page: 1, limit: 20, status: 'pending' });
+    loadOrders({ page: 1, limit: 20, status: OrderStatus.PENDING });
   }, []);
 
   const handlePageChange = (newPage: number) => {
     loadOrders({ page: newPage, limit: 20, status: activeTab });
   };
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    loadOrders({ page: 1, limit: 20, status: tab });
-  };
-
   const handleRefresh = () => {
     loadOrders({ page: 1, limit: 20, status: activeTab });
-    success('Liste actualisée');
+    success("Liste actualisée");
   };
 
   return (
@@ -45,11 +40,7 @@ export default function DeliveryOrdersPage() {
             Gérez toutes vos livraisons
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefresh}
-        >
+        <Button variant="outline" size="sm" onClick={handleRefresh}>
           <RefreshCw className="w-4 h-4 mr-2" />
           Actualiser
         </Button>
@@ -74,7 +65,9 @@ export default function DeliveryOrdersPage() {
             showFilters={false}
             showSearch={false}
             showPagination={true}
-            onOrderClick={(order) => router.push(`/dashboard/delivery/orders/${order.id}`)}
+            onOrderClick={(order) =>
+              router.push(`/dashboard/delivery/orders/${order.id}`)
+            }
           />
         </TabsContent>
 
@@ -90,7 +83,9 @@ export default function DeliveryOrdersPage() {
             showFilters={false}
             showSearch={false}
             showPagination={true}
-            onOrderClick={(order) => router.push(`/dashboard/delivery/orders/${order.id}`)}
+            onOrderClick={(order) =>
+              router.push(`/dashboard/delivery/orders/${order.id}`)
+            }
           />
         </TabsContent>
 
@@ -106,7 +101,9 @@ export default function DeliveryOrdersPage() {
             showFilters={false}
             showSearch={false}
             showPagination={true}
-            onOrderClick={(order) => router.push(`/dashboard/delivery/orders/${order.id}`)}
+            onOrderClick={(order) =>
+              router.push(`/dashboard/delivery/orders/${order.id}`)
+            }
           />
         </TabsContent>
       </Tabs>

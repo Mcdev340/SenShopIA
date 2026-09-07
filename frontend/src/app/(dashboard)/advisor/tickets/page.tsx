@@ -1,41 +1,49 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Card, CardBody } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Pagination } from '@/components/ui/Pagination';
-import { Spinner } from '@/components/ui/Spinner';
-import { Search, Filter, Plus, RefreshCw, MessageCircle, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-import { useToast } from '@/hooks';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Card, CardBody } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Pagination } from "@/components/ui/Pagination";
+import { Spinner } from "@/components/ui/Spinner";
+import {
+  Search,
+  Plus,
+  RefreshCw,
+  MessageCircle,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { useToast } from "@/hooks";
 
 const statusOptions = [
-  { value: '', label: 'Tous les statuts' },
-  { value: 'open', label: 'Ouvert' },
-  { value: 'in_progress', label: 'En cours' },
-  { value: 'resolved', label: 'Résolu' },
-  { value: 'closed', label: 'Fermé' },
+  { value: "", label: "Tous les statuts" },
+  { value: "open", label: "Ouvert" },
+  { value: "in_progress", label: "En cours" },
+  { value: "resolved", label: "Résolu" },
+  { value: "closed", label: "Fermé" },
 ];
 
 const priorityOptions = [
-  { value: '', label: 'Toutes les priorités' },
-  { value: 'low', label: 'Basse' },
-  { value: 'medium', label: 'Moyenne' },
-  { value: 'high', label: 'Élevée' },
-  { value: 'urgent', label: 'Urgente' },
+  { value: "", label: "Toutes les priorités" },
+  { value: "low", label: "Basse" },
+  { value: "medium", label: "Moyenne" },
+  { value: "high", label: "Élevée" },
+  { value: "urgent", label: "Urgente" },
 ];
 
 export default function AdvisorTicketsPage() {
   const router = useRouter();
-  const { success, error: showError } = useToast();
+  const { error: showError } = useToast();
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState('');
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -49,48 +57,91 @@ export default function AdvisorTicketsPage() {
     try {
       // Simulation - à remplacer par un vrai appel API
       const mockTickets = [
-        { id: '1', customer: 'Jean Dupont', subject: 'Problème de paiement', status: 'open', priority: 'high', createdAt: new Date() },
-        { id: '2', customer: 'Marie Diop', subject: 'Question sur une commande', status: 'in_progress', priority: 'medium', createdAt: new Date() },
-        { id: '3', customer: 'Oumar Fall', subject: 'Demande de retour', status: 'resolved', priority: 'low', createdAt: new Date() },
-        { id: '4', customer: 'Aminata Sow', subject: 'Problème technique', status: 'open', priority: 'urgent', createdAt: new Date() },
-        { id: '5', customer: 'Moussa Kane', subject: 'Information produit', status: 'closed', priority: 'low', createdAt: new Date() },
+        {
+          id: "1",
+          customer: "Jean Dupont",
+          subject: "Problème de paiement",
+          status: "open",
+          priority: "high",
+          createdAt: new Date(),
+        },
+        {
+          id: "2",
+          customer: "Marie Diop",
+          subject: "Question sur une commande",
+          status: "in_progress",
+          priority: "medium",
+          createdAt: new Date(),
+        },
+        {
+          id: "3",
+          customer: "Oumar Fall",
+          subject: "Demande de retour",
+          status: "resolved",
+          priority: "low",
+          createdAt: new Date(),
+        },
+        {
+          id: "4",
+          customer: "Aminata Sow",
+          subject: "Problème technique",
+          status: "open",
+          priority: "urgent",
+          createdAt: new Date(),
+        },
+        {
+          id: "5",
+          customer: "Moussa Kane",
+          subject: "Information produit",
+          status: "closed",
+          priority: "low",
+          createdAt: new Date(),
+        },
       ];
       setTickets(mockTickets);
       setTotal(mockTickets.length);
       setTotalPages(Math.ceil(mockTickets.length / 10));
     } catch (error) {
-      showError('Erreur de chargement des tickets');
+      showError("Erreur de chargement des tickets");
     } finally {
       setLoading(false);
     }
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'warning' | 'info' | 'success' | 'secondary'> = {
-      open: 'danger',
-      in_progress: 'info',
-      resolved: 'success',
-      closed: 'secondary',
+    const variants: Record<
+      string,
+      "default" | "warning" | "info" | "success" | "secondary" | "danger"
+    > = {
+      open: "danger",
+      in_progress: "info",
+      resolved: "success",
+      closed: "secondary",
     };
-    return <Badge variant={variants[status] || 'default'}>{status}</Badge>;
+    return <Badge variant={variants[status] || "default"}>{status}</Badge>;
   };
 
   const getPriorityBadge = (priority: string) => {
-    const variants: Record<string, 'default' | 'danger' | 'warning' | 'info'> = {
-      low: 'default',
-      medium: 'warning',
-      high: 'danger',
-      urgent: 'danger',
-    };
-    return <Badge variant={variants[priority] || 'default'}>{priority}</Badge>;
+    const variants: Record<string, "default" | "danger" | "warning" | "info"> =
+      {
+        low: "default",
+        medium: "warning",
+        high: "danger",
+        urgent: "danger",
+      };
+    return <Badge variant={variants[priority] || "default"}>{priority}</Badge>;
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'open': return <AlertCircle className="w-4 h-4" />;
-      case 'in_progress': return <Clock className="w-4 h-4" />;
-      case 'resolved': return <CheckCircle className="w-4 h-4" />;
-      default: return <MessageCircle className="w-4 h-4" />;
+      case "open":
+        return <AlertCircle className="w-4 h-4" />;
+      case "in_progress":
+        return <Clock className="w-4 h-4" />;
+      case "resolved":
+        return <CheckCircle className="w-4 h-4" />;
+      default:
+        return <MessageCircle className="w-4 h-4" />;
     }
   };
 
@@ -107,17 +158,13 @@ export default function AdvisorTicketsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={loadTickets}
-          >
+          <Button variant="outline" size="sm" onClick={loadTickets}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Actualiser
           </Button>
           <Button
             size="sm"
-            onClick={() => router.push('/dashboard/advisor/tickets/new')}
+            onClick={() => router.push("/dashboard/advisor/tickets/new")}
           >
             <Plus className="w-4 h-4 mr-2" />
             Nouveau ticket
@@ -167,7 +214,9 @@ export default function AdvisorTicketsPage() {
                 <div
                   key={ticket.id}
                   className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/dashboard/advisor/tickets/${ticket.id}`)}
+                  onClick={() =>
+                    router.push(`/dashboard/advisor/tickets/${ticket.id}`)
+                  }
                 >
                   <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
@@ -183,7 +232,11 @@ export default function AdvisorTicketsPage() {
                       <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                         <span>{ticket.customer}</span>
                         <span>•</span>
-                        <span>{new Date(ticket.createdAt).toLocaleDateString('fr-FR')}</span>
+                        <span>
+                          {new Date(ticket.createdAt).toLocaleDateString(
+                            "fr-FR",
+                          )}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -201,7 +254,7 @@ export default function AdvisorTicketsPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {total} ticket{total > 1 ? 's' : ''}
+            {total} ticket{total > 1 ? "s" : ""}
           </p>
           <Pagination
             currentPage={page}

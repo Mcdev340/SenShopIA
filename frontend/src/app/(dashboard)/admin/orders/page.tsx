@@ -1,20 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useOrders } from '@/hooks';
-import { OrderList } from '@/components/orders/OrderList';
-import { Button } from '@/components/ui/Button';
-import { Plus, FileDown, RefreshCw } from 'lucide-react';
-import { useToast } from '@/hooks';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useOrders } from "@/hooks";
+import OrderList from "@/components/orders/OrderList";
+import { Button } from "@/components/ui/Button";
+import { Plus, FileDown, RefreshCw } from "lucide-react";
+import { useToast } from "@/hooks";
+import type { Order } from "@/types/order";
 
 export default function AdminOrdersPage() {
   const router = useRouter();
   const { orders, loadOrders, loading, total, page, totalPages } = useOrders();
-  const { success, error: showError } = useToast();
-
-  const [filters, setFilters] = useState({});
-  const [searchQuery, setSearchQuery] = useState('');
+  const { success } = useToast();
 
   useEffect(() => {
     loadOrders({ page: 1, limit: 20 });
@@ -25,23 +23,21 @@ export default function AdminOrdersPage() {
   };
 
   const handleFilterChange = (newFilters: any) => {
-    setFilters(newFilters);
     loadOrders({ ...newFilters, page: 1, limit: 20 });
   };
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
     loadOrders({ search: query, page: 1, limit: 20 });
   };
 
   const handleRefresh = () => {
     loadOrders({ page: 1, limit: 20 });
-    success('Commandes actualisées');
+    success("Commandes actualisées");
   };
 
   const handleExport = () => {
     // Logique d'export
-    success('Export en cours...');
+    success("Export en cours...");
   };
 
   return (
@@ -57,25 +53,17 @@ export default function AdminOrdersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-          >
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Actualiser
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExport}
-          >
+          <Button variant="outline" size="sm" onClick={handleExport}>
             <FileDown className="w-4 h-4 mr-2" />
             Exporter
           </Button>
           <Button
             size="sm"
-            onClick={() => router.push('/dashboard/admin/orders/new')}
+            onClick={() => router.push("/dashboard/admin/orders/new")}
           >
             <Plus className="w-4 h-4 mr-2" />
             Nouvelle commande
@@ -93,7 +81,9 @@ export default function AdminOrdersPage() {
         onPageChange={handlePageChange}
         onFilterChange={handleFilterChange}
         onSearch={handleSearch}
-        onOrderClick={(order) => router.push(`/dashboard/admin/orders/${order.id}`)}
+        onOrderClick={(order: Order) =>
+          router.push(`/dashboard/admin/orders/${order.id}`)
+        }
         variant="default"
         showFilters={true}
         showSearch={true}

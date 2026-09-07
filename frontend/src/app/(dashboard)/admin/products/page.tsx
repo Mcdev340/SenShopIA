@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useProducts } from '@/hooks';
-import { ProductList } from '@/components/products/ProductList';
-import { Button } from '@/components/ui/Button';
-import { Plus, FileDown, RefreshCw } from 'lucide-react';
-import { useToast } from '@/hooks';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useProducts } from "@/hooks";
+import ProductList from "@/components/products/ProductList";
+import { Button } from "@/components/ui/Button";
+import { Plus, FileDown, RefreshCw } from "lucide-react";
+import { useToast } from "@/hooks";
 
 export default function AdminProductsPage() {
   const router = useRouter();
-  const { products, loadProducts, loading, total, page, totalPages } = useProducts();
+  const { products, loadProducts, loading, total, page, totalPages } =
+    useProducts();
   const { success } = useToast();
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export default function AdminProductsPage() {
 
   const handleRefresh = () => {
     loadProducts({ page: 1, limit: 20 });
-    success('Produits actualisés');
+    success("Produits actualisés");
   };
 
   return (
@@ -42,24 +43,17 @@ export default function AdminProductsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-          >
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Actualiser
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-          >
+          <Button variant="outline" size="sm">
             <FileDown className="w-4 h-4 mr-2" />
             Exporter
           </Button>
           <Button
             size="sm"
-            onClick={() => router.push('/dashboard/admin/products/new')}
+            onClick={() => router.push("/dashboard/admin/products/new")}
           >
             <Plus className="w-4 h-4 mr-2" />
             Ajouter un produit

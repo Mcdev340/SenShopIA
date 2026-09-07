@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useOrders, useToast } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Card, CardBody, CardHeader } from '@/components/ui/Card';
-import { Spinner } from '@/components/ui/Spinner';
-import { OrderStatus } from '@/components/orders/OrderStatus';
-import { OrderTracking } from '@/components/orders/OrderTracking';
-import { 
-  ArrowLeft, 
-  Truck, 
-  CheckCircle, 
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useOrders, useToast } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Spinner } from "@/components/ui/Spinner";
+import OrderStatus from "@/components/orders/OrderStatus";
+import OrderTracking from "@/components/orders/OrderTracking";
+import {
+  ArrowLeft,
+  Truck,
+  CheckCircle,
   XCircle,
   Loader2,
   MapPin,
@@ -19,15 +19,15 @@ import {
   Mail,
   User,
   Clock,
-} from 'lucide-react';
-import { formatDate, formatPrice } from '@/lib/utils';
+} from "lucide-react";
+import { formatDate, formatPrice } from "@/lib/utils";
 
 export default function DeliveryOrderDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { getOrder, updateOrderStatus, loading } = useOrders();
+  const { getOrder, updateOrderStatus } = useOrders();
   const { success, error: showError } = useToast();
-  
+
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -46,7 +46,7 @@ export default function DeliveryOrderDetailPage() {
       const data = await getOrder(orderId);
       setOrder(data);
     } catch (error) {
-      showError('Erreur de chargement de la commande');
+      showError("Erreur de chargement de la commande");
     } finally {
       setIsLoading(false);
     }
@@ -56,10 +56,10 @@ export default function DeliveryOrderDetailPage() {
     setIsUpdating(true);
     try {
       await updateOrderStatus(orderId, newStatus as any);
-      success('Statut mis à jour');
+      success("Statut mis à jour");
       await loadOrder();
     } catch (error) {
-      showError('Erreur de mise à jour du statut');
+      showError("Erreur de mise à jour du statut");
     } finally {
       setIsUpdating(false);
     }
@@ -98,7 +98,7 @@ export default function DeliveryOrderDetailPage() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Livraison #{order.id?.slice(-8) || 'N/A'}
+              Livraison #{order.id?.slice(-8) || "N/A"}
             </h1>
             <div className="flex items-center gap-2">
               <OrderStatus status={order.status} size="sm" />
@@ -109,29 +109,37 @@ export default function DeliveryOrderDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {order.status === 'pending' && (
+          {order.status === "pending" && (
             <Button
-              onClick={() => handleStatusUpdate('in_progress')}
+              onClick={() => handleStatusUpdate("in_progress")}
               disabled={isUpdating}
             >
-              {isUpdating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Truck className="w-4 h-4 mr-2" />}
+              {isUpdating ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Truck className="w-4 h-4 mr-2" />
+              )}
               Démarrer la livraison
             </Button>
           )}
-          {order.status === 'in_progress' && (
+          {order.status === "in_progress" && (
             <Button
               variant="success"
-              onClick={() => handleStatusUpdate('delivered')}
+              onClick={() => handleStatusUpdate("delivered")}
               disabled={isUpdating}
             >
-              {isUpdating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+              {isUpdating ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <CheckCircle className="w-4 h-4 mr-2" />
+              )}
               Marquer comme livrée
             </Button>
           )}
-          {order.status === 'pending' && (
+          {order.status === "pending" && (
             <Button
               variant="danger"
-              onClick={() => handleStatusUpdate('cancelled')}
+              onClick={() => handleStatusUpdate("cancelled")}
               disabled={isUpdating}
             >
               <XCircle className="w-4 h-4 mr-2" />
@@ -154,19 +162,19 @@ export default function DeliveryOrderDetailPage() {
               <div className="flex items-center space-x-2">
                 <User className="w-4 h-4 text-gray-400" />
                 <span className="text-gray-700 dark:text-gray-300">
-                  {order.user?.username || 'Client'}
+                  {order.user?.username || "Client"}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-gray-400" />
                 <span className="text-gray-700 dark:text-gray-300">
-                  {order.user?.email || 'N/A'}
+                  {order.user?.email || "N/A"}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-gray-400" />
                 <span className="text-gray-700 dark:text-gray-300">
-                  {order.user?.phone || 'N/A'}
+                  {order.user?.phone || "N/A"}
                 </span>
               </div>
             </div>
@@ -175,7 +183,10 @@ export default function DeliveryOrderDetailPage() {
                 <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
                 <div className="text-gray-700 dark:text-gray-300">
                   <p>{order.shippingAddress?.street}</p>
-                  <p>{order.shippingAddress?.postalCode} {order.shippingAddress?.city}</p>
+                  <p>
+                    {order.shippingAddress?.postalCode}{" "}
+                    {order.shippingAddress?.city}
+                  </p>
                   <p>{order.shippingAddress?.country}</p>
                 </div>
               </div>
@@ -212,10 +223,13 @@ export default function DeliveryOrderDetailPage() {
         </CardHeader>
         <CardBody className="space-y-3">
           {order.items?.map((item: any, index: number) => (
-            <div key={index} className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0">
+            <div
+              key={index}
+              className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0"
+            >
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">
-                  {item.product?.name || 'Produit'}
+                  {item.product?.name || "Produit"}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   x{item.quantity}
