@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { RegisterForm } from '@/components/auth/RegisterForm';
+import RegisterForm  from '@/components/auth/RegisterForm';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 
 export const metadata: Metadata = {

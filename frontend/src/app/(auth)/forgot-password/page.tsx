@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Mail, ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
-import { useAuth } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card, CardBody, CardHeader, CardFooter } from '@/components/ui/Card';
-import { AuthLayout } from '@/components/layout/AuthLayout';
-import { useToast } from '@/hooks';
-import { PasswordResetRequestSchema } from '@/lib/validators';
+import { useState } from "react";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Mail, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
+import { useAuth } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Card, CardBody, CardHeader, CardFooter } from "@/components/ui/Card";
+import AuthLayout from "@/components/layout/AuthLayout";
+import { useToast } from "@/hooks";
+import { PasswordResetRequestSchema } from "@/lib/validators";
 
 type ForgotPasswordFormData = z.infer<typeof PasswordResetRequestSchema>;
 
@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
   } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(PasswordResetRequestSchema),
     defaultValues: {
-      email: '',
+      email: "",
     },
   });
 
@@ -39,10 +39,11 @@ export default function ForgotPasswordPage() {
     try {
       await requestPasswordReset(data.email);
       setIsSuccess(true);
-      success('Email de réinitialisation envoyé !');
+      success("Email de réinitialisation envoyé !");
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Une erreur est survenue';
-      setError('root', { message });
+      const message =
+        error instanceof Error ? error.message : "Une erreur est survenue";
+      setError("root", { message });
       showError(message);
     } finally {
       setIsLoading(false);
@@ -63,7 +64,8 @@ export default function ForgotPasswordPage() {
             Mot de passe oublié
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+            Entrez votre adresse email et nous vous enverrons un lien pour
+            réinitialiser votre mot de passe.
           </p>
         </CardHeader>
 
@@ -77,7 +79,8 @@ export default function ForgotPasswordPage() {
                 Email envoyé !
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Nous vous avons envoyé un email avec les instructions pour réinitialiser votre mot de passe.
+                Nous vous avons envoyé un email avec les instructions pour
+                réinitialiser votre mot de passe.
               </p>
               <Link href="/login">
                 <Button variant="outline" className="mt-4">
@@ -104,7 +107,7 @@ export default function ForgotPasswordPage() {
                     placeholder="vous@exemple.com"
                     className="pl-10"
                     error={errors.email?.message}
-                    {...register('email')}
+                    {...register("email")}
                     disabled={isLoading}
                   />
                 </div>
@@ -127,7 +130,7 @@ export default function ForgotPasswordPage() {
                     Envoi en cours...
                   </>
                 ) : (
-                  'Envoyer le lien'
+                  "Envoyer le lien"
                 )}
               </Button>
             </form>

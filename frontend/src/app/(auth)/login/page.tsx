@@ -1,15 +1,9 @@
-'use client';
+"use client";
 
-import { Suspense } from 'react';
-import { Metadata } from 'next';
-import LoginForm  from '@/components/auth/LoginForm';
-import { AuthLayout } from '@/components/layout/AuthLayout';
-import { Spinner } from '@/components/ui/Spinner';
-
-export const metadata: Metadata = {
-  title: 'Connexion | ShopSense AI',
-  description: 'Connectez-vous à votre compte ShopSense AI pour accéder à vos commandes et fonctionnalités.',
-};
+import { Suspense } from "react";
+import LoginForm from "@/components/auth/LoginForm";
+import AuthLayout from "@/components/layout/AuthLayout";
+import Spinner from "@/components/ui/Spinner";
 
 export default function LoginPage() {
   return (

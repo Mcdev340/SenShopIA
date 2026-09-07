@@ -1,34 +1,35 @@
-'use client';
+"use client";
 
-import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Loader2, CheckCircle, AlertCircle, Mail } from 'lucide-react';
-import { useAuth } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Card, CardBody, CardHeader, CardFooter } from '@/components/ui/Card';
-import { AuthLayout } from '@/components/layout/AuthLayout';
-import { useToast } from '@/hooks';
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { Loader2, CheckCircle, AlertCircle, Mail } from "lucide-react";
+import { useAuth } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Card, CardBody, CardHeader, CardFooter } from "@/components/ui/Card";
+import AuthLayout from "@/components/layout/AuthLayout";
+import { useToast } from "@/hooks";
 
-type VerificationStatus = 'loading' | 'success' | 'error' | 'expired' | 'already_verified';
+type VerificationStatus =
+  "loading" | "success" | "error" | "expired" | "already_verified";
 
 function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { verifyEmail, resendVerificationEmail, user } = useAuth();
   const { success, error: showError } = useToast();
-  
-  const [status, setStatus] = useState<VerificationStatus>('loading');
-  const [message, setMessage] = useState<string>('');
+
+  const [status, setStatus] = useState<VerificationStatus>("loading");
+  const [message, setMessage] = useState<string>("");
   const [isResending, setIsResending] = useState(false);
 
-  const token = searchParams?.get('token') || '';
-  const email = searchParams?.get('email') || user?.email || '';
+  const token = searchParams?.get("token") || "";
+  const email = searchParams?.get("email") || user?.email || "";
 
   useEffect(() => {
     if (!token) {
-      setStatus('error');
-      setMessage('Aucun token de vérification trouvé');
+      setStatus("error");
+      setMessage("Aucun token de vérification trouvé");
       return;
     }
 
@@ -36,27 +37,33 @@ function VerifyEmailContent() {
       try {
         const result = await verifyEmail(token);
         if (result) {
-          setStatus('success');
-          setMessage('Votre email a été vérifié avec succès !');
-          success('Email vérifié avec succès !');
+          setStatus("success");
+          setMessage("Votre email a été vérifié avec succès !");
+          success("Email vérifié avec succès !");
           setTimeout(() => {
-            router.push('/login');
+            router.push("/login");
           }, 3000);
         } else {
-          setStatus('error');
-          setMessage('Erreur lors de la vérification de l\'email');
-          showError('Erreur lors de la vérification de l\'email');
+          setStatus("error");
+          setMessage("Erreur lors de la vérification de l'email");
+          showError("Erreur lors de la vérification de l'email");
         }
       } catch (error: any) {
-        const errorMessage = error?.message || 'Une erreur est survenue';
-        if (errorMessage.includes('expiré') || errorMessage.includes('expired')) {
-          setStatus('expired');
-          setMessage('Le lien de vérification a expiré');
-        } else if (errorMessage.includes('déjà vérifié') || errorMessage.includes('already verified')) {
-          setStatus('already_verified');
-          setMessage('Votre email est déjà vérifié');
+        const errorMessage = error?.message || "Une erreur est survenue";
+        if (
+          errorMessage.includes("expiré") ||
+          errorMessage.includes("expired")
+        ) {
+          setStatus("expired");
+          setMessage("Le lien de vérification a expiré");
+        } else if (
+          errorMessage.includes("déjà vérifié") ||
+          errorMessage.includes("already verified")
+        ) {
+          setStatus("already_verified");
+          setMessage("Votre email est déjà vérifié");
         } else {
-          setStatus('error');
+          setStatus("error");
           setMessage(errorMessage);
         }
         showError(errorMessage);
@@ -68,18 +75,18 @@ function VerifyEmailContent() {
 
   const handleResend = async () => {
     if (!email) {
-      showError('Aucune adresse email disponible');
+      showError("Aucune adresse email disponible");
       return;
     }
 
     setIsResending(true);
     try {
       await resendVerificationEmail(email);
-      success('Un nouvel email de vérification a été envoyé');
-      setStatus('loading');
-      setMessage('Email de vérification envoyé');
+      success("Un nouvel email de vérification a été envoyé");
+      setStatus("loading");
+      setMessage("Email de vérification envoyé");
     } catch (error: any) {
-      showError(error?.message || 'Erreur lors de l\'envoi');
+      showError(error?.message || "Erreur lors de l'envoi");
     } finally {
       setIsResending(false);
     }
@@ -87,7 +94,7 @@ function VerifyEmailContent() {
 
   const renderContent = () => {
     switch (status) {
-      case 'loading':
+      case "loading":
         return (
           <div className="text-center py-8 space-y-4">
             <div className="flex justify-center">
@@ -102,7 +109,7 @@ function VerifyEmailContent() {
           </div>
         );
 
-      case 'success':
+      case "success":
         return (
           <div className="text-center py-8 space-y-4">
             <div className="flex justify-center">
@@ -123,7 +130,7 @@ function VerifyEmailContent() {
           </div>
         );
 
-      case 'already_verified':
+      case "already_verified":
         return (
           <div className="text-center py-8 space-y-4">
             <div className="flex justify-center">
@@ -141,7 +148,7 @@ function VerifyEmailContent() {
           </div>
         );
 
-      case 'expired':
+      case "expired":
         return (
           <div className="text-center py-8 space-y-4">
             <div className="flex justify-center">
@@ -159,14 +166,14 @@ function VerifyEmailContent() {
                     Envoi en cours...
                   </>
                 ) : (
-                  'Renvoyer un email de vérification'
+                  "Renvoyer un email de vérification"
                 )}
               </Button>
             </div>
           </div>
         );
 
-      case 'error':
+      case "error":
         return (
           <div className="text-center py-8 space-y-4">
             <div className="flex justify-center">
@@ -184,7 +191,7 @@ function VerifyEmailContent() {
                     Envoi en cours...
                   </>
                 ) : (
-                  'Renvoyer un email de vérification'
+                  "Renvoyer un email de vérification"
                 )}
               </Button>
               <Link href="/contact">
@@ -210,7 +217,7 @@ function VerifyEmailContent() {
         </h1>
       </CardHeader>
       <CardBody>{renderContent()}</CardBody>
-      {status !== 'success' && status !== 'already_verified' && (
+      {status !== "success" && status !== "already_verified" && (
         <CardFooter className="justify-center border-t border-gray-200 dark:border-gray-800">
           <Link
             href="/login"
@@ -230,7 +237,13 @@ export default function VerifyEmailPage() {
       title="Vérification de l'email"
       subtitle="Confirmez votre adresse email"
     >
-      <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-primary-600" /></div>}>
+      <Suspense
+        fallback={
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+          </div>
+        }
+      >
         <VerifyEmailContent />
       </Suspense>
     </AuthLayout>

@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm';
-import { AuthLayout } from '@/components/layout/AuthLayout';
-import { Spinner } from '@/components/ui/Spinner';
-import { AlertCircle } from 'lucide-react';
-import { Card, CardBody } from '@/components/ui/Card';
-import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
+import AuthLayout from "@/components/layout/AuthLayout";
+import Spinner from "@/components/ui/Spinner";
+import { AlertCircle } from "lucide-react";
+import { Card, CardBody } from "@/components/ui/Card";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
-  const uid = searchParams?.get('uid') || '';
-  const token = searchParams?.get('token') || '';
+  const uid = searchParams?.get("uid") || "";
+  const token = searchParams?.get("token") || "";
 
   if (!uid || !token) {
     return (
@@ -29,9 +29,7 @@ function ResetPasswordContent() {
             Ce lien de réinitialisation est invalide ou a expiré.
           </p>
           <Link href="/forgot-password">
-            <Button className="mt-4">
-              Demander un nouveau lien
-            </Button>
+            <Button className="mt-4">Demander un nouveau lien</Button>
           </Link>
         </CardBody>
       </Card>
