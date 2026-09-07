@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useCart, useAuth } from '@/hooks';
-import { CheckoutForm } from '@/components/checkout/CheckoutForm';
-import { Spinner } from '@/components/ui/Spinner';
-import { Alert } from '@/components/ui/Alert';
-import { Button } from '@/components/ui/Button';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useCart, useAuth } from "@/hooks";
+import CheckoutForm from "@/components/checkout/CheckoutForm";
+import { Spinner } from "@/components/ui/Spinner";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, loading, total } = useCart();
+  const { items, loading } = useCart();
   const { isAuthenticated, loading: authLoading } = useAuth();
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.push('/login?redirect=/checkout');
+      router.push("/login?redirect=/checkout");
     }
   }, [authLoading, isAuthenticated, router]);
 
   useEffect(() => {
     if (!loading && items.length === 0) {
-      router.push('/cart');
+      router.push("/cart");
     }
   }, [loading, items, router]);
 
@@ -42,7 +42,7 @@ export default function CheckoutPage() {
       <div className="max-w-4xl mx-auto">
         <Alert variant="warning" title="Panier vide">
           Votre panier est vide. Ajoutez des produits avant de passer commande.
-          <Button className="mt-4" onClick={() => router.push('/products')}>
+          <Button className="mt-4" onClick={() => router.push("/products")}>
             Voir les produits
           </Button>
         </Alert>
@@ -62,11 +62,11 @@ export default function CheckoutPage() {
       </div>
 
       <CheckoutForm
-        onSuccess={(orderId) => {
+        onSuccess={(orderId: string) => {
           router.push(`/orders/${orderId}`);
         }}
-        onError={(error) => {
-          console.error('Erreur de paiement:', error);
+        onError={(error: string) => {
+          console.error("Erreur de paiement:", error);
         }}
       />
     </div>

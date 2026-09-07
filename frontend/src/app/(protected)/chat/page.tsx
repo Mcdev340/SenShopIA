@@ -1,10 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { ChatInterface } from '@/components/chat/ChatInterface';
-import { useAuth } from '@/hooks';
-import { Spinner } from '@/components/ui/Spinner';
-import { Card } from '@/components/ui/Card';
+import ChatInterface from "@/components/chat/ChatInterface";
+import { useAuth } from "@/hooks";
+import { Spinner } from "@/components/ui/Spinner";
+import { Card } from "@/components/ui/Card";
 
 export default function ChatPage() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -28,13 +27,14 @@ export default function ChatPage() {
           Assistant ShopSense AI
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Posez vos questions, obtenez des recommandations et suivez vos commandes
+          Posez vos questions, obtenez des recommandations et suivez vos
+          commandes
         </p>
       </div>
 
       <Card className="overflow-hidden">
         <ChatInterface
-          title={`Assistant ${user?.firstName || ''}`}
+          title={`Assistant ${user?.firstName || ""}`}
           welcomeMessage="Bonjour ! Je suis votre assistant intelligent. Comment puis-je vous aider aujourd'hui ?"
           maxHeight="600px"
         />

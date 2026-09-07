@@ -1,25 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Heart, ShoppingCart, Trash2, Loader2, Star } from 'lucide-react';
-import { useCart, useProducts, useToast } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { EmptyState } from '@/components/shared/EmptyState';
-import { formatPrice } from '@/lib/utils';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Heart, ShoppingCart, Trash2, Loader2, Star } from "lucide-react";
+import { useCart, useToast } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import EmptyState from "@/components/shared/EmptyState";
+import { formatPrice } from "@/lib/utils";
 
 export default function WishlistPage() {
-  const router = useRouter();
-  const { addToCart } = useCart();
-  const { getWishlist, removeFromWishlist } = useProducts();
+  const { addItem, getWishlist, removeFromWishlist } = useCart();
   const { success, error: showError } = useToast();
 
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAddingToCart, setIsAddingToCart] = useState<Record<string, boolean>>({});
+  const [isAddingToCart, setIsAddingToCart] = useState<Record<string, boolean>>(
+    {},
+  );
 
   useEffect(() => {
     loadWishlist();
@@ -31,7 +30,7 @@ export default function WishlistPage() {
       const result = await getWishlist();
       setItems(result.items || []);
     } catch (error) {
-      showError('Erreur de chargement de la wishlist');
+      showError("Erreur de chargement de la wishlist");
     } finally {
       setLoading(false);
     }
@@ -40,10 +39,10 @@ export default function WishlistPage() {
   const handleAddToCart = async (productId: string) => {
     setIsAddingToCart({ ...isAddingToCart, [productId]: true });
     try {
-      await addToCart(productId, 1);
-      success('Produit ajouté au panier');
+      await addItem(productId, undefined, 1); // Updated as per the patch
+      success("Produit ajouté au panier");
     } catch (error) {
-      showError('Erreur d\'ajout au panier');
+      showError("Erreur d'ajout au panier");
     } finally {
       setIsAddingToCart({ ...isAddingToCart, [productId]: false });
     }
@@ -52,10 +51,10 @@ export default function WishlistPage() {
   const handleRemove = async (productId: string) => {
     try {
       await removeFromWishlist(productId);
-      success('Retiré de la wishlist');
-      setItems(items.filter(item => item.id !== productId));
+      success("Retiré de la wishlist");
+      setItems(items.filter((item) => item.id !== productId));
     } catch (error) {
-      showError('Erreur de suppression');
+      showError("Erreur de suppression");
     }
   };
 
@@ -86,14 +85,17 @@ export default function WishlistPage() {
           <Heart className="w-6 h-6 mr-2 text-red-500 fill-red-500" />
           Ma wishlist
           <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
-            ({items.length} produit{items.length > 1 ? 's' : ''})
+            ({items.length} produit{items.length > 1 ? "s" : ""})
           </span>
         </h1>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {items.map((item) => (
-          <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-all">
+          <Card
+            key={item.id}
+            className="overflow-hidden hover:shadow-lg transition-all"
+          >
             <div className="relative">
               <Link href={`/products/${item.slug}`}>
                 <div className="relative aspect-square bg-gray-100 dark:bg-gray-800">
