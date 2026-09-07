@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from './Button';
+import React, { useEffect, useRef } from "react";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "./Button";
 
 interface ModalProps {
   isOpen: boolean;
@@ -11,7 +11,7 @@ interface ModalProps {
   title?: string;
   description?: string;
   children: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  size?: "sm" | "md" | "lg" | "xl" | "full";
   showCloseButton?: boolean;
   closeOnOverlayClick?: boolean;
   closeOnEscape?: boolean;
@@ -21,11 +21,11 @@ interface ModalProps {
 }
 
 const sizes = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-  xl: 'max-w-xl',
-  full: 'max-w-4xl',
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-lg",
+  xl: "max-w-xl",
+  full: "max-w-4xl",
 };
 
 export const Modal = ({
@@ -34,7 +34,7 @@ export const Modal = ({
   title,
   description,
   children,
-  size = 'md',
+  size = "md",
   showCloseButton = true,
   closeOnOverlayClick = true,
   closeOnEscape = true,
@@ -46,19 +46,19 @@ export const Modal = ({
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && closeOnEscape && isOpen) {
+      if (e.key === "Escape" && closeOnEscape && isOpen) {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose, closeOnEscape]);
 
@@ -72,36 +72,44 @@ export const Modal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
+      className={cn(
+        "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn",
+        overlayClassName,
+      )}
       onClick={handleOverlayClick}
       role="dialog"
       aria-modal="true"
-      aria-labelledby={title ? 'modal-title' : undefined}
+      aria-labelledby={title ? "modal-title" : undefined}
     >
       <div
         ref={modalRef}
         className={cn(
-          'relative w-full bg-white dark:bg-gray-900 rounded-xl shadow-xl max-h-[90vh] overflow-y-auto',
+          "relative w-full bg-white dark:bg-gray-900 rounded-xl shadow-xl max-h-[90vh] overflow-y-auto",
           sizes[size],
-          'animate-slideIn',
-          className
+          "animate-slideIn",
+          className,
         )}
       >
         {(title || showCloseButton) && (
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
             {title && (
               <div>
-                <h2 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h2
+                  id="modal-title"
+                  className="text-lg font-semibold text-gray-900 dark:text-white"
+                >
                   {title}
                 </h2>
                 {description && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {description}
+                  </p>
                 )}
               </div>
             )}
             {showCloseButton && (
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={onClose}
                 className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -112,7 +120,7 @@ export const Modal = ({
             )}
           </div>
         )}
-        <div className={cn('p-4', contentClassName)}>{children}</div>
+        <div className={cn("p-4", contentClassName)}>{children}</div>
       </div>
     </div>
   );

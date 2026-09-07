@@ -1,9 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from './Button';
+import React, { useState, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 interface DropdownItem {
   label: string;
@@ -19,8 +17,8 @@ interface DropdownItem {
 interface DropdownProps {
   trigger: React.ReactNode;
   items: DropdownItem[];
-  align?: 'left' | 'center' | 'right';
-  width?: 'auto' | 'sm' | 'md' | 'lg';
+  align?: "left" | "center" | "right";
+  width?: "auto" | "sm" | "md" | "lg";
   className?: string;
   menuClassName?: string;
   itemClassName?: string;
@@ -31,8 +29,8 @@ interface DropdownProps {
 export const Dropdown = ({
   trigger,
   items,
-  align = 'right',
-  width = 'md',
+  align = "right",
+  width = "md",
   className,
   menuClassName,
   itemClassName,
@@ -43,39 +41,42 @@ export const Dropdown = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const alignClasses = {
-    left: 'left-0',
-    center: 'left-1/2 -translate-x-1/2',
-    right: 'right-0',
+    left: "left-0",
+    center: "left-1/2 -translate-x-1/2",
+    right: "right-0",
   };
 
   const widthClasses = {
-    auto: 'w-auto',
-    sm: 'w-40',
-    md: 'w-48',
-    lg: 'w-56',
+    auto: "w-auto",
+    sm: "w-40",
+    md: "w-48",
+    lg: "w-56",
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
 
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setIsOpen(false);
       }
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleEscape);
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEscape);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, [isOpen]);
 
@@ -90,17 +91,15 @@ export const Dropdown = ({
   };
 
   return (
-    <div ref={dropdownRef} className={cn('relative inline-block', className)}>
-      <div onClick={() => !disabled && setIsOpen(!isOpen)}>
-        {trigger}
-      </div>
+    <div ref={dropdownRef} className={cn("relative inline-block", className)}>
+      <div onClick={() => !disabled && setIsOpen(!isOpen)}>{trigger}</div>
       {isOpen && (
         <div
           className={cn(
-            'absolute z-50 mt-2 rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 shadow-lg py-1',
+            "absolute z-50 mt-2 rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 shadow-lg py-1",
             alignClasses[align],
             widthClasses[width],
-            menuClassName
+            menuClassName,
           )}
         >
           {items.map((item, index) => (
@@ -112,9 +111,9 @@ export const Dropdown = ({
                 <a
                   href={item.href}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors',
-                    item.disabled && 'opacity-50 cursor-not-allowed',
-                    itemClassName
+                    "flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors",
+                    item.disabled && "opacity-50 cursor-not-allowed",
+                    itemClassName,
                   )}
                   onClick={() => handleItemClick(item)}
                 >
@@ -124,9 +123,9 @@ export const Dropdown = ({
               ) : (
                 <button
                   className={cn(
-                    'flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors',
-                    item.disabled && 'opacity-50 cursor-not-allowed',
-                    itemClassName
+                    "flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors",
+                    item.disabled && "opacity-50 cursor-not-allowed",
+                    itemClassName,
                   )}
                   onClick={() => handleItemClick(item)}
                   disabled={item.disabled}

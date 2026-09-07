@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Star, StarHalf } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { Star, StarHalf } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface RatingProps {
   value?: number;
   onChange?: (value: number) => void;
   max?: number;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: "sm" | "md" | "lg" | "xl";
   readOnly?: boolean;
   allowHalf?: boolean;
   showValue?: boolean;
@@ -19,17 +19,17 @@ interface RatingProps {
 }
 
 const sizes = {
-  sm: { star: 'h-3 w-3', text: 'text-xs' },
-  md: { star: 'h-4 w-4', text: 'text-sm' },
-  lg: { star: 'h-5 w-5', text: 'text-base' },
-  xl: { star: 'h-6 w-6', text: 'text-lg' },
+  sm: { star: "h-3 w-3", text: "text-xs" },
+  md: { star: "h-4 w-4", text: "text-sm" },
+  lg: { star: "h-5 w-5", text: "text-base" },
+  xl: { star: "h-6 w-6", text: "text-lg" },
 };
 
 export const Rating = ({
   value = 0,
   onChange,
   max = 5,
-  size = 'md',
+  size = "md",
   readOnly = false,
   allowHalf = false,
   showValue = true,
@@ -61,7 +61,8 @@ export const Rating = ({
 
   const handleClick = (index: number) => {
     if (readOnly || disabled) return;
-    const newValue = allowHalf && index - 0.5 > currentValue ? index - 0.5 : index;
+    const newValue =
+      allowHalf && index - 0.5 > currentValue ? index - 0.5 : index;
     setInternalValue(newValue);
     if (onChange) {
       onChange(newValue);
@@ -76,7 +77,7 @@ export const Rating = ({
   };
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div className={cn("flex items-center gap-2", className)}>
       <div
         className="flex items-center"
         onMouseLeave={handleMouseLeave}
@@ -94,31 +95,53 @@ export const Rating = ({
               onClick={() => handleClick(index)}
               onMouseEnter={() => handleMouseEnter(index)}
               className={cn(
-                'p-0.5 transition-colors focus:outline-none',
-                (readOnly || disabled) && 'cursor-default',
-                !readOnly && !disabled && 'cursor-pointer hover:scale-110'
+                "p-0.5 transition-colors focus:outline-none",
+                (readOnly || disabled) && "cursor-default",
+                !readOnly && !disabled && "cursor-pointer hover:scale-110",
               )}
               disabled={readOnly || disabled}
               aria-label={`Noter ${index} étoiles`}
             >
               {starValue === 1 ? (
-                <Star className={cn(sizes[size].star, 'fill-yellow-400 text-yellow-400')} />
+                <Star
+                  className={cn(
+                    sizes[size].star,
+                    "fill-yellow-400 text-yellow-400",
+                  )}
+                />
               ) : starValue === 0.5 ? (
-                <StarHalf className={cn(sizes[size].star, 'fill-yellow-400 text-yellow-400')} />
+                <StarHalf
+                  className={cn(
+                    sizes[size].star,
+                    "fill-yellow-400 text-yellow-400",
+                  )}
+                />
               ) : (
-                <Star className={cn(sizes[size].star, 'text-gray-300 dark:text-gray-600')} />
+                <Star
+                  className={cn(
+                    sizes[size].star,
+                    "text-gray-300 dark:text-gray-600",
+                  )}
+                />
               )}
             </button>
           );
         })}
       </div>
       {showValue && (
-        <span className={cn('font-medium text-gray-700 dark:text-gray-300', sizes[size].text)}>
+        <span
+          className={cn(
+            "font-medium text-gray-700 dark:text-gray-300",
+            sizes[size].text,
+          )}
+        >
           {currentValue.toFixed(1)}
         </span>
       )}
       {showMax && (
-        <span className={cn('text-gray-400 dark:text-gray-500', sizes[size].text)}>
+        <span
+          className={cn("text-gray-400 dark:text-gray-500", sizes[size].text)}
+        >
           / {max}
         </span>
       )}
