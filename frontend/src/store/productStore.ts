@@ -10,6 +10,7 @@ import {
   ExternalProductRequest,
   ProductVariant,
   ProductTag,
+  LoadProductsParams,
 } from "@/types/product";
 import { productsService } from "@/services/products.service";
 import { ApiError } from "@/lib/api-client";
@@ -78,7 +79,7 @@ export interface ProductState {
   maxRetries: number;
 
   // Actions - Chargement
-  loadProducts: (filters?: Partial<ProductFilter>) => Promise<void>;
+  loadProducts: (filters?: LoadProductsParams) => Promise<void>;
   loadFeaturedProducts: () => Promise<void>;
   loadPopularProducts: () => Promise<void>;
   loadNewProducts: () => Promise<void>;
@@ -302,7 +303,7 @@ export const useProductStore = create<ProductState>()(
 
       // ============ CHARGEMENT ============
 
-      loadProducts: async (filters?: Partial<ProductFilter>) => {
+      loadProducts: async (filters?: LoadProductsParams) => {
         // Éviter les doubles chargements
         if (get().loading) return;
 

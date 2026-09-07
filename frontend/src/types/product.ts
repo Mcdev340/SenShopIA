@@ -1,4 +1,5 @@
 export interface Category {
+  productCount: number;
   id: string;
   name: string;
   slug: string;
@@ -84,6 +85,21 @@ export interface Product {
   finalPrice?: number;
 }
 
+export const SORT_OPTIONS = [
+  "price_asc",
+  "price_desc",
+  "rating",
+  "newest",
+  "popular",
+  "sold",
+] as const;
+
+export type SortOption = (typeof SORT_OPTIONS)[number];
+
+export const isSortOption = (value: string): value is SortOption => {
+  return (SORT_OPTIONS as readonly string[]).includes(value);
+};
+
 export interface ProductFilter {
   category?: string;
   categorySlug?: string;
@@ -92,7 +108,7 @@ export interface ProductFilter {
   brand?: string[];
   tags?: string[];
   attributes?: Record<string, string[]>;
-  sortBy?: 'price_asc' | 'price_desc' | 'rating' | 'newest' | 'popular' | 'sold';
+  sortBy?: SortOption;
   search?: string;
   page?: number;
   limit?: number;
@@ -102,6 +118,8 @@ export interface ProductFilter {
   isNew?: boolean;
   rating?: number;
 }
+
+export interface LoadProductsParams extends Partial<ProductFilter> {}
 
 export interface ProductSearchResult {
   products: Product[];
@@ -168,7 +186,7 @@ export interface ExternalProductRequest {
   url: string;
   marketplace: string;
   productData: Partial<Product>;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   userId: string;
   error?: string;
   createdAt: Date;
@@ -179,8 +197,8 @@ export interface ProductStockUpdate {
   productId: string;
   variantId?: string;
   quantity: number;
-  type: 'add' | 'remove' | 'set';
-  reason: 'order' | 'restock' | 'correction' | 'return';
+  type: "add" | "remove" | "set";
+  reason: "order" | "restock" | "correction" | "return";
   reference?: string;
   createdAt: Date;
   createdBy: string;
@@ -205,6 +223,7 @@ export interface RelatedProduct {
 
 export interface ProductBulkOperation {
   ids: string[];
-  action: 'delete' | 'update' | 'feature' | 'unfeature' | 'activate' | 'deactivate';
+  action:
+    "delete" | "update" | "feature" | "unfeature" | "activate" | "deactivate";
   data?: Partial<Product>;
 }

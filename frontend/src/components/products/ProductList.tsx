@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Product } from "@/types/product";
+import { isSortOption, Product, SortOption } from "@/types/product";
 import ProductCard from "./ProductCard";
 import Spinner from "@/components/ui/Spinner";
 import EmptyState from "@/components/shared/EmptyState";
@@ -37,12 +37,12 @@ interface ProductListProps {
   onPageChange?: (page: number) => void;
   onSearch?: (query: string) => void;
   onFilterChange?: (filters: any) => void;
-  onSortChange?: (sort: string) => void;
+  onSortChange?: (sort: SortOption) => void;
   onViewChange?: (view: "grid" | "list") => void;
   className?: string;
 }
 
-const sortOptions = [
+const sortOptions: { value: SortOption; label: string }[] = [
   { value: "newest", label: "Plus récents" },
   { value: "price_asc", label: "Prix croissant" },
   { value: "price_desc", label: "Prix décroissant" },
@@ -77,7 +77,7 @@ export default function ProductList({
 }: ProductListProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">(variant);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [limit, setLimit] = useState("20");
 
@@ -93,6 +93,10 @@ export default function ProductList({
 
   const handleSort = useCallback(
     (value: string) => {
+      if (!isSortOption(value)) {
+        return;
+      }
+
       setSortBy(value);
       if (onSortChange) {
         onSortChange(value);
