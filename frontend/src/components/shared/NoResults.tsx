@@ -1,9 +1,16 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Search, Filter, X, SlidersHorizontal, AlertCircle, FileSearch } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { cn } from '@/lib/utils';
+import React from "react";
+import {
+  Search,
+  Filter,
+  X,
+  SlidersHorizontal,
+  AlertCircle,
+  FileSearch,
+} from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 interface NoResultsProps {
   /** Titre du message */
@@ -23,11 +30,11 @@ interface NoResultsProps {
   /** Classes supplémentaires */
   className?: string;
   /** Variante d'affichage */
-  variant?: 'default' | 'compact' | 'minimal';
+  variant?: "default" | "compact" | "minimal";
   /** Icône personnalisée */
   icon?: React.ReactNode;
   /** Type d'icône par défaut */
-  iconType?: 'search' | 'filter' | 'alert' | 'file' | 'custom';
+  iconType?: "search" | "filter" | "alert" | "file" | "custom";
   /** Afficher les actions */
   showActions?: boolean;
 }
@@ -40,46 +47,44 @@ const iconTypes = {
 };
 
 export default function NoResults({
-  title = 'Aucun résultat',
-  description = 'Aucun résultat ne correspond à votre recherche.',
+  title = "Aucun résultat",
+  description = "Aucun résultat ne correspond à votre recherche.",
   query,
   activeFilters = 0,
   onClearSearch,
   onClearFilters,
   onReset,
-  className = '',
-  variant = 'default',
+  className = "",
+  variant = "default",
   icon,
-  iconType = 'search',
+  iconType = "search",
   showActions = true,
 }: NoResultsProps) {
-  const IconComponent = iconTypes[iconType] || Search;
+  const IconComponent = iconType === "custom" ? Search : iconTypes[iconType];
   const hasQuery = query && query.length > 0;
   const hasFilters = activeFilters > 0;
   const showClearSearch = hasQuery && onClearSearch;
   const showClearFilters = hasFilters && onClearFilters;
 
   // Version minimal
-  if (variant === 'minimal') {
+  if (variant === "minimal") {
     return (
-      <div className={cn('text-center py-4', className)}>
+      <div className={cn("text-center py-4", className)}>
         <div className="flex justify-center text-gray-400">
           {icon || <IconComponent className="w-6 h-6" />}
         </div>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{title}</p>
         {hasQuery && (
-          <p className="text-xs text-gray-400 dark:text-gray-500">
-            "{query}"
-          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">"{query}"</p>
         )}
       </div>
     );
   }
 
   // Version compact
-  if (variant === 'compact') {
+  if (variant === "compact") {
     return (
-      <div className={cn('text-center py-8 px-4', className)}>
+      <div className={cn("text-center py-8 px-4", className)}>
         <div className="flex justify-center text-gray-400">
           {icon || <IconComponent className="w-12 h-12" />}
         </div>
@@ -92,31 +97,19 @@ export default function NoResults({
         {showActions && (showClearSearch || showClearFilters || onReset) && (
           <div className="mt-4 flex flex-wrap gap-2 justify-center">
             {showClearSearch && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onClearSearch}
-              >
+              <Button variant="outline" size="sm" onClick={onClearSearch}>
                 <X className="w-3 h-3 mr-1" />
                 Effacer la recherche
               </Button>
             )}
             {showClearFilters && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onClearFilters}
-              >
+              <Button variant="outline" size="sm" onClick={onClearFilters}>
                 <Filter className="w-3 h-3 mr-1" />
                 Effacer les filtres ({activeFilters})
               </Button>
             )}
             {onReset && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onReset}
-              >
+              <Button variant="outline" size="sm" onClick={onReset}>
                 <SlidersHorizontal className="w-3 h-3 mr-1" />
                 Réinitialiser
               </Button>
@@ -129,7 +122,7 @@ export default function NoResults({
 
   // Version par défaut
   return (
-    <div className={cn('text-center py-12 px-4 max-w-md mx-auto', className)}>
+    <div className={cn("text-center py-12 px-4 max-w-md mx-auto", className)}>
       <div className="flex justify-center">
         <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
           {icon || <IconComponent className="w-10 h-10 text-gray-400" />}
@@ -148,33 +141,26 @@ export default function NoResults({
       )}
       {hasFilters && (
         <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
-          {activeFilters} filtre{activeFilters > 1 ? 's' : ''} actif{activeFilters > 1 ? 's' : ''}
+          {activeFilters} filtre{activeFilters > 1 ? "s" : ""} actif
+          {activeFilters > 1 ? "s" : ""}
         </p>
       )}
       {showActions && (showClearSearch || showClearFilters || onReset) && (
         <div className="mt-6 flex flex-wrap gap-3 justify-center">
           {showClearSearch && (
-            <Button
-              variant="outline"
-              onClick={onClearSearch}
-            >
+            <Button variant="outline" onClick={onClearSearch}>
               <X className="w-4 h-4 mr-2" />
               Effacer la recherche
             </Button>
           )}
           {showClearFilters && (
-            <Button
-              variant="outline"
-              onClick={onClearFilters}
-            >
+            <Button variant="outline" onClick={onClearFilters}>
               <Filter className="w-4 h-4 mr-2" />
               Effacer les filtres ({activeFilters})
             </Button>
           )}
           {onReset && (
-            <Button
-              onClick={onReset}
-            >
+            <Button onClick={onReset}>
               <SlidersHorizontal className="w-4 h-4 mr-2" />
               Réinitialiser tout
             </Button>

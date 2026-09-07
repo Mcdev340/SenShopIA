@@ -1,10 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, X, Loader2, Mic, Filter } from 'lucide-react';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Search, X, Loader2, Mic, Filter } from "lucide-react";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
+
+const InputComponent = Input as any;
 
 interface SearchBarProps {
   /** Valeur de la recherche */
@@ -42,14 +44,14 @@ interface SearchBarProps {
   /** Classes supplémentaires */
   className?: string;
   /** Variante */
-  variant?: 'default' | 'rounded' | 'underline' | 'outlined';
+  variant?: "default" | "rounded" | "underline" | "outlined";
   /** Taille */
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
 export default function SearchBar({
-  value: externalValue = '',
-  placeholder = 'Rechercher...',
+  value: externalValue = "",
+  placeholder = "Rechercher...",
   isLoading = false,
   showButton = false,
   showVoice = false,
@@ -64,9 +66,9 @@ export default function SearchBar({
   onEnter,
   onVoice,
   onFilters,
-  className = '',
-  variant = 'default',
-  size = 'md',
+  className = "",
+  variant = "default",
+  size = "md",
 }: SearchBarProps) {
   const [internalValue, setInternalValue] = useState(externalValue);
   const [isFocused, setIsFocused] = useState(false);
@@ -76,10 +78,13 @@ export default function SearchBar({
 
   const value = externalValue !== undefined ? externalValue : internalValue;
 
-  const handleSearch = useCallback((searchValue: string) => {
-    onSearch(searchValue);
-    setIsDebouncing(false);
-  }, [onSearch]);
+  const handleSearch = useCallback(
+    (searchValue: string) => {
+      onSearch(searchValue);
+      setIsDebouncing(false);
+    },
+    [onSearch],
+  );
 
   // Debounce
   useEffect(() => {
@@ -117,17 +122,17 @@ export default function SearchBar({
 
   const handleClear = () => {
     if (externalValue === undefined) {
-      setInternalValue('');
+      setInternalValue("");
     }
     if (onChange) {
-      onChange('');
+      onChange("");
     }
-    onSearch('');
+    onSearch("");
     inputRef.current?.focus();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       if (onEnter) {
         onEnter(value);
@@ -148,46 +153,48 @@ export default function SearchBar({
   };
 
   const variantClasses = {
-    default: 'border rounded-lg',
-    rounded: 'border rounded-full px-4',
-    underline: 'border-0 border-b rounded-none',
-    outlined: 'border-2 rounded-lg',
+    default: "border rounded-lg",
+    rounded: "border rounded-full px-4",
+    underline: "border-0 border-b rounded-none",
+    outlined: "border-2 rounded-lg",
   };
 
   const sizeClasses = {
     sm: {
-      input: 'text-sm py-1.5',
-      button: 'px-3 py-1.5 text-sm',
-      icon: 'w-4 h-4',
+      input: "text-sm py-1.5",
+      button: "px-3 py-1.5 text-sm",
+      icon: "w-4 h-4",
     },
     md: {
-      input: 'text-base py-2',
-      button: 'px-4 py-2 text-base',
-      icon: 'w-5 h-5',
+      input: "text-base py-2",
+      button: "px-4 py-2 text-base",
+      icon: "w-5 h-5",
     },
     lg: {
-      input: 'text-lg py-3',
-      button: 'px-6 py-3 text-lg',
-      icon: 'w-6 h-6',
+      input: "text-lg py-3",
+      button: "px-6 py-3 text-lg",
+      icon: "w-6 h-6",
     },
   };
 
   return (
-    <div className={cn('relative flex items-center w-full', className)}>
+    <div className={cn("relative flex items-center w-full", className)}>
       <div
         className={cn(
-          'relative flex items-center w-full transition-all',
+          "relative flex items-center w-full transition-all",
           variantClasses[variant],
-          isFocused && 'ring-2 ring-primary-500 border-primary-500',
-          'border-gray-300 dark:border-gray-600',
-          className
+          isFocused && "ring-2 ring-primary-500 border-primary-500",
+          "border-gray-300 dark:border-gray-600",
+          className,
         )}
       >
-        <Search className={cn(
-          'absolute left-3 text-gray-400 pointer-events-none',
-          sizeClasses[size].icon
-        )} />
-        <Input
+        <Search
+          className={cn(
+            "absolute left-3 text-gray-400 pointer-events-none",
+            sizeClasses[size].icon,
+          )}
+        />
+        <InputComponent
           ref={inputRef}
           type="text"
           value={value}
@@ -197,23 +204,25 @@ export default function SearchBar({
           onBlur={handleBlur}
           placeholder={placeholder}
           className={cn(
-            'w-full border-0 bg-transparent pl-10 focus:ring-0 focus:outline-none',
+            "w-full border-0 bg-transparent pl-10 focus:ring-0 focus:outline-none",
             sizeClasses[size].input,
-            variant === 'underline' && 'rounded-none'
+            variant === "underline" && "rounded-none",
           )}
           autoFocus={autoFocus}
           aria-label={placeholder}
         />
         <div className="flex items-center gap-1 pr-2">
           {isLoading && (
-            <Loader2 className={cn(
-              'animate-spin text-gray-400',
-              sizeClasses[size].icon
-            )} />
+            <Loader2
+              className={cn(
+                "animate-spin text-gray-400",
+                sizeClasses[size].icon,
+              )}
+            />
           )}
           {showVoice && (
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={onVoice}
               className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -233,7 +242,7 @@ export default function SearchBar({
           )}
           {showFilters && (
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={onFilters}
               className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -248,15 +257,17 @@ export default function SearchBar({
               onClick={() => handleSearch(value)}
               disabled={isLoading}
               className={cn(
-                'ml-1 flex-shrink-0',
+                "ml-1 flex-shrink-0",
                 sizeClasses[size].button,
-                variant === 'rounded' && 'rounded-full'
+                variant === "rounded" && "rounded-full",
               )}
             >
               {isLoading ? (
-                <Loader2 className={cn('animate-spin', sizeClasses[size].icon)} />
+                <Loader2
+                  className={cn("animate-spin", sizeClasses[size].icon)}
+                />
               ) : (
-                'Rechercher'
+                "Rechercher"
               )}
             </Button>
           )}
