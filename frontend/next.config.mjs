@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost', 'shopsense-ai.com', 'via.placeholder.com'],
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {

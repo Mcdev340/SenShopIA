@@ -16,7 +16,6 @@ export default function DashboardPage() {
         return;
       }
 
-      // Rediriger vers le dashboard approprié selon le rôle
       switch (user.role) {
         case 'admin':
           router.push('/dashboard/admin');
@@ -35,7 +34,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Spinner size="lg" />
       </div>
     );

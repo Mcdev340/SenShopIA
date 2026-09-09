@@ -16,8 +16,8 @@ import { logger } from "@/lib/logger";
 // ============ TYPES ============
 
 export interface CartState {
-  isValid: any;
-  validateCart: any;
+  isValid: boolean;
+  validateCart: () => Promise<boolean>;
   // Données
   cart: Cart | null;
   items: CartItem[];
@@ -142,6 +142,7 @@ const initialState: Omit<
   CartState,
   | "loadCart"
   | "loadCartSummary"
+  | "validateCart"
   | "refresh"
   | "addItem"
   | "addItems"
@@ -185,6 +186,7 @@ const initialState: Omit<
   | "reset"
 > = {
   // Données
+  isValid: false,
   cart: null,
   items: [],
   savedItems: [],
@@ -311,6 +313,18 @@ export const useCartStore = create<CartState>()(
           });
         } catch (error) {
           logger.warn("Failed to load cart summary", error);
+        }
+      },
+
+      validateCart: async () => {
+        try {
+          const validation = await cartService.validateCart();
+          set({ isValid: validation.valid });
+          return validation.valid;
+        } catch (error) {
+          set({ isValid: false });
+          logger.warn("Failed to validate cart", error);
+          return false;
         }
       },
 
