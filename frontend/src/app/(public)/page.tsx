@@ -1,14 +1,49 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Search, ShoppingBag, Truck, Bot, Star, Shield, Clock } from 'lucide-react';
+import { 
+  ArrowRight, 
+  Search, 
+  ShoppingBag, 
+  Truck, 
+  Bot, 
+  Star, 
+  Shield, 
+  Clock, 
+  Users,
+  Package,
+  TrendingUp,
+  Zap,
+  Globe,
+  CheckCircle,
+  Sparkles,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import ProductGrid from '@/components/products/ProductGrid';
+import { Card, CardBody } from '@/components/ui/Card';
+import { ProductGrid } from '@/components/products/ProductGrid';
 import { useProducts } from '@/hooks';
+import { useState, useEffect } from 'react';
 
 export default function HomePage() {
-  const { popularProducts, loading } = useProducts();
+  const { featuredProducts, popularProducts, loading, loadFeaturedProducts, loadPopularProducts } = useProducts();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        await Promise.all([
+          loadFeaturedProducts(),
+          loadPopularProducts(),
+        ]);
+      } catch (error) {
+        console.error('Error loading home page data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   const features = [
     {
@@ -44,6 +79,21 @@ export default function HomePage() {
     { value: '24/7', label: 'Support client', icon: Clock },
   ];
 
+  const testimonials = [
+    {
+      name: 'Jean Dupont',
+      role: 'Client',
+      content: 'ShopSense AI a révolutionné ma façon d\'acheter. Je peux enfin commander des produits internationaux sans stress !',
+      rating: 5,
+    },
+    {
+      name: 'Marie Diop',
+      role: 'Client',
+      content: 'L\'agent IA est incroyable ! Il m\'a aidé à trouver exactement ce que je cherchais et à faire des économies.',
+      rating: 5,
+    },
+  ];
+
   return (
     <div className="space-y-16">
       {/* Hero Section */}
@@ -76,6 +126,20 @@ export default function HomePage() {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
+            </div>
+            <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-1">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                Livraison 24-48h
+              </div>
+              <div className="flex items-center gap-1">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                Paiement sécurisé
+              </div>
+              <div className="flex items-center gap-1">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                Service client 7/7
+              </div>
             </div>
           </div>
         </div>
@@ -131,7 +195,7 @@ export default function HomePage() {
         </div>
         <ProductGrid
           products={popularProducts.slice(0, 4)}
-          loading={loading}
+          loading={isLoading}
           columns={4}
         />
       </section>
@@ -158,6 +222,38 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Témoignages */}
+      <section className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Ce que disent nos clients
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Ils nous font confiance pour leurs achats
+          </p>
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <Card key={index}>
+              <CardBody className="p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className={`w-4 h-4 ${i < testimonial.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                  ))}
+                </div>
+                <p className="text-gray-600 dark:text-gray-300">
+                  "{testimonial.content}"
+                </p>
+                <div className="mt-4">
+                  <p className="font-medium text-gray-900 dark:text-white">{testimonial.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</p>
+                </div>
+              </CardBody>
+            </Card>
+          ))}
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="container mx-auto px-4 pb-16">
         <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-8 md:p-12 text-white text-center">
@@ -168,27 +264,21 @@ export default function HomePage() {
             Rejoignez notre communauté et découvrez une nouvelle façon d'acheter
             des produits internationaux.
           </p>
-          <Link href="/register">
-            <Button size="lg" variant="secondary" className="bg-white text-primary-600 hover:bg-gray-100">
-              Créer un compte gratuitement
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/register">
+              <Button size="lg" variant="secondary" className="bg-white text-primary-600 hover:bg-gray-100">
+                Créer un compte gratuitement
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+            <Link href="/products">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                Explorer les produits
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </div>
   );
 }
-
-// Composant Users pour les statistiques
-const Users = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-  </svg>
-);
-
-const Package = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-  </svg>
-);
