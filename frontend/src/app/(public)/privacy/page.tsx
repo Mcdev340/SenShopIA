@@ -41,7 +41,11 @@ export default function PrivacyPage() {
       content: 'Les transactions de paiement sont sécurisées et cryptées. Nous ne stockons pas les informations de vos cartes bancaires.',
     },
     {
-      title: '9. Contact',
+      title: '9. Transfert de données',
+      content: 'Vos données peuvent être transférées et stockées dans des pays autres que le vôtre, dans le respect des lois applicables.',
+    },
+    {
+      title: '10. Contact',
       content: 'Pour toute question concernant notre politique de confidentialité, contactez-nous à privacy@shopsense-ai.com.',
     },
   ];

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { Card, CardBody } from '@/components/ui/Card';
+import { Link } from '@/components/ui/Link';
 
 export const metadata: Metadata = {
   title: 'Conditions d\'utilisation | ShopSense AI',
