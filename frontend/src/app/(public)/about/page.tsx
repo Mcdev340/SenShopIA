@@ -5,9 +5,22 @@ import Link from 'next/link';
 import { 
   Users, 
   Rocket, 
+  Globe, 
+  Target, 
+  Award, 
   Heart, 
   Shield,
   Zap,
+  TrendingUp,
+  MessageCircle,
+  ShoppingBag,
+  Truck,
+  Clock,
+  Star,
+  CheckCircle,
+  MapPin,
+  Phone,
+  Mail,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -40,10 +53,10 @@ export default function AboutPage() {
   ];
 
   const stats = [
-    { value: '10k+', label: 'Clients satisfaits' },
-    { value: '50k+', label: 'Produits disponibles' },
-    { value: '98%', label: 'Taux de satisfaction' },
-    { value: '24/7', label: 'Support client' },
+    { value: '10k+', label: 'Clients satisfaits', icon: Users },
+    { value: '50k+', label: 'Produits disponibles', icon: ShoppingBag },
+    { value: '98%', label: 'Taux de satisfaction', icon: Star },
+    { value: '24/7', label: 'Support client', icon: Clock },
   ];
 
   const team = [
@@ -51,20 +64,33 @@ export default function AboutPage() {
       name: 'Mamadou Diallo',
       role: 'CEO & Co-fondateur',
       description: 'Expert en e-commerce avec 10 ans d\'expérience.',
-      image: '/images/team/1.jpg',
+      initials: 'MD',
     },
     {
       name: 'Aminata Sow',
       role: 'CTO & Co-fondatrice',
       description: 'Spécialiste en intelligence artificielle et machine learning.',
-      image: '/images/team/2.jpg',
+      initials: 'AS',
     },
     {
       name: 'Oumar Ndiaye',
       role: 'Head of Operations',
       description: 'Expert en logistique et chaîne d\'approvisionnement.',
-      image: '/images/team/3.jpg',
+      initials: 'ON',
     },
+    {
+      name: 'Marie Diop',
+      role: 'Head of Marketing',
+      description: 'Experte en marketing digital et croissance.',
+      initials: 'MD',
+    },
+  ];
+
+  const milestones = [
+    { year: '2020', title: 'Fondation', description: 'Création de ShopSense AI avec une vision claire.' },
+    { year: '2021', title: 'Première version', description: 'Lancement de la plateforme MVP.' },
+    { year: '2022', title: 'Expansion', description: 'Extension à 5 pays d\'Afrique de l\'Ouest.' },
+    { year: '2023', title: 'IA avancée', description: 'Intégration de l\'intelligence artificielle.' },
   ];
 
   return (
@@ -98,16 +124,46 @@ export default function AboutPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <Card key={index}>
-            <CardBody className="p-6 text-center">
-              <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">
-                {stat.value}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
-            </CardBody>
-          </Card>
-        ))}
+        {stats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index}>
+              <CardBody className="p-6 text-center">
+                <Icon className="w-8 h-8 text-primary-600 dark:text-primary-400 mx-auto mb-2" />
+                <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">
+                  {stat.value}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+              </CardBody>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Timeline */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">
+          Notre Histoire
+        </h2>
+        <div className="relative">
+          <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-primary-200 dark:bg-primary-800" />
+          <div className="space-y-8">
+            {milestones.map((milestone, index) => (
+              <div key={index} className={`flex items-center ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}>
+                <div className="w-1/2" />
+                <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center z-10">
+                  <span className="text-white text-sm font-bold">{milestone.year.slice(-2)}</span>
+                </div>
+                <Card className="w-1/2">
+                  <CardBody className="p-4">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{milestone.title}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{milestone.description}</p>
+                  </CardBody>
+                </Card>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Values */}
@@ -142,12 +198,12 @@ export default function AboutPage() {
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">
           Notre Équipe
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {team.map((member, index) => (
             <Card key={index}>
               <CardBody className="p-6 text-center">
-                <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 mx-auto mb-4 flex items-center justify-center text-3xl">
-                  {member.name.charAt(0)}
+                <div className="w-20 h-20 rounded-full bg-primary-100 dark:bg-primary-900/30 mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-primary-600 dark:text-primary-400">
+                  {member.initials}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {member.name}
@@ -164,7 +220,7 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* CTA */}
+      {/* Contact */}
       <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-8 text-center text-white">
         <h2 className="text-2xl font-bold mb-4">
           Rejoignez notre aventure
@@ -172,6 +228,20 @@ export default function AboutPage() {
         <p className="text-lg mb-6 opacity-90">
           Ensemble, simplifions les achats en Afrique.
         </p>
+        <div className="flex flex-wrap justify-center gap-6 mb-6 text-sm">
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            <span>Dakar, Sénégal</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Phone className="w-4 h-4" />
+            <span>+221 77 000 00 00</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Mail className="w-4 h-4" />
+            <span>contact@shopsense-ai.com</span>
+          </div>
+        </div>
         <Link href="/contact">
           <Button variant="secondary" className="bg-white text-primary-600 hover:bg-gray-100">
             Contactez-nous

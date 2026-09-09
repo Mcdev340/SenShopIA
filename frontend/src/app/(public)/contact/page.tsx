@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Mail, Phone, MapPin, Send, Loader2, CheckCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Loader2, CheckCircle, Clock, MessageCircle, Users } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
@@ -34,10 +34,9 @@ export default function ContactPage() {
     },
   });
 
-  const onSubmit = async () => {
+  const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
-      // Simuler l'envoi
       await new Promise(resolve => setTimeout(resolve, 1500));
       setIsSuccess(true);
       success('Message envoyé avec succès !');
@@ -56,19 +55,28 @@ export default function ContactPage() {
       title: 'Email',
       value: 'contact@shopsense-ai.com',
       link: 'mailto:contact@shopsense-ai.com',
+      description: 'Nous répondons sous 24h',
     },
     {
       icon: Phone,
       title: 'Téléphone',
       value: '+221 77 000 00 00',
       link: 'tel:+221770000000',
+      description: 'Lun-Ven, 8h-18h',
     },
     {
       icon: MapPin,
       title: 'Adresse',
       value: 'Dakar, Sénégal',
       link: 'https://maps.google.com',
+      description: 'Venez nous rencontrer',
     },
+  ];
+
+  const faqItems = [
+    { q: 'Quels sont vos horaires ?', a: 'Nous sommes disponibles du lundi au vendredi de 8h à 18h.' },
+    { q: 'Comment suivre ma commande ?', a: 'Connectez-vous à votre compte et rendez-vous dans la section "Mes commandes".' },
+    { q: 'Puis-je modifier ma commande ?', a: 'Oui, tant que votre commande n\'est pas encore en cours de traitement.' },
   ];
 
   return (
@@ -106,6 +114,9 @@ export default function ContactPage() {
                       >
                         {item.value}
                       </a>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        {item.description}
+                      </p>
                     </div>
                   </div>
                 </CardBody>
@@ -115,22 +126,35 @@ export default function ContactPage() {
 
           <Card>
             <CardBody className="p-4">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                <Clock className="w-4 h-4 mr-2" />
                 Horaires d'ouverture
               </p>
               <div className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
-                <div className="flex justify-between">
+                <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
                   <span>Lundi - Vendredi</span>
                   <span>8h - 18h</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
                   <span>Samedi</span>
                   <span>9h - 13h</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between py-1">
                   <span>Dimanche</span>
-                  <span>Fermé</span>
+                  <span className="text-red-500">Fermé</span>
                 </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardBody className="p-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                <Users className="w-4 h-4 text-primary-600" />
+                <span>Une question ? Consultez notre</span>
+                <a href="/faq" className="text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                  FAQ
+                </a>
               </div>
             </CardBody>
           </Card>
@@ -149,13 +173,16 @@ export default function ContactPage() {
                   <p className="text-gray-500 dark:text-gray-400 mt-2">
                     Nous vous répondrons dans les plus brefs délais.
                   </p>
+                  <Button className="mt-4" onClick={() => setIsSuccess(false)}>
+                    Envoyer un autre message
+                  </Button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Nom complet
+                        Nom complet <span className="text-red-500">*</span>
                       </label>
                       <Input
                         placeholder="Jean Dupont"
@@ -165,7 +192,7 @@ export default function ContactPage() {
                     </div>
                     <div className="space-y-1">
                       <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Email
+                        Email <span className="text-red-500">*</span>
                       </label>
                       <Input
                         type="email"
@@ -178,7 +205,7 @@ export default function ContactPage() {
 
                   <div className="space-y-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Sujet
+                      Sujet <span className="text-red-500">*</span>
                     </label>
                     <Input
                       placeholder="Sujet de votre message"
@@ -189,7 +216,7 @@ export default function ContactPage() {
 
                   <div className="space-y-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Message
+                      Message <span className="text-red-500">*</span>
                     </label>
                     <Textarea
                       placeholder="Décrivez votre demande..."
@@ -197,6 +224,11 @@ export default function ContactPage() {
                       error={errors.message?.message}
                       {...register('message')}
                     />
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Notre équipe vous répondra dans les 24h.</span>
                   </div>
 
                   <Button
@@ -221,6 +253,25 @@ export default function ContactPage() {
               )}
             </CardBody>
           </Card>
+
+          {/* FAQ rapide */}
+          <div className="mt-4">
+            <Card>
+              <CardBody className="p-4">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Questions fréquentes
+                </p>
+                <div className="space-y-2">
+                  {faqItems.map((item, index) => (
+                    <div key={index} className="text-sm">
+                      <p className="text-gray-900 dark:text-white font-medium">{item.q}</p>
+                      <p className="text-gray-500 dark:text-gray-400">{item.a}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardBody>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
