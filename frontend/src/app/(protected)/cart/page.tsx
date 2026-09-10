@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import {
-  ShoppingBag,
-  Trash2,
-  Plus,
-  Minus,
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
+import { 
+  ShoppingBag, 
+  Trash2, 
+  Plus, 
+  Minus, 
   ArrowLeft,
   ShoppingCart,
   Heart,
@@ -16,32 +16,34 @@ import {
   Shield,
   CreditCard,
   Loader2,
+  Tag,
   X,
-} from "lucide-react";
-import { useCart, useAuth, useToast } from "@/hooks";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Card, CardBody, CardHeader, CardFooter } from "@/components/ui/Card";
-import { Checkbox } from "@/components/ui/Checkbox";
-import EmptyState from "@/components/shared/EmptyState";
-import { formatPrice } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+  Check,
+} from 'lucide-react';
+import { useCart, useAuth, useToast } from '@/hooks';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card, CardBody, CardHeader, CardFooter } from '@/components/ui/Card';
+import { Checkbox } from '@/components/ui/Checkbox';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { formatPrice } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 export default function CartPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const {
-    items,
-    loading,
-    subtotal,
-    total,
+  const { 
+    items, 
+    loading, 
+    subtotal, 
+    total, 
     shippingCost,
     discount,
     couponCode,
     couponDiscount,
     itemCount,
-    updateItem,
-    removeItem,
+    updateQuantity,
+    removeFromCart,
     clearCart,
     applyCoupon,
     removeCoupon,
@@ -52,10 +54,10 @@ export default function CartPage() {
     loadCart,
     isEmpty,
   } = useCart();
-  const { success } = useToast();
+  const { success, error: showError } = useToast();
 
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
-  const [couponInput, setCouponInput] = useState("");
+  const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -69,18 +71,18 @@ export default function CartPage() {
 
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
-    await updateItem(itemId, newQuantity);
+    await updateQuantity(itemId, newQuantity);
   };
 
   const handleRemove = async (itemId: string) => {
-    await removeItem(itemId);
-    success("Article retiré du panier");
+    await removeFromCart(itemId);
+    success('Article retiré du panier');
   };
 
   const handleClearCart = async () => {
-    if (window.confirm("Voulez-vous vraiment vider votre panier ?")) {
+    if (window.confirm('Voulez-vous vraiment vider votre panier ?')) {
       await clearCart();
-      success("Panier vidé");
+      success('Panier vidé');
     }
   };
 
@@ -92,13 +94,13 @@ export default function CartPage() {
     try {
       const successResult = await applyCoupon(couponInput.trim().toUpperCase());
       if (successResult) {
-        setCouponInput("");
-        success("Coupon appliqué avec succès");
+        setCouponInput('');
+        success('Coupon appliqué avec succès');
       } else {
-        setCouponError("Code promo invalide");
+        setCouponError('Code promo invalide');
       }
     } catch (error) {
-      setCouponError("Une erreur est survenue");
+      setCouponError('Une erreur est survenue');
     } finally {
       setIsApplyingCoupon(false);
     }
@@ -106,7 +108,7 @@ export default function CartPage() {
 
   const handleRemoveCoupon = async () => {
     await removeCoupon();
-    success("Coupon retiré");
+    success('Coupon retiré');
   };
 
   const handleSelectItem = async (itemId: string, selected: boolean) => {
@@ -119,10 +121,14 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (!isAuthenticated) {
-      router.push("/login?redirect=/checkout");
+      router.push('/login?redirect=/checkout');
       return;
     }
-    router.push("/checkout");
+    if (selectedIds.length === 0) {
+      showError('Sélectionnez au moins un article');
+      return;
+    }
+    router.push('/checkout');
   };
 
   if (loading) {
@@ -152,7 +158,7 @@ export default function CartPage() {
           <ShoppingBag className="w-6 h-6 mr-2 text-primary-600" />
           Mon panier
           <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
-            ({itemCount} article{itemCount > 1 ? "s" : ""})
+            ({itemCount} article{itemCount > 1 ? 's' : ''})
           </span>
         </h1>
         {items.length > 0 && (
@@ -177,18 +183,14 @@ export default function CartPage() {
               <Checkbox
                 id="select-all"
                 checked={selectAll}
-                onChange={(event) => handleSelectAll(event.target.checked)}
+                onCheckedChange={handleSelectAll}
               />
-              <label
-                htmlFor="select-all"
-                className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer"
-              >
+              <label htmlFor="select-all" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                 Tout sélectionner
               </label>
             </div>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              {selectedIds.length} sélectionné
-              {selectedIds.length > 1 ? "s" : ""}
+              {selectedIds.length} sélectionné{selectedIds.length > 1 ? 's' : ''}
             </span>
           </div>
 
@@ -200,17 +202,11 @@ export default function CartPage() {
             >
               <Checkbox
                 checked={selectedIds.includes(item.id)}
-                onChange={(event) =>
-                  handleSelectItem(item.id, event.target.checked)
-                }
+                onCheckedChange={(checked) => handleSelectItem(item.id, !!checked)}
                 className="mt-1"
               />
 
-              {/* Image */}
-              <Link
-                href={`/products/${item.product.slug}`}
-                className="flex-shrink-0"
-              >
+              <Link href={`/products/${item.product.slug}`} className="flex-shrink-0">
                 <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                   {item.product.images && item.product.images[0] ? (
                     <Image
@@ -228,7 +224,6 @@ export default function CartPage() {
                 </div>
               </Link>
 
-              {/* Informations */}
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start">
                   <div>
@@ -255,21 +250,15 @@ export default function CartPage() {
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center space-x-2">
                     <button
-                      onClick={() =>
-                        handleQuantityChange(item.id, item.quantity - 1)
-                      }
+                      onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                       disabled={item.quantity <= 1}
                       className="p-1 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Minus className="w-4 h-4" />
                     </button>
-                    <span className="w-8 text-center font-medium">
-                      {item.quantity}
-                    </span>
+                    <span className="w-8 text-center font-medium">{item.quantity}</span>
                     <button
-                      onClick={() =>
-                        handleQuantityChange(item.id, item.quantity + 1)
-                      }
+                      onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                       disabled={item.quantity >= item.product.stock}
                       className="p-1 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
@@ -330,9 +319,7 @@ export default function CartPage() {
                         setCouponInput(e.target.value.toUpperCase());
                         setCouponError(null);
                       }}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && handleApplyCoupon()
-                      }
+                      onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
                       disabled={isApplyingCoupon}
                       error={couponError || undefined}
                       className="flex-1"
@@ -346,7 +333,7 @@ export default function CartPage() {
                       {isApplyingCoupon ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
-                        "Appliquer"
+                        'Appliquer'
                       )}
                     </Button>
                   </div>
@@ -356,35 +343,23 @@ export default function CartPage() {
               {/* Totaux */}
               <div className="space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Sous-total
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">Sous-total</span>
                   <span className="font-medium text-gray-900 dark:text-white">
                     {formatPrice(subtotal)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Livraison
-                  </span>
-                  <span
-                    className={cn(
-                      "font-medium",
-                      shippingCost === 0
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-gray-900 dark:text-white",
-                    )}
-                  >
-                    {shippingCost === 0
-                      ? "Gratuite"
-                      : formatPrice(shippingCost)}
+                  <span className="text-gray-600 dark:text-gray-400">Livraison</span>
+                  <span className={cn(
+                    'font-medium',
+                    shippingCost === 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'
+                  )}>
+                    {shippingCost === 0 ? 'Gratuite' : formatPrice(shippingCost)}
                   </span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Réduction
-                    </span>
+                    <span className="text-gray-600 dark:text-gray-400">Réduction</span>
                     <span className="font-medium text-green-600 dark:text-green-400">
                       -{formatPrice(discount)}
                     </span>
@@ -392,7 +367,6 @@ export default function CartPage() {
                 )}
               </div>
 
-              {/* Total */}
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                 <div className="flex justify-between text-lg font-bold">
                   <span className="text-gray-900 dark:text-white">Total</span>
@@ -405,15 +379,14 @@ export default function CartPage() {
                 </p>
               </div>
 
-              {/* Boutons */}
               <Button
                 className="w-full"
                 size="lg"
                 onClick={handleCheckout}
-                disabled={items.length === 0}
+                disabled={selectedIds.length === 0}
               >
                 <CreditCard className="w-4 h-4 mr-2" />
-                Passer à la caisse
+                Passer à la caisse ({selectedIds.length})
               </Button>
 
               <Link href="/products" className="block">
@@ -428,21 +401,15 @@ export default function CartPage() {
               <div className="w-full grid grid-cols-3 gap-2 text-center">
                 <div>
                   <Truck className="w-5 h-5 text-gray-400 mx-auto" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Livraison rapide
-                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Livraison rapide</p>
                 </div>
                 <div>
                   <Shield className="w-5 h-5 text-gray-400 mx-auto" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Paiement sécurisé
-                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Paiement sécurisé</p>
                 </div>
                 <div>
                   <Heart className="w-5 h-5 text-gray-400 mx-auto" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Service client
-                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Service client</p>
                 </div>
               </div>
             </CardFooter>

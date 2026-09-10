@@ -18,11 +18,17 @@ import {
   Edit, 
   Save, 
   X, 
+  Camera,
   Shield,
   Package,
   Heart,
   LogOut,
   Loader2,
+  Check,
+  Bell,
+  CreditCard,
+  HelpCircle,
+  Settings,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -87,6 +93,10 @@ export default function ProfilePage() {
       showError('Les mots de passe ne correspondent pas');
       return;
     }
+    if (passwordData.newPassword.length < 6) {
+      showError('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
     setIsChangingPassword(true);
     try {
       await changePassword(passwordData.oldPassword, passwordData.newPassword);
@@ -107,8 +117,11 @@ export default function ProfilePage() {
   const menuItems = [
     { icon: Package, label: 'Mes commandes', href: '/orders' },
     { icon: Heart, label: 'Liste de souhaits', href: '/wishlist' },
-    { icon: Shield, label: 'Paramètres de sécurité', href: '/security' },
-    { icon: MapPin, label: 'Adresses', href: '/addresses' },
+    { icon: MapPin, label: 'Mes adresses', href: '/addresses' },
+    { icon: Shield, label: 'Sécurité', href: '/security' },
+    { icon: Bell, label: 'Notifications', href: '/notifications' },
+    { icon: Settings, label: 'Paramètres', href: '/settings' },
+    { icon: HelpCircle, label: 'Aide', href: '/help' },
   ];
 
   return (
@@ -148,7 +161,7 @@ export default function ProfilePage() {
           </Card>
 
           <Card>
-            <CardBody className="space-y-1">
+            <CardBody className="space-y-1 p-2">
               {menuItems.map((item, index) => (
                 <Link
                   key={index}
@@ -199,7 +212,7 @@ export default function ProfilePage() {
                 <CardBody className="space-y-4">
                   {isEditing ? (
                     <>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                             Prénom
@@ -207,6 +220,7 @@ export default function ProfilePage() {
                           <Input
                             value={formData.firstName}
                             onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                            placeholder="Jean"
                           />
                         </div>
                         <div className="space-y-1">
@@ -216,6 +230,7 @@ export default function ProfilePage() {
                           <Input
                             value={formData.lastName}
                             onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                            placeholder="Dupont"
                           />
                         </div>
                       </div>
@@ -226,6 +241,7 @@ export default function ProfilePage() {
                         <Input
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          placeholder="77 123 45 67"
                         />
                       </div>
                       <div className="space-y-1">
@@ -236,13 +252,11 @@ export default function ProfilePage() {
                           value={formData.bio}
                           onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                           rows={3}
+                          placeholder="Parlez-nous de vous..."
                         />
                       </div>
                       <div className="flex gap-2">
-                        <Button
-                          onClick={handleSave}
-                          disabled={isSaving}
-                        >
+                        <Button onClick={handleSave} disabled={isSaving}>
                           {isSaving ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           ) : (
@@ -261,27 +275,41 @@ export default function ProfilePage() {
                       </div>
                     </>
                   ) : (
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
-                        <User className="w-4 h-4 text-gray-400" />
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {user.firstName} {user.lastName}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Mail className="w-4 h-4 text-gray-400" />
-                        <span className="text-gray-700 dark:text-gray-300">{user.email}</span>
-                      </div>
-                      {user.phone && (
-                        <div className="flex items-center space-x-2">
-                          <Phone className="w-4 h-4 text-gray-400" />
-                          <span className="text-gray-700 dark:text-gray-300">{user.phone}</span>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Prénom</p>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {user.firstName || 'Non renseigné'}
+                          </p>
                         </div>
-                      )}
+                        <div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Nom</p>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {user.lastName || 'Non renseigné'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                          <p className="font-medium text-gray-900 dark:text-white flex items-center">
+                            <Mail className="w-4 h-4 mr-2 text-gray-400" />
+                            {user.email}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Téléphone</p>
+                          <p className="font-medium text-gray-900 dark:text-white flex items-center">
+                            <Phone className="w-4 h-4 mr-2 text-gray-400" />
+                            {user.phone || 'Non renseigné'}
+                          </p>
+                        </div>
+                      </div>
                       {user.bio && (
-                        <div className="flex items-start space-x-2">
-                          <User className="w-4 h-4 text-gray-400 mt-0.5" />
-                          <span className="text-gray-700 dark:text-gray-300">{user.bio}</span>
+                        <div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Bio</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{user.bio}</p>
                         </div>
                       )}
                     </div>
@@ -307,6 +335,7 @@ export default function ProfilePage() {
                       type="password"
                       value={passwordData.oldPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                      placeholder="••••••••"
                     />
                   </div>
                   <div className="space-y-1">
@@ -317,6 +346,7 @@ export default function ProfilePage() {
                       type="password"
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                      placeholder="••••••••"
                     />
                   </div>
                   <div className="space-y-1">
@@ -327,6 +357,7 @@ export default function ProfilePage() {
                       type="password"
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                      placeholder="••••••••"
                     />
                   </div>
                   <Button
@@ -335,7 +366,9 @@ export default function ProfilePage() {
                   >
                     {isChangingPassword ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : null}
+                    ) : (
+                      <Shield className="w-4 h-4 mr-2" />
+                    )}
                     Changer le mot de passe
                   </Button>
                 </CardBody>
