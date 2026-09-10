@@ -1,36 +1,32 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth, useToast } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Card, CardBody, CardHeader } from '@/components/ui/Card';
-import { Avatar } from '@/components/ui/Avatar';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
-import { Spinner } from '@/components/ui/Spinner';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Edit, 
-  Save, 
-  X, 
-  Camera,
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth, useToast } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Avatar } from "@/components/ui/Avatar";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
+import { Spinner } from "@/components/ui/Spinner";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Edit,
+  Save,
+  X,
   Shield,
   Package,
   Heart,
   LogOut,
   Loader2,
-  Check,
   Bell,
-  CreditCard,
   HelpCircle,
   Settings,
-} from 'lucide-react';
-import Link from 'next/link';
+} from "lucide-react";
+import Link from "next/link";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -41,24 +37,24 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    bio: '',
+    firstName: "",
+    lastName: "",
+    phone: "",
+    bio: "",
   });
   const [passwordData, setPasswordData] = useState({
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   useEffect(() => {
     if (user) {
       setFormData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        phone: user.phone || '',
-        bio: user.bio || '',
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        phone: user.phone || "",
+        bio: user.bio || "",
       });
     }
   }, [user]);
@@ -80,9 +76,9 @@ export default function ProfilePage() {
     try {
       await updateProfile(formData);
       setIsEditing(false);
-      success('Profil mis à jour');
+      success("Profil mis à jour");
     } catch (error) {
-      showError('Erreur de mise à jour');
+      showError("Erreur de mise à jour");
     } finally {
       setIsSaving(false);
     }
@@ -90,20 +86,24 @@ export default function ProfilePage() {
 
   const handleChangePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      showError('Les mots de passe ne correspondent pas');
+      showError("Les mots de passe ne correspondent pas");
       return;
     }
     if (passwordData.newPassword.length < 6) {
-      showError('Le mot de passe doit contenir au moins 6 caractères');
+      showError("Le mot de passe doit contenir au moins 6 caractères");
       return;
     }
     setIsChangingPassword(true);
     try {
       await changePassword(passwordData.oldPassword, passwordData.newPassword);
-      setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
-      success('Mot de passe changé');
+      setPasswordData({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      success("Mot de passe changé");
     } catch (error) {
-      showError('Erreur de changement de mot de passe');
+      showError("Erreur de changement de mot de passe");
     } finally {
       setIsChangingPassword(false);
     }
@@ -111,17 +111,17 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
+    router.push("/login");
   };
 
   const menuItems = [
-    { icon: Package, label: 'Mes commandes', href: '/orders' },
-    { icon: Heart, label: 'Liste de souhaits', href: '/wishlist' },
-    { icon: MapPin, label: 'Mes adresses', href: '/addresses' },
-    { icon: Shield, label: 'Sécurité', href: '/security' },
-    { icon: Bell, label: 'Notifications', href: '/notifications' },
-    { icon: Settings, label: 'Paramètres', href: '/settings' },
-    { icon: HelpCircle, label: 'Aide', href: '/help' },
+    { icon: Package, label: "Mes commandes", href: "/orders" },
+    { icon: Heart, label: "Liste de souhaits", href: "/wishlist" },
+    { icon: MapPin, label: "Mes adresses", href: "/addresses" },
+    { icon: Shield, label: "Sécurité", href: "/security" },
+    { icon: Bell, label: "Notifications", href: "/notifications" },
+    { icon: Settings, label: "Paramètres", href: "/settings" },
+    { icon: HelpCircle, label: "Aide", href: "/help" },
   ];
 
   return (
@@ -150,12 +150,17 @@ export default function ProfilePage() {
                 {user.firstName || user.username}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {user.role === 'admin' ? 'Administrateur' :
-                 user.role === 'delivery' ? 'Livreur' :
-                 user.role === 'advisor' ? 'Conseiller' : 'Client'}
+                {user.role === "admin"
+                  ? "Administrateur"
+                  : user.role === "delivery"
+                    ? "Livreur"
+                    : user.role === "advisor"
+                      ? "Conseiller"
+                      : "Client"}
               </p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                Membre depuis {new Date(user.createdAt).toLocaleDateString('fr-FR')}
+                Membre depuis{" "}
+                {new Date(user.createdAt).toLocaleDateString("fr-FR")}
               </p>
             </CardBody>
           </Card>
@@ -169,7 +174,9 @@ export default function ProfilePage() {
                   className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <item.icon className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{item.label}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    {item.label}
+                  </span>
                 </Link>
               ))}
               <button
@@ -219,7 +226,12 @@ export default function ProfilePage() {
                           </label>
                           <Input
                             value={formData.firstName}
-                            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                firstName: e.target.value,
+                              })
+                            }
                             placeholder="Jean"
                           />
                         </div>
@@ -229,7 +241,12 @@ export default function ProfilePage() {
                           </label>
                           <Input
                             value={formData.lastName}
-                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                lastName: e.target.value,
+                              })
+                            }
                             placeholder="Dupont"
                           />
                         </div>
@@ -240,7 +257,9 @@ export default function ProfilePage() {
                         </label>
                         <Input
                           value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, phone: e.target.value })
+                          }
                           placeholder="77 123 45 67"
                         />
                       </div>
@@ -250,7 +269,9 @@ export default function ProfilePage() {
                         </label>
                         <Textarea
                           value={formData.bio}
-                          onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, bio: e.target.value })
+                          }
                           rows={3}
                           placeholder="Parlez-nous de vous..."
                         />
@@ -278,38 +299,50 @@ export default function ProfilePage() {
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Prénom</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Prénom
+                          </p>
                           <p className="font-medium text-gray-900 dark:text-white">
-                            {user.firstName || 'Non renseigné'}
+                            {user.firstName || "Non renseigné"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Nom</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Nom
+                          </p>
                           <p className="font-medium text-gray-900 dark:text-white">
-                            {user.lastName || 'Non renseigné'}
+                            {user.lastName || "Non renseigné"}
                           </p>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Email
+                          </p>
                           <p className="font-medium text-gray-900 dark:text-white flex items-center">
                             <Mail className="w-4 h-4 mr-2 text-gray-400" />
                             {user.email}
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Téléphone</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Téléphone
+                          </p>
                           <p className="font-medium text-gray-900 dark:text-white flex items-center">
                             <Phone className="w-4 h-4 mr-2 text-gray-400" />
-                            {user.phone || 'Non renseigné'}
+                            {user.phone || "Non renseigné"}
                           </p>
                         </div>
                       </div>
                       {user.bio && (
                         <div>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Bio</p>
-                          <p className="font-medium text-gray-900 dark:text-white">{user.bio}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Bio
+                          </p>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {user.bio}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -334,7 +367,12 @@ export default function ProfilePage() {
                     <Input
                       type="password"
                       value={passwordData.oldPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          oldPassword: e.target.value,
+                        })
+                      }
                       placeholder="••••••••"
                     />
                   </div>
@@ -345,7 +383,12 @@ export default function ProfilePage() {
                     <Input
                       type="password"
                       value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          newPassword: e.target.value,
+                        })
+                      }
                       placeholder="••••••••"
                     />
                   </div>
@@ -356,13 +399,22 @@ export default function ProfilePage() {
                     <Input
                       type="password"
                       value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
                       placeholder="••••••••"
                     />
                   </div>
                   <Button
                     onClick={handleChangePassword}
-                    disabled={isChangingPassword || !passwordData.oldPassword || !passwordData.newPassword}
+                    disabled={
+                      isChangingPassword ||
+                      !passwordData.oldPassword ||
+                      !passwordData.newPassword
+                    }
                   >
                     {isChangingPassword ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />

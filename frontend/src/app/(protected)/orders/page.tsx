@@ -1,33 +1,33 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useOrders, useAuth } from '@/hooks';
-import { OrderList } from '@/components/orders/OrderList';
-import { Spinner } from '@/components/ui/Spinner';
-import { EmptyState } from '@/components/shared/EmptyState';
-import { Package, Search, Filter, SlidersHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
-import { Card, CardBody } from '@/components/ui/Card';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useOrders, useAuth } from "@/hooks";
+import OrderList from "@/components/orders/OrderList";
+import { Spinner } from "@/components/ui/Spinner";
+import EmptyState from "@/components/shared/EmptyState";
+import { Package, Filter } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Select";
+import { Card, CardBody } from "@/components/ui/Card";
+import type { Order, OrderStatus } from "@/types/order";
 
 const statusOptions = [
-  { value: '', label: 'Tous les statuts' },
-  { value: 'pending', label: 'En attente' },
-  { value: 'confirmed', label: 'Confirmée' },
-  { value: 'processing', label: 'En traitement' },
-  { value: 'shipped', label: 'Expédiée' },
-  { value: 'in_transit', label: 'En transit' },
-  { value: 'delivered', label: 'Livrée' },
-  { value: 'cancelled', label: 'Annulée' },
+  { value: "", label: "Tous les statuts" },
+  { value: "pending", label: "En attente" },
+  { value: "confirmed", label: "Confirmée" },
+  { value: "processing", label: "En traitement" },
+  { value: "shipped", label: "Expédiée" },
+  { value: "in_transit", label: "En transit" },
+  { value: "delivered", label: "Livrée" },
+  { value: "cancelled", label: "Annulée" },
 ];
 
 const sortOptions = [
-  { value: 'createdAt_desc', label: 'Plus récentes' },
-  { value: 'createdAt_asc', label: 'Plus anciennes' },
-  { value: 'total_desc', label: 'Montant décroissant' },
-  { value: 'total_asc', label: 'Montant croissant' },
+  { value: "createdAt_desc", label: "Plus récentes" },
+  { value: "createdAt_asc", label: "Plus anciennes" },
+  { value: "total_desc", label: "Montant décroissant" },
+  { value: "total_asc", label: "Montant croissant" },
 ];
 
 export default function OrdersPage() {
@@ -35,8 +35,8 @@ export default function OrdersPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const { orders, loading, loadOrders, total, page, totalPages } = useOrders();
 
-  const [statusFilter, setStatusFilter] = useState('');
-  const [sortBy, setSortBy] = useState('createdAt_desc');
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortBy, setSortBy] = useState("createdAt_desc");
   const [showFilters, setShowFilters] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,28 +51,44 @@ export default function OrdersPage() {
     try {
       await loadOrders({ page: 1, limit: 10 });
     } catch (error) {
-      console.error('Error loading orders:', error);
+      console.error("Error loading orders:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handlePageChange = (newPage: number) => {
-    loadOrders({ page: newPage, limit: 10, status: statusFilter || undefined });
+    loadOrders({
+      page: newPage,
+      limit: 10,
+      status: (statusFilter as OrderStatus) || undefined,
+    });
   };
 
   const handleStatusFilter = (value: string) => {
     setStatusFilter(value);
-    loadOrders({ page: 1, limit: 10, status: value || undefined });
+    loadOrders({
+      page: 1,
+      limit: 10,
+      status: (value as OrderStatus) || undefined,
+    });
   };
 
   const handleSort = (value: string) => {
     setSortBy(value);
-    loadOrders({ page: 1, limit: 10, status: statusFilter || undefined });
+    loadOrders({
+      page: 1,
+      limit: 10,
+      status: (statusFilter as OrderStatus) || undefined,
+    });
   };
 
   const handleRefresh = () => {
-    loadOrders({ page: 1, limit: 10, status: statusFilter || undefined });
+    loadOrders({
+      page: 1,
+      limit: 10,
+      status: (statusFilter as OrderStatus) || undefined,
+    });
   };
 
   if (authLoading || isLoading) {
@@ -112,11 +128,7 @@ export default function OrdersPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-          >
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
             Actualiser
           </Button>
           <Button
@@ -172,7 +184,7 @@ export default function OrdersPage() {
         showFilters={false}
         showSearch={false}
         showPagination={true}
-        onOrderClick={(order) => router.push(`/orders/${order.id}`)}
+        onOrderClick={(order: Order) => router.push(`/orders/${order.id}`)}
       />
     </div>
   );

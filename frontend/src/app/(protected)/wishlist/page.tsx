@@ -1,37 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { 
-  Heart, 
-  ShoppingCart, 
-  Trash2, 
-  Loader2, 
-  Star, 
-  Eye,
-  ShoppingBag,
-  X,
-  Check,
-} from 'lucide-react';
-import { useCart, useProducts, useToast, useAuth } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Card, CardBody } from '@/components/ui/Card';
-import { EmptyState } from '@/components/shared/EmptyState';
-import { Spinner } from '@/components/ui/Spinner';
-import { formatPrice } from '@/lib/utils';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Heart, ShoppingCart, Loader2, Star, Eye, X } from "lucide-react";
+import { useCart, useToast, useAuth } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Card, CardBody } from "@/components/ui/Card";
+import EmptyState from "@/components/shared/EmptyState";
+import { Spinner } from "@/components/ui/Spinner";
+import { formatPrice } from "@/lib/utils";
 
 export default function WishlistPage() {
-  const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const { addToCart } = useCart();
-  const { getWishlist, removeFromWishlist, loading } = useProducts();
+  const { addItem, getWishlist, removeFromWishlist } = useCart();
   const { success, error: showError } = useToast();
 
   const [items, setItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAddingToCart, setIsAddingToCart] = useState<Record<string, boolean>>({});
+  const [isAddingToCart, setIsAddingToCart] = useState<Record<string, boolean>>(
+    {},
+  );
   const [removingId, setRemovingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,7 +35,7 @@ export default function WishlistPage() {
       const result = await getWishlist();
       setItems(result.items || []);
     } catch (error) {
-      showError('Erreur de chargement de la wishlist');
+      showError("Erreur de chargement de la wishlist");
     } finally {
       setIsLoading(false);
     }
@@ -55,10 +44,10 @@ export default function WishlistPage() {
   const handleAddToCart = async (productId: string) => {
     setIsAddingToCart({ ...isAddingToCart, [productId]: true });
     try {
-      await addToCart(productId, 1);
-      success('Produit ajouté au panier');
+      await addItem(productId, undefined, 1);
+      success("Produit ajouté au panier");
     } catch (error) {
-      showError('Erreur d\'ajout au panier');
+      showError("Erreur d'ajout au panier");
     } finally {
       setIsAddingToCart({ ...isAddingToCart, [productId]: false });
     }
@@ -68,10 +57,10 @@ export default function WishlistPage() {
     setRemovingId(productId);
     try {
       await removeFromWishlist(productId);
-      setItems(items.filter(item => item.id !== productId));
-      success('Retiré de la wishlist');
+      setItems(items.filter((item) => item.id !== productId));
+      success("Retiré de la wishlist");
     } catch (error) {
-      showError('Erreur de suppression');
+      showError("Erreur de suppression");
     } finally {
       setRemovingId(null);
     }
@@ -82,10 +71,10 @@ export default function WishlistPage() {
       try {
         await addToCart(item.id, 1);
       } catch (error) {
-        console.error('Error adding item to cart:', error);
+        console.error("Error adding item to cart:", error);
       }
     }
-    success('Tous les produits ajoutés au panier');
+    success("Tous les produits ajoutés au panier");
   };
 
   if (isLoading) {
@@ -117,7 +106,7 @@ export default function WishlistPage() {
             <Heart className="w-6 h-6 mr-2 text-red-500 fill-red-500" />
             Ma wishlist
             <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
-              ({items.length} produit{items.length > 1 ? 's' : ''})
+              ({items.length} produit{items.length > 1 ? "s" : ""})
             </span>
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -125,11 +114,7 @@ export default function WishlistPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAddAllToCart}
-          >
+          <Button variant="outline" size="sm" onClick={handleAddAllToCart}>
             <ShoppingCart className="w-4 h-4 mr-2" />
             Tout ajouter au panier
           </Button>
@@ -139,7 +124,10 @@ export default function WishlistPage() {
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {items.map((item) => (
-          <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-all group">
+          <Card
+            key={item.id}
+            className="overflow-hidden hover:shadow-lg transition-all group"
+          >
             <div className="relative">
               <Link href={`/products/${item.slug}`}>
                 <div className="relative aspect-square bg-gray-100 dark:bg-gray-800">
@@ -248,3 +236,7 @@ export default function WishlistPage() {
     </div>
   );
 }
+function addToCart(_id: any, _arg1: number) {
+  throw new Error("Function not implemented.");
+}
+

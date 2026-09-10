@@ -1,17 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useAuth, useToast } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card, CardBody, CardHeader } from '@/components/ui/Card';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Spinner } from '@/components/ui/Spinner';
-import { 
-  Shield, 
-  Lock, 
-  Smartphone, 
-  Mail, 
+import { useState } from "react";
+import { useAuth, useToast } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { Spinner } from "@/components/ui/Spinner";
+import {
+  Shield,
+  Lock,
+  Smartphone,
   Key,
   AlertCircle,
   CheckCircle,
@@ -19,10 +18,10 @@ import {
   Eye,
   EyeOff,
   Fingerprint,
-} from 'lucide-react';
+} from "lucide-react";
 
 export default function SecurityPage() {
-  const { user, loading, changePassword } = useAuth();
+  const { loading, changePassword } = useAuth();
   const { success, error: showError } = useToast();
 
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -32,9 +31,9 @@ export default function SecurityPage() {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [loginAlerts, setLoginAlerts] = useState(true);
   const [passwordData, setPasswordData] = useState({
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const [passwordStrength, setPasswordStrength] = useState(0);
 
@@ -55,22 +54,26 @@ export default function SecurityPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      showError('Les mots de passe ne correspondent pas');
+      showError("Les mots de passe ne correspondent pas");
       return;
     }
     if (passwordData.newPassword.length < 8) {
-      showError('Le mot de passe doit contenir au moins 8 caractères');
+      showError("Le mot de passe doit contenir au moins 8 caractères");
       return;
     }
 
     setIsChangingPassword(true);
     try {
       await changePassword(passwordData.oldPassword, passwordData.newPassword);
-      setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordData({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
       setPasswordStrength(0);
-      success('Mot de passe changé avec succès');
+      success("Mot de passe changé avec succès");
     } catch (error) {
-      showError('Erreur de changement de mot de passe');
+      showError("Erreur de changement de mot de passe");
     } finally {
       setIsChangingPassword(false);
     }
@@ -84,8 +87,13 @@ export default function SecurityPage() {
     );
   }
 
-  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500'];
-  const strengthLabels = ['Faible', 'Moyen', 'Bon', 'Excellent'];
+  const strengthColors = [
+    "bg-red-500",
+    "bg-orange-500",
+    "bg-yellow-500",
+    "bg-green-500",
+  ];
+  const strengthLabels = ["Faible", "Moyen", "Bon", "Excellent"];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -138,9 +146,14 @@ export default function SecurityPage() {
               </label>
               <div className="relative">
                 <Input
-                  type={showOldPassword ? 'text' : 'password'}
+                  type={showOldPassword ? "text" : "password"}
                   value={passwordData.oldPassword}
-                  onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                  onChange={(e) =>
+                    setPasswordData({
+                      ...passwordData,
+                      oldPassword: e.target.value,
+                    })
+                  }
                   placeholder="••••••••"
                   className="pr-10"
                 />
@@ -149,7 +162,11 @@ export default function SecurityPage() {
                   onClick={() => setShowOldPassword(!showOldPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showOldPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showOldPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -160,7 +177,7 @@ export default function SecurityPage() {
               </label>
               <div className="relative">
                 <Input
-                  type={showNewPassword ? 'text' : 'password'}
+                  type={showNewPassword ? "text" : "password"}
                   value={passwordData.newPassword}
                   onChange={(e) => handlePasswordChange(e.target.value)}
                   placeholder="••••••••"
@@ -171,7 +188,11 @@ export default function SecurityPage() {
                   onClick={() => setShowNewPassword(!showNewPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showNewPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
               {passwordData.newPassword && (
@@ -183,18 +204,24 @@ export default function SecurityPage() {
                         className={`h-1 flex-1 rounded-full ${
                           level <= passwordStrength
                             ? strengthColors[passwordStrength - 1]
-                            : 'bg-gray-200 dark:bg-gray-700'
+                            : "bg-gray-200 dark:bg-gray-700"
                         }`}
                       />
                     ))}
                   </div>
-                  <p className={`text-xs mt-1 ${
-                    passwordStrength <= 1 ? 'text-red-500' :
-                    passwordStrength === 2 ? 'text-orange-500' :
-                    passwordStrength === 3 ? 'text-yellow-500' :
-                    'text-green-500'
-                  }`}>
-                    Force: {strengthLabels[passwordStrength - 1] || 'Très faible'}
+                  <p
+                    className={`text-xs mt-1 ${
+                      passwordStrength <= 1
+                        ? "text-red-500"
+                        : passwordStrength === 2
+                          ? "text-orange-500"
+                          : passwordStrength === 3
+                            ? "text-yellow-500"
+                            : "text-green-500"
+                    }`}
+                  >
+                    Force:{" "}
+                    {strengthLabels[passwordStrength - 1] || "Très faible"}
                   </p>
                 </div>
               )}
@@ -206,9 +233,14 @@ export default function SecurityPage() {
               </label>
               <div className="relative">
                 <Input
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                  onChange={(e) =>
+                    setPasswordData({
+                      ...passwordData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
                   placeholder="••••••••"
                   className="pr-10"
                 />
@@ -217,7 +249,11 @@ export default function SecurityPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -227,19 +263,27 @@ export default function SecurityPage() {
                 Exigences du mot de passe :
               </p>
               <ul className="space-y-1 text-sm">
-                <li className={`flex items-center gap-1 ${passwordData.newPassword.length >= 8 ? 'text-green-500' : 'text-gray-400'}`}>
+                <li
+                  className={`flex items-center gap-1 ${passwordData.newPassword.length >= 8 ? "text-green-500" : "text-gray-400"}`}
+                >
                   <CheckCircle className="w-3 h-3" />
                   Au moins 8 caractères
                 </li>
-                <li className={`flex items-center gap-1 ${/[a-z]/.test(passwordData.newPassword) && /[A-Z]/.test(passwordData.newPassword) ? 'text-green-500' : 'text-gray-400'}`}>
+                <li
+                  className={`flex items-center gap-1 ${/[a-z]/.test(passwordData.newPassword) && /[A-Z]/.test(passwordData.newPassword) ? "text-green-500" : "text-gray-400"}`}
+                >
                   <CheckCircle className="w-3 h-3" />
                   Majuscules et minuscules
                 </li>
-                <li className={`flex items-center gap-1 ${/\d/.test(passwordData.newPassword) ? 'text-green-500' : 'text-gray-400'}`}>
+                <li
+                  className={`flex items-center gap-1 ${/\d/.test(passwordData.newPassword) ? "text-green-500" : "text-gray-400"}`}
+                >
                   <CheckCircle className="w-3 h-3" />
                   Au moins un chiffre
                 </li>
-                <li className={`flex items-center gap-1 ${/[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword) ? 'text-green-500' : 'text-gray-400'}`}>
+                <li
+                  className={`flex items-center gap-1 ${/[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword) ? "text-green-500" : "text-gray-400"}`}
+                >
                   <CheckCircle className="w-3 h-3" />
                   Un caractère spécial
                 </li>
@@ -248,7 +292,11 @@ export default function SecurityPage() {
 
             <Button
               type="submit"
-              disabled={isChangingPassword || !passwordData.oldPassword || !passwordData.newPassword}
+              disabled={
+                isChangingPassword ||
+                !passwordData.oldPassword ||
+                !passwordData.newPassword
+              }
             >
               {isChangingPassword ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -283,19 +331,19 @@ export default function SecurityPage() {
                   Authentification à deux facteurs
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {twoFactorEnabled ? 'Activée' : 'Désactivée'}
+                  {twoFactorEnabled ? "Activée" : "Désactivée"}
                 </p>
               </div>
             </div>
             <Button
-              variant={twoFactorEnabled ? 'outline' : 'default'}
+              variant={twoFactorEnabled ? "outline" : "default"}
               size="sm"
               onClick={() => {
                 setTwoFactorEnabled(!twoFactorEnabled);
-                success(twoFactorEnabled ? '2FA désactivée' : '2FA activée');
+                success(twoFactorEnabled ? "2FA désactivée" : "2FA activée");
               }}
             >
-              {twoFactorEnabled ? 'Désactiver' : 'Activer'}
+              {twoFactorEnabled ? "Désactiver" : "Activer"}
             </Button>
           </div>
         </CardBody>
@@ -321,9 +369,13 @@ export default function SecurityPage() {
             </div>
             <Checkbox
               checked={loginAlerts}
-              onCheckedChange={(checked) => {
-                setLoginAlerts(!!checked);
-                success(checked ? 'Alertes activées' : 'Alertes désactivées');
+              onChange={(event) => {
+                setLoginAlerts(event.target.checked);
+                success(
+                  event.target.checked
+                    ? "Alertes activées"
+                    : "Alertes désactivées",
+                );
               }}
             />
           </div>

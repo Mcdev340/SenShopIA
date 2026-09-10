@@ -1,18 +1,17 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useCart, useAuth, useToast } from '@/hooks';
-import { CheckoutForm } from '@/components/checkout/CheckoutForm';
-import { CheckoutSummary } from '@/components/checkout/CheckoutSummary';
-import { Spinner } from '@/components/ui/Spinner';
-import { Alert } from '@/components/ui/Alert';
-import { Button } from '@/components/ui/Button';
-import { ShoppingBag, ArrowLeft, Lock, Shield } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCart, useAuth, useToast } from "@/hooks";
+import CheckoutForm from "@/components/checkout/CheckoutForm";
+import { Spinner } from "@/components/ui/Spinner";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { ShoppingBag, ArrowLeft, Lock, Shield } from "lucide-react";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, loading, total, loadCart } = useCart();
+  const { items, loadCart } = useCart();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const { error: showError } = useToast();
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +19,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     const init = async () => {
       if (!authLoading && !isAuthenticated) {
-        router.push('/login?redirect=/checkout');
+        router.push("/login?redirect=/checkout");
         return;
       }
       await loadCart();
@@ -31,7 +30,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!isLoading && items.length === 0) {
-      router.push('/cart');
+      router.push("/cart");
     }
   }, [isLoading, items, router]);
 
@@ -53,7 +52,7 @@ export default function CheckoutPage() {
         <Alert variant="warning" title="Panier vide">
           Votre panier est vide. Ajoutez des produits avant de passer commande.
           <div className="mt-4">
-            <Button onClick={() => router.push('/products')}>
+            <Button onClick={() => router.push("/products")}>
               <ShoppingBag className="w-4 h-4 mr-2" />
               Voir les produits
             </Button>
@@ -70,7 +69,7 @@ export default function CheckoutPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => router.push('/cart')}
+          onClick={() => router.push("/cart")}
           className="mb-2"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -98,10 +97,10 @@ export default function CheckoutPage() {
 
       {/* Checkout Form */}
       <CheckoutForm
-        onSuccess={(orderId) => {
+        onSuccess={(orderId: string) => {
           router.push(`/orders/${orderId}`);
         }}
-        onError={(error) => {
+        onError={(error: string) => {
           showError(error);
         }}
       />

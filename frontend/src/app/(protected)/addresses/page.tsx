@@ -1,32 +1,30 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth, useToast } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card, CardBody, CardHeader, CardFooter } from '@/components/ui/Card';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Spinner } from '@/components/ui/Spinner';
-import { EmptyState } from '@/components/shared/EmptyState';
-import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
-import { 
-  MapPin, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Star, 
-  StarOff, 
-  Home, 
-  Building, 
+import { useState, useEffect } from "react";
+import { useAuth, useToast } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { Spinner } from "@/components/ui/Spinner";
+import EmptyState from "@/components/shared/EmptyState";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import {
+  MapPin,
+  Plus,
+  Edit,
+  Trash2,
+  Star,
+  StarOff,
+  Home,
+  Building,
   Phone,
   Loader2,
   X,
   Check,
-  AlertCircle,
-} from 'lucide-react';
-import { UserAddress } from '@/types/user';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import { UserAddress } from "@/types/user";
+import { cn } from "@/lib/utils";
 
 interface AddressFormData {
   label: string;
@@ -41,28 +39,26 @@ interface AddressFormData {
 }
 
 const initialFormData: AddressFormData = {
-  label: '',
-  street: '',
-  city: '',
-  state: '',
-  country: 'SN',
-  postalCode: '',
-  phone: '',
+  label: "",
+  street: "",
+  city: "",
+  state: "",
+  country: "SN",
+  postalCode: "",
+  phone: "",
   isDefault: false,
-  instructions: '',
+  instructions: "",
 };
 
 export default function AddressesPage() {
-  const router = useRouter();
-  const { 
-    user, 
-    addresses, 
-    loading: authLoading, 
-    loadAddresses, 
-    createAddress, 
-    updateAddress, 
-    deleteAddress, 
-    setDefaultAddress 
+  const {
+    addresses,
+    loading: authLoading,
+    loadAddresses,
+    createAddress,
+    updateAddress,
+    deleteAddress,
+    setDefaultAddress,
   } = useAuth();
   const { success, error: showError } = useToast();
 
@@ -84,7 +80,7 @@ export default function AddressesPage() {
     try {
       await loadAddresses();
     } catch (error) {
-      showError('Erreur de chargement des adresses');
+      showError("Erreur de chargement des adresses");
     } finally {
       setIsLoading(false);
     }
@@ -93,14 +89,15 @@ export default function AddressesPage() {
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.label.trim()) newErrors.label = 'Le libellé est requis';
-    if (!formData.street.trim()) newErrors.street = 'La rue est requise';
-    if (!formData.city.trim()) newErrors.city = 'La ville est requise';
-    if (!formData.state.trim()) newErrors.state = 'La région est requise';
-    if (!formData.postalCode.trim()) newErrors.postalCode = 'Le code postal est requis';
-    if (!formData.phone.trim()) newErrors.phone = 'Le téléphone est requis';
+    if (!formData.label.trim()) newErrors.label = "Le libellé est requis";
+    if (!formData.street.trim()) newErrors.street = "La rue est requise";
+    if (!formData.city.trim()) newErrors.city = "La ville est requise";
+    if (!formData.state.trim()) newErrors.state = "La région est requise";
+    if (!formData.postalCode.trim())
+      newErrors.postalCode = "Le code postal est requis";
+    if (!formData.phone.trim()) newErrors.phone = "Le téléphone est requis";
     else if (!/^(\+?[0-9]{1,3})?[0-9]{9,12}$/.test(formData.phone)) {
-      newErrors.phone = 'Numéro de téléphone invalide';
+      newErrors.phone = "Numéro de téléphone invalide";
     }
 
     setErrors(newErrors);
@@ -115,15 +112,15 @@ export default function AddressesPage() {
     try {
       if (editingId) {
         await updateAddress(editingId, formData);
-        success('Adresse mise à jour');
+        success("Adresse mise à jour");
       } else {
         await createAddress(formData);
-        success('Adresse ajoutée');
+        success("Adresse ajoutée");
       }
       resetForm();
       await loadAddressesData();
     } catch (error) {
-      showError('Erreur lors de l\'enregistrement');
+      showError("Erreur lors de l'enregistrement");
     } finally {
       setIsSubmitting(false);
     }
@@ -139,7 +136,7 @@ export default function AddressesPage() {
       postalCode: address.postalCode,
       phone: address.phone,
       isDefault: address.isDefault,
-      instructions: address.instructions || '',
+      instructions: address.instructions || "",
     });
     setEditingId(address.id);
     setShowForm(true);
@@ -150,11 +147,11 @@ export default function AddressesPage() {
     setIsDeleting(true);
     try {
       await deleteAddress(deleteConfirmId);
-      success('Adresse supprimée');
+      success("Adresse supprimée");
       setDeleteConfirmId(null);
       await loadAddressesData();
     } catch (error) {
-      showError('Erreur de suppression');
+      showError("Erreur de suppression");
     } finally {
       setIsDeleting(false);
     }
@@ -163,10 +160,10 @@ export default function AddressesPage() {
   const handleSetDefault = async (id: string) => {
     try {
       await setDefaultAddress(id);
-      success('Adresse par défaut définie');
+      success("Adresse par défaut définie");
       await loadAddressesData();
     } catch (error) {
-      showError('Erreur');
+      showError("Erreur");
     }
   };
 
@@ -211,7 +208,7 @@ export default function AddressesPage() {
         <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {editingId ? 'Modifier l\'adresse' : 'Nouvelle adresse'}
+              {editingId ? "Modifier l'adresse" : "Nouvelle adresse"}
             </h2>
             <button
               onClick={resetForm}
@@ -231,7 +228,9 @@ export default function AddressesPage() {
                   <Input
                     placeholder="Maison, Bureau, etc."
                     value={formData.label}
-                    onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, label: e.target.value })
+                    }
                     error={errors.label}
                     className="pl-10"
                   />
@@ -245,7 +244,9 @@ export default function AddressesPage() {
                 <Input
                   placeholder="123 Rue de l'Indépendance"
                   value={formData.street}
-                  onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, street: e.target.value })
+                  }
                   error={errors.street}
                 />
               </div>
@@ -258,7 +259,9 @@ export default function AddressesPage() {
                   <Input
                     placeholder="Dakar"
                     value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, city: e.target.value })
+                    }
                     error={errors.city}
                   />
                 </div>
@@ -269,7 +272,9 @@ export default function AddressesPage() {
                   <Input
                     placeholder="Dakar"
                     value={formData.state}
-                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, state: e.target.value })
+                    }
                     error={errors.state}
                   />
                 </div>
@@ -283,7 +288,9 @@ export default function AddressesPage() {
                   <Input
                     placeholder="10000"
                     value={formData.postalCode}
-                    onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, postalCode: e.target.value })
+                    }
                     error={errors.postalCode}
                   />
                 </div>
@@ -296,7 +303,9 @@ export default function AddressesPage() {
                     <Input
                       placeholder="77 123 45 67"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
                       error={errors.phone}
                       className="pl-10"
                     />
@@ -311,7 +320,9 @@ export default function AddressesPage() {
                 <Input
                   placeholder="Bâtiment, étage, code..."
                   value={formData.instructions}
-                  onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, instructions: e.target.value })
+                  }
                 />
               </div>
 
@@ -319,15 +330,27 @@ export default function AddressesPage() {
                 <Checkbox
                   id="isDefault"
                   checked={formData.isDefault}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isDefault: !!checked })}
+                  onChange={(event) =>
+                    setFormData({
+                      ...formData,
+                      isDefault: event.target.checked,
+                    })
+                  }
                 />
-                <label htmlFor="isDefault" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                <label
+                  htmlFor="isDefault"
+                  className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer"
+                >
                   Définir comme adresse par défaut
                 </label>
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button type="submit" disabled={isSubmitting} className="flex-1">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -336,7 +359,7 @@ export default function AddressesPage() {
                   ) : (
                     <>
                       <Check className="w-4 h-4 mr-2" />
-                      {editingId ? 'Mettre à jour' : 'Ajouter'}
+                      {editingId ? "Mettre à jour" : "Ajouter"}
                     </>
                   )}
                 </Button>
@@ -361,16 +384,21 @@ export default function AddressesPage() {
       ) : (
         <div className="space-y-4">
           {addresses.map((address) => (
-            <Card key={address.id} className={cn(
-              'transition-all',
-              address.isDefault && 'border-primary-300 dark:border-primary-700 bg-primary-50/50 dark:bg-primary-900/10'
-            )}>
+            <Card
+              key={address.id}
+              className={cn(
+                "transition-all",
+                address.isDefault &&
+                  "border-primary-300 dark:border-primary-700 bg-primary-50/50 dark:bg-primary-900/10",
+              )}
+            >
               <CardBody className="p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                        {address.label.toLowerCase().includes('bureau') || address.label.toLowerCase().includes('office') ? (
+                        {address.label.toLowerCase().includes("bureau") ||
+                        address.label.toLowerCase().includes("office") ? (
                           <Building className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                         ) : (
                           <Home className="w-4 h-4 text-primary-600 dark:text-primary-400" />
@@ -388,7 +416,9 @@ export default function AddressesPage() {
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-300 space-y-0.5">
                       <p>{address.street}</p>
-                      <p>{address.postalCode} {address.city}, {address.state}</p>
+                      <p>
+                        {address.postalCode} {address.city}, {address.state}
+                      </p>
                       <p>{address.country}</p>
                       <p className="flex items-center gap-1 mt-1">
                         <Phone className="w-3 h-3" />

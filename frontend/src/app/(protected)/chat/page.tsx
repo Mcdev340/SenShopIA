@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { ChatInterface } from '@/components/chat/ChatInterface';
-import { useAuth } from '@/hooks';
-import { Spinner } from '@/components/ui/Spinner';
-import { Card, CardBody } from '@/components/ui/Card';
-import { MessageCircle, Bot, User, Info } from 'lucide-react';
+import { useState, useEffect } from "react";
+import ChatInterface from "@/components/chat/ChatInterface";
+import { useAuth } from "@/hooks";
+import { Spinner } from "@/components/ui/Spinner";
+import { Card, CardBody } from "@/components/ui/Card";
+import { MessageCircle, Info } from "lucide-react";
 
 export default function ChatPage() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -36,7 +36,8 @@ export default function ChatPage() {
           Assistant ShopSense AI
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Posez vos questions, obtenez des recommandations et suivez vos commandes
+          Posez vos questions, obtenez des recommandations et suivez vos
+          commandes
         </p>
       </div>
 
@@ -46,9 +47,12 @@ export default function ChatPage() {
           <div className="flex items-start gap-2">
             <Info className="w-4 h-4 text-primary-600 dark:text-primary-400 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-primary-700 dark:text-primary-300">
-              <p className="font-medium">Notre assistant IA est là pour vous aider</p>
+              <p className="font-medium">
+                Notre assistant IA est là pour vous aider
+              </p>
               <p className="text-xs mt-0.5">
-                Il peut rechercher des produits, suivre vos commandes, calculer des livraisons et bien plus.
+                Il peut rechercher des produits, suivre vos commandes, calculer
+                des livraisons et bien plus.
               </p>
             </div>
           </div>
@@ -58,7 +62,7 @@ export default function ChatPage() {
       {/* Chat */}
       <Card className="overflow-hidden">
         <ChatInterface
-          title={`Assistant ${user?.firstName || user?.username || ''}`}
+          title={`Assistant ${user?.firstName || user?.username || ""}`}
           welcomeMessage="Bonjour ! Je suis votre assistant intelligent. Comment puis-je vous aider aujourd'hui ?"
           maxHeight="600px"
         />

@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useAuth, useUI, useToast } from '@/hooks';
-import { Button } from '@/components/ui/Button';
-import { Card, CardBody, CardHeader } from '@/components/ui/Card';
-import { Checkbox } from '@/components/ui/Checkbox';
-import { Select } from '@/components/ui/Select';
-import { Spinner } from '@/components/ui/Spinner';
-import { 
-  Settings, 
-  Globe, 
-  Bell, 
-  Palette, 
-  Moon, 
-  Sun, 
+import { useState } from "react";
+import { useAuth, useUI, useToast } from "@/hooks";
+import { Button } from "@/components/ui/Button";
+import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { Select } from "@/components/ui/Select";
+import { Spinner } from "@/components/ui/Spinner";
+import {
+  Settings,
+  Globe,
+  Bell,
+  Palette,
+  Moon,
+  Sun,
   Monitor,
   Mail,
   Smartphone,
@@ -21,36 +21,36 @@ import {
   Save,
   Loader2,
   Check,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const languages = [
-  { value: 'fr', label: 'Français' },
-  { value: 'en', label: 'English' },
+  { value: "fr", label: "Français" },
+  { value: "en", label: "English" },
 ];
 
 const currencies = [
-  { value: 'XOF', label: 'FCFA (XOF)' },
-  { value: 'EUR', label: 'Euro (EUR)' },
-  { value: 'USD', label: 'Dollar US (USD)' },
+  { value: "XOF", label: "FCFA (XOF)" },
+  { value: "EUR", label: "Euro (EUR)" },
+  { value: "USD", label: "Dollar US (USD)" },
 ];
 
 const timezones = [
-  { value: 'Africa/Dakar', label: 'Dakar (GMT+0)' },
-  { value: 'Africa/Abidjan', label: 'Abidjan (GMT+0)' },
-  { value: 'Africa/Lagos', label: 'Lagos (GMT+1)' },
+  { value: "Africa/Dakar", label: "Dakar (GMT+0)" },
+  { value: "Africa/Abidjan", label: "Abidjan (GMT+0)" },
+  { value: "Africa/Lagos", label: "Lagos (GMT+1)" },
 ];
 
 export default function SettingsPage() {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
   const { theme, setTheme, language, setLanguage } = useUI();
   const { success } = useToast();
 
   const [isSaving, setIsSaving] = useState(false);
   const [settings, setSettings] = useState({
-    language: language || 'fr',
-    currency: 'XOF',
-    timezone: 'Africa/Dakar',
+    language: language || "fr",
+    currency: "XOF",
+    timezone: "Africa/Dakar",
     emailNotifications: true,
     pushNotifications: true,
     smsNotifications: false,
@@ -63,9 +63,9 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setLanguage(settings.language as 'fr' | 'en');
-      success('Paramètres enregistrés');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setLanguage(settings.language as "fr" | "en");
+      success("Paramètres enregistrés");
     } catch (error) {
       // Handle error
     } finally {
@@ -109,25 +109,38 @@ export default function SettingsPage() {
             </label>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { value: 'light', label: 'Clair', icon: Sun },
-                { value: 'dark', label: 'Sombre', icon: Moon },
-                { value: 'system', label: 'Système', icon: Monitor },
+                { value: "light", label: "Clair", icon: Sun },
+                { value: "dark", label: "Sombre", icon: Moon },
+                { value: "system", label: "Système", icon: Monitor },
               ].map((option) => {
                 const Icon = option.icon;
                 const isActive = theme === option.value;
                 return (
                   <button
                     key={option.value}
-                    onClick={() => setTheme(option.value as 'light' | 'dark' | 'system')}
+                    onClick={() =>
+                      setTheme(option.value as "light" | "dark" | "system")
+                    }
                     className={cn(
-                      'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all',
+                      "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all",
                       isActive
-                        ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                        ? "border-primary-600 bg-primary-50 dark:bg-primary-900/20"
+                        : "border-gray-200 dark:border-gray-700 hover:border-gray-300",
                     )}
                   >
-                    <Icon className={cn('w-5 h-5', isActive && 'text-primary-600 dark:text-primary-400')} />
-                    <span className={cn('text-sm', isActive && 'text-primary-600 dark:text-primary-400 font-medium')}>
+                    <Icon
+                      className={cn(
+                        "w-5 h-5",
+                        isActive && "text-primary-600 dark:text-primary-400",
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "text-sm",
+                        isActive &&
+                          "text-primary-600 dark:text-primary-400 font-medium",
+                      )}
+                    >
                       {option.label}
                     </span>
                     {isActive && <Check className="w-4 h-4 text-primary-600" />}
@@ -156,7 +169,12 @@ export default function SettingsPage() {
               <Select
                 options={languages}
                 value={settings.language}
-                onChange={(e) => setSettings({ ...settings, language: e.target.value })}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    language: e.target.value as "fr" | "en",
+                  })
+                }
               />
             </div>
             <div className="space-y-1">
@@ -166,7 +184,9 @@ export default function SettingsPage() {
               <Select
                 options={currencies}
                 value={settings.currency}
-                onChange={(e) => setSettings({ ...settings, currency: e.target.value })}
+                onChange={(e) =>
+                  setSettings({ ...settings, currency: e.target.value })
+                }
               />
             </div>
             <div className="space-y-1">
@@ -176,7 +196,9 @@ export default function SettingsPage() {
               <Select
                 options={timezones}
                 value={settings.timezone}
-                onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
+                onChange={(e) =>
+                  setSettings({ ...settings, timezone: e.target.value })
+                }
               />
             </div>
           </div>
@@ -207,7 +229,12 @@ export default function SettingsPage() {
               </div>
               <Checkbox
                 checked={settings.emailNotifications}
-                onCheckedChange={(checked) => setSettings({ ...settings, emailNotifications: !!checked })}
+                onChange={(event) =>
+                  setSettings({
+                    ...settings,
+                    emailNotifications: event.target.checked,
+                  })
+                }
               />
             </div>
 
@@ -225,7 +252,12 @@ export default function SettingsPage() {
               </div>
               <Checkbox
                 checked={settings.pushNotifications}
-                onCheckedChange={(checked) => setSettings({ ...settings, pushNotifications: !!checked })}
+                onChange={(event) =>
+                  setSettings({
+                    ...settings,
+                    pushNotifications: event.target.checked,
+                  })
+                }
               />
             </div>
 
@@ -243,7 +275,12 @@ export default function SettingsPage() {
               </div>
               <Checkbox
                 checked={settings.smsNotifications}
-                onCheckedChange={(checked) => setSettings({ ...settings, smsNotifications: !!checked })}
+                onChange={(event) =>
+                  setSettings({
+                    ...settings,
+                    smsNotifications: event.target.checked,
+                  })
+                }
               />
             </div>
           </div>
@@ -269,7 +306,12 @@ export default function SettingsPage() {
             </div>
             <Checkbox
               checked={settings.marketingEmails}
-              onCheckedChange={(checked) => setSettings({ ...settings, marketingEmails: !!checked })}
+              onChange={(event) =>
+                setSettings({
+                  ...settings,
+                  marketingEmails: event.target.checked,
+                })
+              }
             />
           </div>
 
@@ -284,7 +326,9 @@ export default function SettingsPage() {
             </div>
             <Checkbox
               checked={settings.newsletter}
-              onCheckedChange={(checked) => setSettings({ ...settings, newsletter: !!checked })}
+              onChange={(event) =>
+                setSettings({ ...settings, newsletter: event.target.checked })
+              }
             />
           </div>
         </CardBody>
