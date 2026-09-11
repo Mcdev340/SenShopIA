@@ -1,22 +1,20 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useProducts } from "@/hooks";
-import ProductList from "@/components/products/ProductList";
-import { Button } from "@/components/ui/Button";
-import { Plus, FileDown, RefreshCw } from "lucide-react";
-import { useToast } from "@/hooks";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useProducts, useToast } from '@/hooks';
+import ProductList from '@/components/products/ProductList';
+import { Button } from '@/components/ui/Button';
+import { Plus, FileDown, RefreshCw } from 'lucide-react';
 
 export default function AdminProductsPage() {
   const router = useRouter();
-  const { products, loadProducts, loading, total, page, totalPages } =
-    useProducts();
+  const { products, loadProducts, loading, total, page, totalPages } = useProducts();
   const { success } = useToast();
 
   useEffect(() => {
     loadProducts({ page: 1, limit: 20 });
-  }, []);
+  }, [loadProducts]);
 
   const handlePageChange = (newPage: number) => {
     loadProducts({ page: newPage, limit: 20 });
@@ -28,7 +26,7 @@ export default function AdminProductsPage() {
 
   const handleRefresh = () => {
     loadProducts({ page: 1, limit: 20 });
-    success("Produits actualisés");
+    success('Produits actualisés');
   };
 
   return (
@@ -53,7 +51,7 @@ export default function AdminProductsPage() {
           </Button>
           <Button
             size="sm"
-            onClick={() => router.push("/dashboard/admin/products/new")}
+            onClick={() => router.push('/dashboard/admin/products/new')}
           >
             <Plus className="w-4 h-4 mr-2" />
             Ajouter un produit

@@ -1,48 +1,49 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useOrders } from "@/hooks";
-import OrderList from "@/components/orders/OrderList";
-import { Button } from "@/components/ui/Button";
-import { Plus, FileDown, RefreshCw } from "lucide-react";
-import { useToast } from "@/hooks";
-import type { Order } from "@/types/order";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useOrders, useToast } from '@/hooks';
+import OrderList from '@/components/orders/OrderList';
+import { Button } from '@/components/ui/Button';
+import { Plus, FileDown, RefreshCw } from 'lucide-react';
 
 export default function AdminOrdersPage() {
   const router = useRouter();
   const { orders, loadOrders, loading, total, page, totalPages } = useOrders();
   const { success } = useToast();
 
+  const [filters, setFilters] = useState({});
+  const [setSearchQuery] = useState('');
+
   useEffect(() => {
     loadOrders({ page: 1, limit: 20 });
-  }, []);
+  }, [loadOrders]);
 
   const handlePageChange = (newPage: number) => {
     loadOrders({ page: newPage, limit: 20 });
   };
 
   const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
     loadOrders({ ...newFilters, page: 1, limit: 20 });
   };
 
   const handleSearch = (query: string) => {
+    setSearchQuery(query);
     loadOrders({ search: query, page: 1, limit: 20 });
   };
 
   const handleRefresh = () => {
     loadOrders({ page: 1, limit: 20 });
-    success("Commandes actualisées");
+    success('Commandes actualisées');
   };
 
   const handleExport = () => {
-    // Logique d'export
-    success("Export en cours...");
+    success('Export en cours...');
   };
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -63,7 +64,7 @@ export default function AdminOrdersPage() {
           </Button>
           <Button
             size="sm"
-            onClick={() => router.push("/dashboard/admin/orders/new")}
+            onClick={() => router.push('/dashboard/admin/orders/new')}
           >
             <Plus className="w-4 h-4 mr-2" />
             Nouvelle commande
@@ -71,7 +72,6 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {/* Liste des commandes */}
       <OrderList
         orders={orders}
         loading={loading}
@@ -81,9 +81,7 @@ export default function AdminOrdersPage() {
         onPageChange={handlePageChange}
         onFilterChange={handleFilterChange}
         onSearch={handleSearch}
-        onOrderClick={(order: Order) =>
-          router.push(`/dashboard/admin/orders/${order.id}`)
-        }
+        onOrderClick={(order) => router.push(`/dashboard/admin/orders/${order.id}`)}
         variant="default"
         showFilters={true}
         showSearch={true}
