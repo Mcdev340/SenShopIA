@@ -1,21 +1,34 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Calendar, User, Clock, ArrowLeft, Share2, Heart, MessageCircle, Bookmark, Tag, TrendingUp, Facebook, Twitter, Linkedin, Link2, Check } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardBody } from '@/components/ui/Card';
-import { Spinner } from '@/components/ui/Spinner';
-import { Alert } from '@/components/ui/Alert';
-import { useToast } from '@/hooks';
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  Clock,
+  ArrowLeft,
+  Heart,
+  MessageCircle,
+  Bookmark,
+  TrendingUp,
+  Link2,
+  Check,
+} from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { FaFacebook } from "react-icons/fa";
+import { FaTwitter } from "react-icons/fa";
+import { FaLinkedin } from "react-icons/fa";
+import { Card, CardBody } from "@/components/ui/Card";
+import { Spinner } from "@/components/ui/Spinner";
+import { Alert } from "@/components/ui/Alert";
+import { useToast } from "@/hooks";
 
 const mockPost = {
-  id: '1',
-  title: 'Comment acheter depuis l\'étranger sans se ruiner ?',
-  slug: 'comment-acheter-depuis-etranger-sans-se-ruiner',
-  excerpt: 'Découvrez nos astuces pour acheter des produits internationaux à moindre coût. Guide complet des économies à réaliser.',
+  id: "1",
+  title: "Comment acheter depuis l'étranger sans se ruiner ?",
+  slug: "comment-acheter-depuis-etranger-sans-se-ruiner",
+  excerpt:
+    "Découvrez nos astuces pour acheter des produits internationaux à moindre coût. Guide complet des économies à réaliser.",
   content: `
     <p>L'achat de produits internationaux peut sembler complexe et coûteux. Pourtant, avec les bonnes stratégies, vous pouvez réaliser des économies significatives. Dans cet article, nous vous dévoilons toutes nos astuces pour acheter depuis l'étranger sans vous ruiner.</p>
 
@@ -37,29 +50,30 @@ const mockPost = {
     <h2>Conclusion</h2>
     <p>Avec ShopSense AI, acheter depuis l'étranger devient simple et économique. Utilisez nos outils et conseils pour optimiser vos achats et réaliser des économies substantielles.</p>
   `,
-  image: '/images/blog/achats-etranger.jpg',
-  author: 'Mamadou Diallo',
-  authorAvatar: '/images/team/1.jpg',
-  date: '2024-01-15',
+  image: "/images/blog/achats-etranger.jpg",
+  author: "Mamadou Diallo",
+  authorAvatar: "/images/team/1.jpg",
+  date: "2024-01-15",
   readTime: 5,
-  category: 'Conseils d\'achat',
-  tags: ['Achats internationaux', 'Économies', 'Guide'],
+  category: "Conseils d'achat",
+  tags: ["Achats internationaux", "Économies", "Guide"],
   views: 1250,
   comments: 23,
   relatedPosts: [
     {
-      id: '2',
-      title: 'Les meilleures pratiques de paiement en ligne au Sénégal',
-      slug: 'meilleures-pratiques-paiement-en-ligne-senegal',
-      excerpt: 'Guide des moyens de paiement disponibles au Sénégal.',
-      image: '/images/blog/paiement-senegal.jpg',
+      id: "2",
+      title: "Les meilleures pratiques de paiement en ligne au Sénégal",
+      slug: "meilleures-pratiques-paiement-en-ligne-senegal",
+      excerpt: "Guide des moyens de paiement disponibles au Sénégal.",
+      image: "/images/blog/paiement-senegal.jpg",
     },
     {
-      id: '3',
-      title: 'Comment suivre votre colis en temps réel',
-      slug: 'comment-suivre-colis-temps-reel',
-      excerpt: 'Utilisez notre outil de suivi pour connaître la position de votre colis.',
-      image: '/images/blog/suivi-colis.jpg',
+      id: "3",
+      title: "Comment suivre votre colis en temps réel",
+      slug: "comment-suivre-colis-temps-reel",
+      excerpt:
+        "Utilisez notre outil de suivi pour connaître la position de votre colis.",
+      image: "/images/blog/suivi-colis.jpg",
     },
   ],
 };
@@ -88,22 +102,22 @@ export default function BlogPostPage() {
     setLoading(true);
     setError(null);
     try {
-      await new Promise(resolve => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 600));
       if (slug === mockPost.slug) {
         setPost(mockPost);
       } else {
-        setError('Article non trouvé');
+        setError("Article non trouvé");
       }
     } catch (error) {
-      setError('Erreur de chargement');
+      setError("Erreur de chargement");
     } finally {
       setLoading(false);
     }
   };
 
   const handleShare = async (platform: string) => {
-    const url = typeof window !== 'undefined' ? window.location.href : '';
-    const title = post?.title || '';
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const title = post?.title || "";
 
     const shareUrls: Record<string, string> = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
@@ -111,29 +125,29 @@ export default function BlogPostPage() {
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
     };
 
-    if (platform === 'copy') {
+    if (platform === "copy") {
       try {
         await navigator.clipboard.writeText(url);
         setIsCopied(true);
-        success('Lien copié !');
+        success("Lien copié !");
         setTimeout(() => setIsCopied(false), 3000);
       } catch {
         // Fallback
-        const textarea = document.createElement('textarea');
+        const textarea = document.createElement("textarea");
         textarea.value = url;
         document.body.appendChild(textarea);
         textarea.select();
-        document.execCommand('copy');
+        document.execCommand("copy");
         document.body.removeChild(textarea);
         setIsCopied(true);
-        success('Lien copié !');
+        success("Lien copié !");
         setTimeout(() => setIsCopied(false), 3000);
       }
       return;
     }
 
     if (shareUrls[platform]) {
-      window.open(shareUrls[platform], '_blank', 'width=600,height=400');
+      window.open(shareUrls[platform], "_blank", "width=600,height=400");
     }
   };
 
@@ -150,7 +164,7 @@ export default function BlogPostPage() {
       <div className="max-w-4xl mx-auto">
         <Alert variant="danger" title="Article non trouvé">
           L'article que vous recherchez n'existe pas.
-          <Button className="mt-4" onClick={() => router.push('/blog')}>
+          <Button className="mt-4" onClick={() => router.push("/blog")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour au blog
           </Button>
@@ -165,7 +179,7 @@ export default function BlogPostPage() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => router.push('/blog')}
+        onClick={() => router.push("/blog")}
         className="mb-6"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -201,10 +215,10 @@ export default function BlogPostPage() {
                   {post.author}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {new Date(post.date).toLocaleDateString('fr-FR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
+                  {new Date(post.date).toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
                   })}
                 </p>
               </div>
@@ -235,52 +249,60 @@ export default function BlogPostPage() {
             variant="outline"
             size="sm"
             onClick={() => setIsLiked(!isLiked)}
-            className={isLiked ? 'text-red-500 border-red-200' : ''}
+            className={isLiked ? "text-red-500 border-red-200" : ""}
           >
-            <Heart className={`w-4 h-4 mr-2 ${isLiked ? 'fill-red-500' : ''}`} />
-            {isLiked ? 'J\'aime' : 'Aimer'}
+            <Heart
+              className={`w-4 h-4 mr-2 ${isLiked ? "fill-red-500" : ""}`}
+            />
+            {isLiked ? "J'aime" : "Aimer"}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setIsSaved(!isSaved)}
-            className={isSaved ? 'text-primary-600 border-primary-200' : ''}
+            className={isSaved ? "text-primary-600 border-primary-200" : ""}
           >
-            <Bookmark className={`w-4 h-4 mr-2 ${isSaved ? 'fill-primary-600' : ''}`} />
-            {isSaved ? 'Sauvegardé' : 'Sauvegarder'}
+            <Bookmark
+              className={`w-4 h-4 mr-2 ${isSaved ? "fill-primary-600" : ""}`}
+            />
+            {isSaved ? "Sauvegardé" : "Sauvegarder"}
           </Button>
           <div className="flex items-center gap-1 ml-auto">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleShare('facebook')}
+              onClick={() => handleShare("facebook")}
               className="text-gray-400 hover:text-blue-600"
             >
-              <Facebook className="w-4 h-4" />
+              <FaFacebook size={24} />{" "}
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleShare('twitter')}
+              onClick={() => handleShare("twitter")}
               className="text-gray-400 hover:text-sky-500"
             >
-              <Twitter className="w-4 h-4" />
+              <FaTwitter size={24} />{" "}
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleShare('linkedin')}
+              onClick={() => handleShare("linkedin")}
               className="text-gray-400 hover:text-blue-700"
             >
-              <Linkedin className="w-4 h-4" />
+              <FaLinkedin size={24} /> {" "}
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleShare('copy')}
+              onClick={() => handleShare("copy")}
               className="text-gray-400 hover:text-gray-600"
             >
-              {isCopied ? <Check className="w-4 h-4 text-green-500" /> : <Link2 className="w-4 h-4" />}
+              {isCopied ? (
+                <Check className="w-4 h-4 text-green-500" />
+              ) : (
+                <Link2 className="w-4 h-4" />
+              )}
             </Button>
           </div>
         </div>
@@ -296,7 +318,7 @@ export default function BlogPostPage() {
           {post.tags.map((tag: string) => (
             <Link
               key={tag}
-              href={`/blog/tag/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+              href={`/blog/tag/${tag.toLowerCase().replace(/\s+/g, "-")}`}
               className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               #{tag}
@@ -319,7 +341,9 @@ export default function BlogPostPage() {
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">Jean Dupont</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    Jean Dupont
+                  </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     Super article, très instructif !
                   </p>
@@ -331,7 +355,9 @@ export default function BlogPostPage() {
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">Marie Diop</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    Marie Diop
+                  </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     Merci pour ces conseils, je vais les appliquer !
                   </p>

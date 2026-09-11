@@ -1,57 +1,48 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import { 
-  ArrowLeft, 
-  ShoppingCart, 
-  Heart, 
-  Share2, 
-  Star, 
-  StarHalf,
-  Minus, 
-  Plus, 
-  Truck, 
-  Shield, 
+import {
+  ArrowLeft,
+  ShoppingCart,
+  Heart,
+  Share2,
+  Minus,
+  Plus,
+  Truck,
+  Shield,
   Clock,
-  Check,
-  AlertCircle,
   Loader2,
-  ChevronDown,
-  ChevronUp,
   Tag,
   Award,
-  RotateCcw,
-  CreditCard,
-  Package,
   Sparkles,
+  ChevronRight,
 } from 'lucide-react';
 import { useProducts, useCart, useToast, useAuth } from '@/hooks';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Card, CardBody } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
 import { Alert } from '@/components/ui/Alert';
-import { ProductImages } from '@/components/products/ProductImages';
-import { ProductPrice } from '@/components/products/ProductPrice';
-import { ProductStock } from '@/components/products/ProductStock';
-import { ProductRating } from '@/components/products/ProductRating';
-import { ProductVariant } from '@/components/products/ProductVariant';
-import { ProductReviews } from '@/components/products/ProductReviews';
-import { ProductGrid } from '@/components/products/ProductGrid';
-import { formatPrice, cn } from '@/lib/utils';
+import ProductImages from '@/components/products/ProductImages';
+import ProductPrice from '@/components/products/ProductPrice';
+import ProductStock from '@/components/products/ProductStock';
+import ProductRating from '@/components/products/ProductRating';
+import ProductVariant from '@/components/products/ProductVariant';
+import ProductReviews from '@/components/products/ProductReviews';
+import ProductGrid from '@/components/products/ProductGrid';
+import { useWishlist } from '@/hooks/useWishlist';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { getProductBySlug, getRelatedProducts, loading } = useProducts();
-  const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useProducts();
+  const { getProductBySlug, getProductsByCategory } = useProducts();
+  const { addItem } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
   const { success, error: showError } = useToast();
-  
+
   const [product, setProduct] = useState<any>(null);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,71 +57,86 @@ export default function ProductDetailPage() {
   const slug = params?.slug as string;
 
   useEffect(() => {
-    if (slug) {
-      loadProduct();
-    }
-  }, [slug]);
+    if (!slug) return;
 
-  const loadProduct = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await getProductBySlug(slug);
-      if (data) {
-        setProduct(data);
-        // Charger les produits similaires
-        try {
-          const related = await getRelatedProducts(data.id);
-          setRelatedProducts(related || []);
-        } catch (err) {
-          console.error('Error loading related products:', err);
+    const loadProduct = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await getProductBySlug(slug);
+        if (data) {
+          setProduct(data);
+          // Charger des produits similaires via la catégorie du produit,
+          // en l'absence de fetcher "getRelatedProducts" dédié.
+          // ⚠️ getProductsByCategory : signature/retour à vérifier dans productStore.ts
+          try {
+            const related = await getProductsByCategory(data.categoryId);
+            const relatedList: any[] = Array.isArray(related)
+              ? related
+              : (related as any)?.products ?? [];
+            setRelatedProducts(relatedList.filter((p: any) => p.id !== data.id).slice(0, 8));
+          } catch (err) {
+            console.error('Error loading related products:', err);
+          }
+        } else {
+          setError('Produit non trouvé');
         }
-      } else {
-        setError('Produit non trouvé');
+      } catch (err) {
+        setError('Erreur de chargement du produit');
+        showError('Erreur de chargement du produit');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      setError('Erreur de chargement du produit');
-      showError('Erreur de chargement du produit');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    loadProduct();
+    // Reset des états liés au produit précédent quand le slug change
+    setQuantity(1);
+    setSelectedVariant(null);
+  }, [slug]);
 
   // Vérifier si le produit est dans la wishlist
   useEffect(() => {
-    if (product && isAuthenticated) {
-      const checkWishlist = async () => {
-        try {
-          const inWishlist = await isInWishlist(product.id);
-          setIsWishlist(inWishlist);
-        } catch {
-          setIsWishlist(false);
-        }
-      };
-      checkWishlist();
-    }
+    if (!product || !isAuthenticated) return;
+
+    const checkWishlist = async () => {
+      try {
+        const inWishlist = await isInWishlist(product.id);
+        setIsWishlist(inWishlist);
+      } catch {
+        setIsWishlist(false);
+      }
+    };
+    checkWishlist();
   }, [product, isAuthenticated]);
+
+  // Variante sélectionnée et valeurs effectives (prix / stock) qui en découlent
+  const selectedVariantData = product?.variants?.find((v: any) => v.id === selectedVariant) || null;
+  const effectivePrice = selectedVariantData?.price ?? product?.price;
+  const effectiveSalePrice = selectedVariantData?.salePrice ?? product?.salePrice;
+  const effectiveStock = selectedVariantData?.stock ?? product?.stock ?? 0;
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
-    if (newQuantity >= 1 && newQuantity <= (product?.stock || 99)) {
+    if (newQuantity >= 1 && newQuantity <= (effectiveStock || 99)) {
       setQuantity(newQuantity);
     }
   };
 
   const handleAddToCart = async () => {
     if (!product) return;
-    if (product.stock <= 0) {
+    if (effectiveStock <= 0) {
       showError('Ce produit est en rupture de stock');
       return;
     }
 
     setIsAddingToCart(true);
     try {
-      await addToCart(product.id, quantity);
+      // Signature réelle du store : addItem(productId, variantId, quantity)
+      await addItem(product.id, selectedVariant ?? undefined, quantity);
       success(`${product.name} ajouté au panier`);
-    } catch (error) {
-      showError('Erreur d\'ajout au panier');
+    } catch (err) {
+      showError("Erreur d'ajout au panier");
     } finally {
       setIsAddingToCart(false);
     }
@@ -155,8 +161,8 @@ export default function ProductDetailPage() {
         setIsWishlist(true);
         success('Ajouté à la wishlist');
       }
-    } catch (error) {
-      showError('Erreur lors de l\'opération');
+    } catch (err) {
+      showError("Erreur lors de l'opération");
     } finally {
       setIsWishlistLoading(false);
     }
@@ -181,10 +187,13 @@ export default function ProductDetailPage() {
 
   const handleVariantSelect = (variantId: string) => {
     setSelectedVariant(variantId);
+    // Le prix et le stock affichés sont recalculés automatiquement
+    // via selectedVariantData / effectivePrice / effectiveStock ci-dessus.
+    // On recadre la quantité si elle dépasse le stock de la nouvelle variante.
     const variant = product?.variants?.find((v: any) => v.id === variantId);
-    if (variant) {
-      // Mettre à jour le prix si nécessaire
-      // Le prix sera mis à jour via le parent
+    const newStock = variant?.stock ?? product?.stock ?? 0;
+    if (quantity > newStock) {
+      setQuantity(newStock > 0 ? newStock : 1);
     }
   };
 
@@ -192,13 +201,13 @@ export default function ProductDetailPage() {
     { id: 'description', label: 'Description' },
     { id: 'specifications', label: 'Spécifications' },
     { id: 'reviews', label: `Avis (${product?.reviewsCount || 0})` },
-  ];
+  ] as const;
 
   const features = [
     { icon: Truck, label: 'Livraison 24-48h', description: 'Suivi en temps réel' },
     { icon: Shield, label: 'Paiement sécurisé', description: 'Cryptage SSL' },
     { icon: Clock, label: 'Retour 14 jours', description: 'Satisfait ou remboursé' },
-    { icon: Award, label: 'Garantie 1 an', description: 'Pièces et main-d\'œuvre' },
+    { icon: Award, label: 'Garantie 1 an', description: "Pièces et main-d'œuvre" },
   ];
 
   if (isLoading) {
@@ -228,9 +237,9 @@ export default function ProductDetailPage() {
     );
   }
 
-  const isOnSale = product.salePrice !== undefined && product.salePrice !== null && product.salePrice < product.price;
-  const isOutOfStock = product.stock <= 0;
-  const discountPercentage = isOnSale ? Math.round((1 - product.salePrice / product.price) * 100) : 0;
+  const isOnSale = effectiveSalePrice !== undefined && effectiveSalePrice !== null && effectiveSalePrice < effectivePrice;
+  const isOutOfStock = effectiveStock <= 0;
+  const discountPercentage = isOnSale ? Math.round((1 - effectiveSalePrice / effectivePrice) * 100) : 0;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -277,21 +286,21 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Rating */}
-          <ProductRating 
-            rating={product.rating || 0} 
-            count={product.reviewsCount || 0} 
+          <ProductRating
+            rating={product.rating || 0}
+            count={product.reviewsCount || 0}
             size="lg"
           />
 
           {/* Price */}
-          <ProductPrice 
-            price={product.price} 
-            salePrice={product.salePrice} 
+          <ProductPrice
+            price={effectivePrice}
+            salePrice={effectiveSalePrice}
             size="lg"
           />
 
           {/* Stock */}
-          <ProductStock stock={product.stock} size="md" />
+          <ProductStock stock={effectiveStock} size="md" />
 
           {/* Variants */}
           {product.variants && product.variants.length > 0 && (
@@ -318,7 +327,7 @@ export default function ProductDetailPage() {
               </span>
               <button
                 onClick={() => handleQuantityChange(1)}
-                disabled={quantity >= product.stock || isOutOfStock}
+                disabled={quantity >= effectiveStock || isOutOfStock}
                 className="p-2 px-3 rounded-r-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label="Augmenter la quantité"
               >
@@ -326,7 +335,7 @@ export default function ProductDetailPage() {
               </button>
             </div>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              {product.stock > 0 ? `${product.stock} disponibles` : 'Rupture de stock'}
+              {effectiveStock > 0 ? `${effectiveStock} disponibles` : 'Rupture de stock'}
             </span>
           </div>
 
@@ -425,7 +434,7 @@ export default function ProductDetailPage() {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   'py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
                   activeTab === tab.id
@@ -454,7 +463,7 @@ export default function ProductDetailPage() {
                 Object.entries(product.specifications).map(([key, value]) => (
                   <div key={key} className="flex justify-between py-2 px-3 border-b border-gray-100 dark:border-gray-800">
                     <span className="text-sm text-gray-500 dark:text-gray-400 capitalize">{key}</span>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">{value}</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{value as string}</span>
                   </div>
                 ))
               ) : (

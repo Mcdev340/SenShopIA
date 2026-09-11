@@ -3,15 +3,15 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useProducts } from '@/hooks';
-import { ProductGrid } from '@/components/products/ProductGrid';
-import { ProductList } from '@/components/products/ProductList';
-import { SearchBar } from '@/components/shared/SearchBar';
+import ProductGrid from '@/components/products/ProductGrid';
+import ProductList from '@/components/products/ProductList';
+import SearchBar from '@/components/shared/SearchBar';
 import { Spinner } from '@/components/ui/Spinner';
-import { EmptyState } from '@/components/shared/EmptyState';
+import EmptyState from '@/components/shared/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
-import { Filter, X, SlidersHorizontal, Grid3X3, List, ChevronDown, ChevronUp } from 'lucide-react';
-import { ProductFilters } from '@/components/products/ProductFilters';
+import { Filter, X, Grid3X3, List, Search } from 'lucide-react';
+import ProductFilters from '@/components/products/ProductFilters';
 import { cn } from '@/lib/utils';
 
 function SearchContent() {

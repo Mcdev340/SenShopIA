@@ -5,7 +5,6 @@ import { Search, ChevronDown, ChevronUp, MessageCircle, Phone, Mail } from 'luci
 import { Input } from '@/components/ui/Input';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { cn } from '@/lib/utils';
 
 const faqData = [
   {

@@ -1,19 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useProducts } from '@/hooks';
-import { ProductGrid } from '@/components/products/ProductGrid';
-import { ProductFilters } from '@/components/products/ProductFilters';
-import { ProductList } from '@/components/products/ProductList';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import ProductGrid from '@/components/products/ProductGrid';
+import ProductFilters from '@/components/products/ProductFilters';
+import ProductList from '@/components/products/ProductList';
 import { Spinner } from '@/components/ui/Spinner';
 import { Button } from '@/components/ui/Button';
-import { SlidersHorizontal, X, Grid3X3, List, ChevronDown, ChevronUp } from 'lucide-react';
+import { SlidersHorizontal, X, Grid3X3, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useProducts } from '@/hooks';
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { 
     products, 
     loading, 
@@ -49,9 +48,6 @@ export default function ProductsPage() {
     loadProducts({ page: newPage, limit: 20 });
   };
 
-  const handleSearch = (query: string) => {
-    loadProducts({ search: query, page: 1, limit: 20 });
-  };
 
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters);

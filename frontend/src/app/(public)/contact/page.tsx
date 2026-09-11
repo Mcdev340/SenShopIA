@@ -34,7 +34,7 @@ export default function ContactPage() {
     },
   });
 
-  const onSubmit = async (data: ContactFormData) => {
+  const onSubmit = async () => {
     setIsSubmitting(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));

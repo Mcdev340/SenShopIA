@@ -111,6 +111,7 @@ export {
 // ============================================
 // Pour une utilisation avec import * as hooks from '@/hooks'
 
+
 export default {
   // Hooks de store
   useAuth,

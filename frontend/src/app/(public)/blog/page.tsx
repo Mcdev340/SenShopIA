@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Calendar, User, Clock, ArrowRight, Search, Tag, TrendingUp, MessageCircle } from 'lucide-react';
+import { Calendar, User, Clock, ArrowRight, Search, MessageCircle } from 'lucide-react';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
-import { EmptyState } from '@/components/shared/EmptyState';
+import EmptyState from '@/components/shared/EmptyState';
 
 const mockPosts = [
   {
@@ -100,7 +100,7 @@ const popularTags = [
 ];
 
 export default function BlogPage() {
-  const [posts, setPosts] = useState(mockPosts);
+  const [posts] = useState(mockPosts);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');

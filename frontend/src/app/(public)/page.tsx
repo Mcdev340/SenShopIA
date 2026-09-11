@@ -12,20 +12,16 @@ import {
   Clock, 
   Users,
   Package,
-  TrendingUp,
-  Zap,
-  Globe,
   CheckCircle,
-  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody } from '@/components/ui/Card';
-import { ProductGrid } from '@/components/products/ProductGrid';
+import ProductGrid  from '@/components/products/ProductGrid';
 import { useProducts } from '@/hooks';
 import { useState, useEffect } from 'react';
 
 export default function HomePage() {
-  const { featuredProducts, popularProducts, loading, loadFeaturedProducts, loadPopularProducts } = useProducts();
+  const { popularProducts, loadFeaturedProducts, loadPopularProducts } = useProducts();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

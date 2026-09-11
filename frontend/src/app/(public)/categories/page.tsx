@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useProducts } from '@/hooks';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
-import { EmptyState } from '@/components/shared/EmptyState';
+import EmptyState  from '@/components/shared/EmptyState';
 import { 
   Package, 
   Smartphone, 
@@ -65,7 +64,7 @@ const colorClasses: Record<string, string> = {
 };
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState(mockCategories);
+  const [categories] = useState(mockCategories);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 

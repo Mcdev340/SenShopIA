@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import Image from 'next/image';
 import { useProducts } from '@/hooks';
-import { ProductGrid } from '@/components/products/ProductGrid';
+import ProductGrid from '@/components/products/ProductGrid';
 import { Spinner } from '@/components/ui/Spinner';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, Building2, Star, Package, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Building2, Star, Package } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 
 // Marques mockées (à remplacer par des données réelles)
@@ -99,7 +98,7 @@ const mockProducts = [
 export default function BrandDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { loadProducts } = useProducts();
+  useProducts();
 
   const [brand, setBrand] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);

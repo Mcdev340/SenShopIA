@@ -3,11 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useProducts } from '@/hooks';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
-import { EmptyState } from '@/components/shared/EmptyState';
-import { Search, Building2, Package, Star, TrendingUp } from 'lucide-react';
+import EmptyState from '@/components/shared/EmptyState';
+import { Search, Building2, Package, Star } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 
 // Marques mockées (à remplacer par des données réelles)
@@ -95,7 +94,7 @@ const mockBrands = [
 ];
 
 export default function BrandsPage() {
-  const [brands, setBrands] = useState(mockBrands);
+  const [brands] = useState(mockBrands);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
