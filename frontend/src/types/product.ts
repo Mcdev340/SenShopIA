@@ -86,6 +86,7 @@ export interface Product {
 }
 
 export const SORT_OPTIONS = [
+  "relevance",
   "price_asc",
   "price_desc",
   "rating",

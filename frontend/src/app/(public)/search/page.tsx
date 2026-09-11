@@ -13,6 +13,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Filter, X, Grid3X3, List, Search } from 'lucide-react';
 import ProductFilters from '@/components/products/ProductFilters';
 import { cn } from '@/lib/utils';
+import { SortOption, isSortOption } from '@/types/product';
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -22,7 +23,7 @@ function SearchContent() {
   const [query, setQuery] = useState(searchParams?.get('q') || '');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState('relevance');
+  const [sortBy, setSortBy] = useState<SortOption>('relevance');
 
   useEffect(() => {
     if (query) {
@@ -54,7 +55,7 @@ function SearchContent() {
     setIsFilterOpen(false);
   };
 
-  const handleSortChange = (sort: string) => {
+  const handleSortChange = (sort: SortOption) => {
     setSortBy(sort);
     searchProducts(query, { sortBy: sort, page: 1, limit: 20 });
   };
@@ -107,7 +108,7 @@ function SearchContent() {
     },
   ];
 
-  const sortOptions = [
+  const sortOptions: { value: SortOption; label: string }[] = [
     { value: 'relevance', label: 'Pertinence' },
     { value: 'newest', label: 'Plus récents' },
     { value: 'price_asc', label: 'Prix croissant' },
@@ -238,7 +239,11 @@ function SearchContent() {
             <div className="flex items-center gap-2">
               <select
                 value={sortBy}
-                onChange={(e) => handleSortChange(e.target.value)}
+                onChange={(e) => {
+                  if (isSortOption(e.target.value)) {
+                    handleSortChange(e.target.value);
+                  }
+                }}
                 className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 {sortOptions.map((option) => (

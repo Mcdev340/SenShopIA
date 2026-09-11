@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { SlidersHorizontal, X, Grid3X3, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProducts } from '@/hooks';
+import { SortOption, isSortOption } from '@/types/product';
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
@@ -27,7 +28,7 @@ export default function ProductsPage() {
   
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState('newest');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [showFilters, setShowFilters] = useState(false);
 
   const categoryParam = searchParams?.get('category') || '';
@@ -54,7 +55,7 @@ export default function ProductsPage() {
     loadProducts({ ...newFilters, page: 1, limit: 20 });
   };
 
-  const handleSortChange = (sort: string) => {
+  const handleSortChange = (sort: SortOption) => {
     setSortBy(sort);
     loadProducts({ sortBy: sort, page: 1, limit: 20 });
   };
@@ -128,7 +129,7 @@ export default function ProductsPage() {
     },
   ];
 
-  const sortOptions = [
+  const sortOptions: { value: SortOption; label: string }[] = [
     { value: 'newest', label: 'Plus récents' },
     { value: 'price_asc', label: 'Prix croissant' },
     { value: 'price_desc', label: 'Prix décroissant' },
@@ -219,7 +220,11 @@ export default function ProductsPage() {
             <div className="flex items-center gap-2">
               <select
                 value={sortBy}
-                onChange={(e) => handleSortChange(e.target.value)}
+                onChange={(e) => {
+                  if (isSortOption(e.target.value)) {
+                    handleSortChange(e.target.value);
+                  }
+                }}
                 className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 {sortOptions.map((option) => (

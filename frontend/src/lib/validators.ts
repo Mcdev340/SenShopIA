@@ -200,7 +200,7 @@ export const SearchQuerySchema = z.object({
   category: z.string().optional(),
   minPrice: z.number().min(0).optional(),
   maxPrice: z.number().min(0).optional(),
-  sortBy: z.enum(['price_asc', 'price_desc', 'rating', 'newest', 'popular']).optional(),
+  sortBy: z.enum(['relevance', 'price_asc', 'price_desc', 'rating', 'newest', 'popular', 'sold']).optional(),
   inStock: z.boolean().optional(),
   onSale: z.boolean().optional(),
   page: z.number().min(1).default(1),
