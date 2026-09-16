@@ -6,9 +6,8 @@ import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Select } from "@/components/ui/Select";
 import { Spinner } from "@/components/ui/Spinner";
-import { EmptyState } from "@/components/shared/EmptyState";
+import EmptyState from "@/components/shared/EmptyState";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 import {
   Truck,
@@ -18,11 +17,9 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle,
   Eye,
-  Filter,
 } from "lucide-react";
-import { formatRelativeTime, formatPrice, cn } from "@/lib/utils";
+import { formatPrice, cn } from "@/lib/utils";
 
 interface DeliveryOrder {
   id: string;
@@ -119,7 +116,6 @@ export default function DeliveryOrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("pending");
   const [isLoading, setIsLoading] = useState(true);
-  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -199,7 +195,7 @@ export default function DeliveryOrdersPage() {
       </Card>
 
       {/* Tabs */}
-      <Tabs defaultValue="pending" onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="pending">
             En attente ({getCountByStatus("pending")})

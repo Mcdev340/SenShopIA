@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, useOrders } from '@/hooks';
-import { StatsGrid, useDeliveryStats } from '@/components/dashboard/StatsGrid';
-import { QuickActions, useQuickActions } from '@/components/dashboard/QuickActions';
+import { useOrders } from '@/hooks';
+import StatsGrid, { useDeliveryStats } from '@/components/dashboard/StatsGrid';
+import QuickActions, { useQuickActions } from '@/components/dashboard/QuickActions';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -13,13 +13,11 @@ import {
   MapPin, 
   Truck, 
   Clock, 
-  CheckCircle, 
-  AlertCircle,
+  CheckCircle,
   ArrowRight,
   Phone,
-  User,
 } from 'lucide-react';
-import { formatRelativeTime, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 interface Delivery {
   id: string;
@@ -39,8 +37,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: any }> 
 
 export default function DeliveryDashboardPage() {
   const router = useRouter();
-  const { user } = useAuth();
-  const { loadOrders, loading } = useOrders();
+  const { loadOrders } = useOrders();
 
   const [stats] = useState(useDeliveryStats());
   const [isLoading, setIsLoading] = useState(true);
