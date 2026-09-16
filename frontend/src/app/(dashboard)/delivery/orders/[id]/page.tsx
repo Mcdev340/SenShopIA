@@ -1,67 +1,124 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useOrders, useToast } from "@/hooks";
-import { Button } from "@/components/ui/Button";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { Spinner } from "@/components/ui/Spinner";
-import OrderStatus from "@/components/orders/OrderStatus";
-import OrderTracking from "@/components/orders/OrderTracking";
-import {
-  ArrowLeft,
-  Truck,
-  CheckCircle,
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Spinner } from '@/components/ui/Spinner';
+import { Alert } from '@/components/ui/Alert';
+import { 
+  ArrowLeft, 
+  MapPin, 
+  Phone, 
+  User, 
+  Package, 
+  Truck, 
+  CheckCircle, 
   XCircle,
+  Navigation,
+  MessageCircle,
   Loader2,
-  MapPin,
-  Phone,
-  Mail,
-  User,
-  Clock,
-} from "lucide-react";
-import { formatDate, formatPrice } from "@/lib/utils";
+} from 'lucide-react';
+import { formatPrice, formatDate } from '@/lib/utils';
+import { useToast } from '@/hooks';
 
-export default function DeliveryOrderDetailPage() {
+interface DeliveryDetail {
+  id: string;
+  orderId: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  address: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  amount: number;
+  items: number;
+  createdAt: Date;
+  estimatedDelivery: Date;
+  notes?: string;
+}
+
+const mockDelivery: DeliveryDetail = {
+  id: 'DEL-001',
+  orderId: 'ORD-1234',
+  customerName: 'Jean Dupont',
+  customerPhone: '+221 77 123 45 67',
+  customerEmail: 'jean@example.com',
+  address: '123 Rue de l\'Indépendance, Dakar, Sénégal',
+  status: 'pending',
+  amount: 125000,
+  items: 3,
+  createdAt: new Date(Date.now() - 1800000),
+  estimatedDelivery: new Date(Date.now() + 3600000),
+  notes: 'Appeler avant d\'arriver. Bâtiment B, 3ème étage.',
+};
+
+const statusConfig: Record<string, { label: string; color: string }> = {
+  pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' },
+  in_progress: { label: 'En cours', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
+  completed: { label: 'Livré', color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
+  failed: { label: 'Échoué', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
+};
+
+export default function DeliveryDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { getOrder, updateOrderStatus } = useOrders();
   const { success, error: showError } = useToast();
 
-  const [order, setOrder] = useState<any>(null);
+  const [delivery, setDelivery] = useState<DeliveryDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const orderId = params?.id as string;
+  const deliveryId = params?.id as string;
 
   useEffect(() => {
-    if (orderId) {
-      loadOrder();
+    if (deliveryId) {
+      loadDelivery();
     }
-  }, [orderId]);
+  }, [deliveryId]);
 
-  const loadOrder = async () => {
+  const loadDelivery = async () => {
     setIsLoading(true);
+    setError(null);
     try {
-      const data = await getOrder(orderId);
-      setOrder(data);
-    } catch (error) {
-      showError("Erreur de chargement de la commande");
+      await new Promise(resolve => setTimeout(resolve, 600));
+      if (deliveryId === mockDelivery.id) {
+        setDelivery(mockDelivery);
+      } else {
+        setError('Livraison non trouvée');
+      }
+    } catch (err) {
+      setError('Erreur de chargement');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleStatusUpdate = async (newStatus: string) => {
+  const handleStatusUpdate = async (newStatus: DeliveryDetail['status']) => {
+    if (!delivery) return;
     setIsUpdating(true);
     try {
-      await updateOrderStatus(orderId, newStatus as any);
-      success("Statut mis à jour");
-      await loadOrder();
-    } catch (error) {
-      showError("Erreur de mise à jour du statut");
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setDelivery({ ...delivery, status: newStatus });
+      success('Statut mis à jour');
+    } catch (err) {
+      showError('Erreur de mise à jour');
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleCallCustomer = () => {
+    if (delivery?.customerPhone) {
+      window.location.href = `tel:${delivery.customerPhone}`;
+    }
+  };
+
+  const handleOpenMap = () => {
+    if (delivery?.address) {
+      const encodedAddress = encodeURIComponent(delivery.address);
+      window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
     }
   };
 
@@ -73,22 +130,24 @@ export default function DeliveryOrderDetailPage() {
     );
   }
 
-  if (!order) {
+  if (error || !delivery) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Commande non trouvée
-        </h2>
-        <Button className="mt-4" onClick={() => router.back()}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Retour
-        </Button>
+      <div className="max-w-4xl mx-auto">
+        <Alert variant="danger" title="Livraison non trouvée">
+          {error || 'Cette livraison n\'existe pas.'}
+          <Button className="mt-4" onClick={() => router.push('/dashboard/delivery/orders')}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Retour aux livraisons
+          </Button>
+        </Alert>
       </div>
     );
   }
 
+  const config = statusConfig[delivery.status];
+
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center space-x-4">
@@ -98,155 +157,193 @@ export default function DeliveryOrderDetailPage() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Livraison #{order.id?.slice(-8) || "N/A"}
+              Livraison {delivery.id}
             </h1>
-            <div className="flex items-center gap-2">
-              <OrderStatus status={order.status} size="sm" />
+            <div className="flex items-center gap-2 mt-1">
+              <Badge className={config.color}>{config.label}</Badge>
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {formatDate(order.createdAt)}
+                Commande {delivery.orderId}
               </span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {order.status === "pending" && (
-            <Button
-              onClick={() => handleStatusUpdate("in_progress")}
-              disabled={isUpdating}
-            >
-              {isUpdating ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Truck className="w-4 h-4 mr-2" />
-              )}
-              Démarrer la livraison
-            </Button>
-          )}
-          {order.status === "in_progress" && (
-            <Button
-              variant="success"
-              onClick={() => handleStatusUpdate("delivered")}
-              disabled={isUpdating}
-            >
-              {isUpdating ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <CheckCircle className="w-4 h-4 mr-2" />
-              )}
-              Marquer comme livrée
-            </Button>
-          )}
-          {order.status === "pending" && (
-            <Button
-              variant="danger"
-              onClick={() => handleStatusUpdate("cancelled")}
-              disabled={isUpdating}
-            >
-              <XCircle className="w-4 h-4 mr-2" />
-              Annuler
-            </Button>
-          )}
-        </div>
       </div>
+
+      {/* Actions */}
+      {delivery.status === 'pending' && (
+        <Card>
+          <CardBody className="p-4">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={() => handleStatusUpdate('in_progress')}
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Truck className="w-4 h-4 mr-2" />
+                )}
+                Démarrer la livraison
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCallCustomer}
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                Appeler le client
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {delivery.status === 'in_progress' && (
+        <Card>
+          <CardBody className="p-4">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="success"
+                onClick={() => handleStatusUpdate('completed')}
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                )}
+                Marquer comme livré
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => handleStatusUpdate('failed')}
+                disabled={isUpdating}
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Échec de livraison
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCallCustomer}
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                Appeler
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleOpenMap}
+              >
+                <Navigation className="w-4 h-4 mr-2" />
+                Itinéraire
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       {/* Informations client */}
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+            <User className="w-5 h-5 mr-2 text-gray-400" />
             Informations client
           </h3>
         </CardHeader>
-        <CardBody>
+        <CardBody className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <User className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-700 dark:text-gray-300">
-                  {order.user?.username || "Client"}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Mail className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-700 dark:text-gray-300">
-                  {order.user?.email || "N/A"}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-700 dark:text-gray-300">
-                  {order.user?.phone || "N/A"}
-                </span>
-              </div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Nom</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {delivery.customerName}
+              </p>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-start space-x-2">
-                <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
-                <div className="text-gray-700 dark:text-gray-300">
-                  <p>{order.shippingAddress?.street}</p>
-                  <p>
-                    {order.shippingAddress?.postalCode}{" "}
-                    {order.shippingAddress?.city}
-                  </p>
-                  <p>{order.shippingAddress?.country}</p>
-                </div>
-              </div>
-              {order.deliveryInstructions && (
-                <div className="flex items-start space-x-2">
-                  <Clock className="w-4 h-4 text-gray-400 mt-0.5" />
-                  <span className="text-gray-700 dark:text-gray-300">
-                    {order.deliveryInstructions}
-                  </span>
-                </div>
-              )}
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Téléphone</p>
+              <a
+                href={`tel:${delivery.customerPhone}`}
+                className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+              >
+                {delivery.customerPhone}
+              </a>
+            </div>
+            <div className="sm:col-span-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Adresse de livraison</p>
+              <p className="font-medium text-gray-900 dark:text-white flex items-start gap-2">
+                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-400" />
+                {delivery.address}
+              </p>
             </div>
           </div>
         </CardBody>
       </Card>
 
-      {/* Suivi */}
-      {order.trackingNumber && (
-        <OrderTracking
-          trackingNumber={order.trackingNumber}
-          status={order.status}
-          history={order.trackingHistory || []}
-          estimatedDelivery={order.estimatedDelivery}
-          currentLocation={order.currentLocation}
-        />
-      )}
-
-      {/* Détails de la commande */}
+      {/* Détails livraison */}
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Détails de la commande
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+            <Package className="w-5 h-5 mr-2 text-gray-400" />
+            Détails de la livraison
           </h3>
         </CardHeader>
         <CardBody className="space-y-3">
-          {order.items?.map((item: any, index: number) => (
-            <div
-              key={index}
-              className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0"
-            >
-              <div>
-                <p className="font-medium text-gray-900 dark:text-white">
-                  {item.product?.name || "Produit"}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  x{item.quantity}
-                </p>
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Articles</p>
               <p className="font-medium text-gray-900 dark:text-white">
-                {formatPrice(item.price * item.quantity)}
+                {delivery.items} article{delivery.items > 1 ? 's' : ''}
               </p>
             </div>
-          ))}
-          <div className="pt-3 border-t-2 border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between text-lg font-bold">
-              <span className="text-gray-900 dark:text-white">Total</span>
-              <span className="text-primary-600 dark:text-primary-400">
-                {formatPrice(order.total || 0)}
-              </span>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Montant</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {formatPrice(delivery.amount)}
+              </p>
             </div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Créée le</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {formatDate(delivery.createdAt)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Livraison estimée</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {formatDate(delivery.estimatedDelivery)}
+              </p>
+            </div>
+          </div>
+
+          {delivery.notes && (
+            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                Instructions de livraison:
+              </p>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                {delivery.notes}
+              </p>
+            </div>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* Contact */}
+      <Card>
+        <CardBody className="p-4">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={handleCallCustomer}>
+              <Phone className="w-4 h-4 mr-2" />
+              Appeler le client
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push('/chat')}
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Contacter le support
+            </Button>
+            <Button variant="outline" onClick={handleOpenMap}>
+              <Navigation className="w-4 h-4 mr-2" />
+              Ouvrir dans Maps
+            </Button>
           </div>
         </CardBody>
       </Card>
