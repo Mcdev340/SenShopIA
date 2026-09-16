@@ -42,7 +42,7 @@ interface QuickActionsProps {
   actions?: QuickAction[];
   title?: string;
   subtitle?: string;
-  columns?: 2 | 3 | 4;
+  columns?: 1 | 2 | 3 | 4;
   className?: string;
 }
 
@@ -178,6 +178,7 @@ export default function QuickActions({
   const router = useRouter();
 
   const columnsClasses = {
+    1: "grid-cols-1",
     2: "grid-cols-1 sm:grid-cols-2",
     3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
     4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",

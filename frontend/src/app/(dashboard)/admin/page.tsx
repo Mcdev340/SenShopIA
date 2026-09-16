@@ -2,25 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, useOrders, useProducts } from '@/hooks';
-import { StatsGrid, useDefaultStats } from '@/components/dashboard/StatsGrid';
-import { ChartCard, useDefaultChartData } from '@/components/dashboard/ChartCard';
-import { RecentOrders, useDefaultOrders } from '@/components/dashboard/RecentOrders';
-import { QuickActions, useQuickActions } from '@/components/dashboard/QuickActions';
-import { RecentActivity, useDefaultActivities } from '@/components/dashboard/RecentActivity';
-import { Card, CardBody } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { ShoppingBag, Users, Package, DollarSign, ArrowRight } from 'lucide-react';
+import { useOrders, useProducts } from '@/hooks';
+import StatsGrid from '@/components/dashboard/StatsGrid';
+import ChartCard, { useDefaultChartData } from '@/components/dashboard/ChartCard';
+import RecentOrders, { useDefaultOrders } from '@/components/dashboard/RecentOrders';
+import QuickActions, { useQuickActions } from '@/components/dashboard/QuickActions';
+import RecentActivity, { useDefaultActivities } from '@/components/dashboard/RecentActivity';
+import { ShoppingBag, Users, Package, DollarSign } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { user } = useAuth();
-  const { orders, loadOrders, loading: ordersLoading } = useOrders();
-  const { products, loadProducts, loading: productsLoading } = useProducts();
+  const { orders, loadOrders } = useOrders();
+  const { products, loadProducts } = useProducts();
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const defaultStats = useDefaultStats();
   const chartData = useDefaultChartData();
   const defaultOrders = useDefaultOrders();
   const defaultActivities = useDefaultActivities();

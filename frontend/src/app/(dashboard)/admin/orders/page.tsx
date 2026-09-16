@@ -12,29 +12,29 @@ export default function AdminOrdersPage() {
   const { orders, loadOrders, loading, total, page, totalPages } = useOrders();
   const { success } = useToast();
 
-  const [filters, setFilters] = useState({});
-  const [setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadOrders({ page: 1, limit: 20 });
   }, [loadOrders]);
 
   const handlePageChange = (newPage: number) => {
-    loadOrders({ page: newPage, limit: 20 });
+    loadOrders({ ...filters, ...(searchQuery ? { search: searchQuery } : {}), page: newPage, limit: 20 });
   };
 
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters);
-    loadOrders({ ...newFilters, page: 1, limit: 20 });
+    loadOrders({ ...newFilters, ...(searchQuery ? { search: searchQuery } : {}), page: 1, limit: 20 });
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    loadOrders({ search: query, page: 1, limit: 20 });
+    loadOrders({ ...filters, search: query, page: 1, limit: 20 });
   };
 
   const handleRefresh = () => {
-    loadOrders({ page: 1, limit: 20 });
+    loadOrders({ ...filters, ...(searchQuery ? { search: searchQuery } : {}), page: 1, limit: 20 });
     success('Commandes actualisées');
   };
 

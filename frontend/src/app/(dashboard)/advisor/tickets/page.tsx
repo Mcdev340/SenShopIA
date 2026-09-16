@@ -2,23 +2,114 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { Card, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Pagination } from "@/components/ui/Pagination";
+import { Select } from "@/components/ui/Select";
 import { Spinner } from "@/components/ui/Spinner";
+import EmptyState from "@/components/shared/EmptyState";
+import StatsGrid from "@/components/dashboard/StatsGrid";
+import { Pagination } from "@/components/ui/Pagination";
 import {
-  Search,
-  Plus,
-  RefreshCw,
   MessageCircle,
+  Search,
+  Filter,
+  RefreshCw,
+  Eye,
+  AlertCircle,
   Clock,
   CheckCircle,
-  AlertCircle,
+  User,
+  MessageSquare,
 } from "lucide-react";
-import { useToast } from "@/hooks";
+import { formatRelativeTime, cn } from "@/lib/utils";
+
+interface Ticket {
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  subject: string;
+  category: string;
+  priority: "low" | "medium" | "high" | "urgent";
+  status: "open" | "in_progress" | "resolved" | "closed";
+  assignedTo?: string;
+  createdAt: Date;
+  lastUpdate: Date;
+}
+
+const mockTickets: Ticket[] = [
+  {
+    id: "TKT-001",
+    customerName: "Jean Dupont",
+    customerEmail: "jean@example.com",
+    subject: "Problème de paiement",
+    category: "Paiement",
+    priority: "high",
+    status: "open",
+    createdAt: new Date(Date.now() - 1800000),
+    lastUpdate: new Date(Date.now() - 900000),
+  },
+  {
+    id: "TKT-002",
+    customerName: "Marie Diop",
+    customerEmail: "marie@example.com",
+    subject: "Question sur une commande",
+    category: "Commande",
+    priority: "medium",
+    status: "in_progress",
+    assignedTo: "Awa Ndiaye",
+    createdAt: new Date(Date.now() - 3600000),
+    lastUpdate: new Date(Date.now() - 1800000),
+  },
+  {
+    id: "TKT-003",
+    customerName: "Oumar Fall",
+    customerEmail: "oumar@example.com",
+    subject: "Demande de retour",
+    category: "Retour",
+    priority: "low",
+    status: "resolved",
+    assignedTo: "Ibrahima Ba",
+    createdAt: new Date(Date.now() - 7200000),
+    lastUpdate: new Date(Date.now() - 3600000),
+  },
+  {
+    id: "TKT-004",
+    customerName: "Aminata Sow",
+    customerEmail: "aminata@example.com",
+    subject: "Problème technique",
+    category: "Technique",
+    priority: "urgent",
+    status: "open",
+    createdAt: new Date(Date.now() - 900000),
+    lastUpdate: new Date(Date.now() - 450000),
+  },
+  {
+    id: "TKT-005",
+    customerName: "Moussa Diallo",
+    customerEmail: "moussa@example.com",
+    subject: "Information produit",
+    category: "Produit",
+    priority: "low",
+    status: "closed",
+    assignedTo: "Fatou Sall",
+    createdAt: new Date(Date.now() - 86400000),
+    lastUpdate: new Date(Date.now() - 82800000),
+  },
+  {
+    id: "TKT-006",
+    customerName: "Awa Sall",
+    customerEmail: "awa@example.com",
+    subject: "Problème de livraison",
+    category: "Livraison",
+    priority: "high",
+    status: "in_progress",
+    assignedTo: "Awa Ndiaye",
+    createdAt: new Date(Date.now() - 5400000),
+    lastUpdate: new Date(Date.now() - 2700000),
+  },
+];
 
 const statusOptions = [
   { value: "", label: "Tous les statuts" },
@@ -36,113 +127,122 @@ const priorityOptions = [
   { value: "urgent", label: "Urgente" },
 ];
 
+const statusConfig: Record<
+  string,
+  { label: string; color: string; icon: any }
+> = {
+  open: {
+    label: "Ouvert",
+    color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+    icon: AlertCircle,
+  },
+  in_progress: {
+    label: "En cours",
+    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+    icon: Clock,
+  },
+  resolved: {
+    label: "Résolu",
+    color:
+      "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+    icon: CheckCircle,
+  },
+  closed: {
+    label: "Fermé",
+    color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+    icon: CheckCircle,
+  },
+};
+
+const priorityConfig: Record<string, { label: string; color: string }> = {
+  low: {
+    label: "Basse",
+    color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+  },
+  medium: {
+    label: "Moyenne",
+    color:
+      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+  },
+  high: {
+    label: "Élevée",
+    color:
+      "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+  },
+  urgent: {
+    label: "Urgente",
+    color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  },
+};
+
 export default function AdvisorTicketsPage() {
   const router = useRouter();
-  const { error: showError } = useToast();
-  const [tickets, setTickets] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [tickets] = useState<Ticket[]>(mockTickets);
+  const [filteredTickets, setFilteredTickets] = useState<Ticket[]>(mockTickets);
+  const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
+  const [totalPages] = useState(1);
 
   useEffect(() => {
-    loadTickets();
-  }, [page, statusFilter, priorityFilter, search]);
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const loadTickets = async () => {
-    setLoading(true);
-    try {
-      // Simulation - à remplacer par un vrai appel API
-      const mockTickets = [
-        {
-          id: "1",
-          customer: "Jean Dupont",
-          subject: "Problème de paiement",
-          status: "open",
-          priority: "high",
-          createdAt: new Date(),
-        },
-        {
-          id: "2",
-          customer: "Marie Diop",
-          subject: "Question sur une commande",
-          status: "in_progress",
-          priority: "medium",
-          createdAt: new Date(),
-        },
-        {
-          id: "3",
-          customer: "Oumar Fall",
-          subject: "Demande de retour",
-          status: "resolved",
-          priority: "low",
-          createdAt: new Date(),
-        },
-        {
-          id: "4",
-          customer: "Aminata Sow",
-          subject: "Problème technique",
-          status: "open",
-          priority: "urgent",
-          createdAt: new Date(),
-        },
-        {
-          id: "5",
-          customer: "Moussa Kane",
-          subject: "Information produit",
-          status: "closed",
-          priority: "low",
-          createdAt: new Date(),
-        },
-      ];
-      setTickets(mockTickets);
-      setTotal(mockTickets.length);
-      setTotalPages(Math.ceil(mockTickets.length / 10));
-    } catch (error) {
-      showError("Erreur de chargement des tickets");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    let filtered = tickets.filter(
+      (t) =>
+        t.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.id.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+    if (statusFilter)
+      filtered = filtered.filter((t) => t.status === statusFilter);
+    if (priorityFilter)
+      filtered = filtered.filter((t) => t.priority === priorityFilter);
+    setFilteredTickets(filtered);
+  }, [searchQuery, statusFilter, priorityFilter, tickets]);
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<
-      string,
-      "default" | "warning" | "info" | "success" | "secondary" | "danger"
-    > = {
-      open: "danger",
-      in_progress: "info",
-      resolved: "success",
-      closed: "secondary",
-    };
-    return <Badge variant={variants[status] || "default"}>{status}</Badge>;
-  };
+  const stats = [
+    {
+      id: "total",
+      title: "Total tickets",
+      value: tickets.length,
+      icon: <MessageCircle className="w-5 h-5" />,
+      color: "primary" as const,
+    },
+    {
+      id: "open",
+      title: "Ouverts",
+      value: tickets.filter((t) => t.status === "open").length,
+      icon: <AlertCircle className="w-5 h-5" />,
+      color: "danger" as const,
+    },
+    {
+      id: "in_progress",
+      title: "En cours",
+      value: tickets.filter((t) => t.status === "in_progress").length,
+      icon: <Clock className="w-5 h-5" />,
+      color: "info" as const,
+    },
+    {
+      id: "resolved",
+      title: "Résolus",
+      value: tickets.filter(
+        (t) => t.status === "resolved" || t.status === "closed",
+      ).length,
+      icon: <CheckCircle className="w-5 h-5" />,
+      color: "success" as const,
+    },
+  ];
 
-  const getPriorityBadge = (priority: string) => {
-    const variants: Record<string, "default" | "danger" | "warning" | "info"> =
-      {
-        low: "default",
-        medium: "warning",
-        high: "danger",
-        urgent: "danger",
-      };
-    return <Badge variant={variants[priority] || "default"}>{priority}</Badge>;
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "open":
-        return <AlertCircle className="w-4 h-4" />;
-      case "in_progress":
-        return <Clock className="w-4 h-4" />;
-      case "resolved":
-        return <CheckCircle className="w-4 h-4" />;
-      default:
-        return <MessageCircle className="w-4 h-4" />;
-    }
+  const handleRefresh = () => {
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 500);
   };
 
   return (
@@ -150,27 +250,32 @@ export default function AdvisorTicketsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Gestion des tickets
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+            <MessageCircle className="w-6 h-6 mr-2 text-primary-600" />
+            Tickets support
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Gérez tous les tickets de support
+            Gérez les tickets de support client
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" onClick={loadTickets}>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Actualiser
           </Button>
           <Button
+            variant="outline"
             size="sm"
-            onClick={() => router.push("/dashboard/advisor/tickets/new")}
+            onClick={() => setShowFilters(!showFilters)}
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Nouveau ticket
+            <Filter className="w-4 h-4 mr-2" />
+            Filtres
           </Button>
         </div>
       </div>
+
+      {/* Stats */}
+      <StatsGrid stats={stats} columns={4} />
 
       {/* Filtres */}
       <Card>
@@ -180,71 +285,108 @@ export default function AdvisorTicketsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 placeholder="Rechercher un ticket..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
-            <Select
-              options={statusOptions}
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-40"
-            />
-            <Select
-              options={priorityOptions}
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-              className="w-40"
-            />
+            {showFilters && (
+              <>
+                <Select
+                  options={statusOptions}
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full sm:w-40"
+                />
+                <Select
+                  options={priorityOptions}
+                  value={priorityFilter}
+                  onChange={(e) => setPriorityFilter(e.target.value)}
+                  className="w-full sm:w-40"
+                />
+              </>
+            )}
           </div>
         </CardBody>
       </Card>
 
-      {/* Liste des tickets */}
+      {/* Liste */}
       <Card>
-        <CardBody className="p-0 overflow-x-auto">
-          {loading ? (
+        <CardBody className="p-0">
+          {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Spinner size="lg" />
             </div>
+          ) : filteredTickets.length === 0 ? (
+            <EmptyState
+              title="Aucun ticket"
+              description={
+                searchQuery
+                  ? `Aucun résultat pour "${searchQuery}"`
+                  : "Aucun ticket disponible"
+              }
+              icon={<MessageSquare className="w-16 h-16 text-gray-400" />}
+            />
           ) : (
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {tickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
-                  onClick={() =>
-                    router.push(`/dashboard/advisor/tickets/${ticket.id}`)
-                  }
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                      {getStatusIcon(ticket.status)}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-gray-900 dark:text-white">
-                          {ticket.subject}
-                        </p>
-                        {getPriorityBadge(ticket.priority)}
+              {filteredTickets.map((ticket) => {
+                const statusConf = statusConfig[ticket.status];
+                const StatusIcon = statusConf.icon;
+                return (
+                  <div
+                    key={ticket.id}
+                    className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                    onClick={() =>
+                      router.push(`/dashboard/advisor/tickets/${ticket.id}`)
+                    }
+                  >
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                        <User className="w-5 h-5 text-gray-500" />
                       </div>
-                      <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                        <span>{ticket.customer}</span>
-                        <span>•</span>
-                        <span>
-                          {new Date(ticket.createdAt).toLocaleDateString(
-                            "fr-FR",
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-medium text-gray-900 dark:text-white truncate">
+                            {ticket.subject}
+                          </p>
+                          <Badge
+                            className={priorityConfig[ticket.priority].color}
+                          >
+                            {priorityConfig[ticket.priority].label}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex-wrap">
+                          <span>{ticket.customerName}</span>
+                          <span>•</span>
+                          <span>{ticket.category}</span>
+                          <span>•</span>
+                          <span>{formatRelativeTime(ticket.createdAt)}</span>
+                          {ticket.assignedTo && (
+                            <>
+                              <span>•</span>
+                              <span>Assigné à {ticket.assignedTo}</span>
+                            </>
                           )}
-                        </span>
+                        </div>
                       </div>
                     </div>
+                    <div className="flex items-center gap-3 flex-shrink-0 ml-4">
+                      <Badge
+                        className={cn(
+                          "flex items-center gap-1",
+                          statusConf.color,
+                        )}
+                      >
+                        <StatusIcon className="w-3 h-3" />
+                        {statusConf.label}
+                      </Badge>
+                      <Button variant="ghost" size="sm" className="p-2">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    {getStatusBadge(ticket.status)}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardBody>
@@ -254,7 +396,8 @@ export default function AdvisorTicketsPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {total} ticket{total > 1 ? "s" : ""}
+            {filteredTickets.length} ticket
+            {filteredTickets.length > 1 ? "s" : ""}
           </p>
           <Pagination
             currentPage={page}
